@@ -162,4 +162,7 @@ export const TOYS = {
   },
 };
 
-export const TOY_BASES = Object.values(TOYS).map((t) => t.base);
+// Pastillita: mientras no esté su modelo 3D (herramientas/modelos_ia.py), muñeco de bloques rojo y blanco
+TOYS.capsula = { base: 'c', skin: skin('capsula') };
+
+export const TOY_BASES =Object.values(TOYS).map((t) => t.base);

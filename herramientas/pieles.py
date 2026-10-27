@@ -287,6 +287,26 @@ def monstruito():
     p.guardar("bichito")
 
 
+def capsula():
+    p = Piel("c")
+    blanco, rojo, negro = (246, 246, 246), (214, 30, 36), (34, 30, 34)
+    p.cabeza(blanco)
+    x0, y0 = HEAD_ROW[1][:2]
+    p.ojos(x0, y0, y=58, sep=22, w=16, h=20)
+    for cx in (x0 + 42, x0 + 86):
+        p.rect((cx - 12, y0 + 36, cx + 12, y0 + 41), negro, r=2)  # cejas
+    p.mejillas(x0, y0, (255, 150, 150), y=80, sep=36)
+    p.rect((x0 + 52, y0 + 78, x0 + 76, y0 + 92), (120, 30, 40), r=8)  # boca abierta
+    p.rect((x0 + 56, y0 + 86, x0 + 72, y0 + 92), (240, 110, 120), r=4)
+    p.torso(rojo)
+    p.brazos(negro, blanco, puno=blanco, corte=700)
+    p.piernas(negro, rojo, 52)
+    for x in LEGS:
+        p.rect((x, 1024 - 14, x + 256, 1024), (255, 255, 255))  # suela blanca
+        p.rect((x + 64, 800, x + 128, 864), (255, 255, 255))
+    p.guardar("capsula")
+
+
 # ---------------------------------------------------------------- recoloreados
 
 def monocromo(base, color, nombre):
@@ -311,4 +331,5 @@ if __name__ == "__main__":
     astronauta()
     monocromo("m", (92, 168, 70), "soldado")
     monstruito()
+    capsula()
     print("pieles en", SALIDA.relative_to(RAIZ))

@@ -15,7 +15,7 @@ from gradio_client import Client, handle_file
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "public" / "models" / "ia"
 # Orden de la cola diaria (el dibujo de «peon» es el peón de madera: al generarlo, cambiar su nombre en shared/characters.js)
-IDS = ["muneca", "caballero", "osito", "dino", "pirata", "vaquero", "robot", "ranger", "bichito", "heroe", "soldado", "peon"]
+IDS = ["capsula", "muneca", "caballero", "osito", "dino", "pirata", "vaquero", "robot", "ranger", "bichito", "heroe", "soldado", "peon"]
 
 
 def generar(client, imagen, destino):

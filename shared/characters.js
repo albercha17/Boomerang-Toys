@@ -23,6 +23,7 @@
     { id: 'dino', name: 'Dinosaurio', emoji: '🦖', description: 'Dientes, cola y pinchos naranjas en la espalda.' },
     { id: 'pirata', name: 'Pirata', emoji: '🏴‍☠️', description: 'Tricornio, parche y barba pelirroja.' },
     { id: 'vaquero', name: 'Vaquero', emoji: '🤠', description: 'Sombrero, pañuelo amarillo y estrella de sheriff.' },
+    { id: 'capsula', name: 'Pastillita', emoji: '💊', description: 'Cápsula roja y blanca con guantes y zapatillas. Siempre saludando.' },
   ]);
 
   const BY_ID = Object.freeze(Object.fromEntries(CHARACTERS.map((c) => [c.id, c])));
