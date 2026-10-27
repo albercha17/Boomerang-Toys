@@ -44,8 +44,9 @@
   const FEEDBACK = Object.freeze({
     ALIVE: 1,
     ARMED: 2,
+    IN_MATCH: 4, // ronda en juego: quien cae no reaparece hasta la siguiente
   });
-  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED;
+  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED | FEEDBACK.IN_MATCH;
 
   // Los ejes viajan como enteros en [-AXIS_MAX, AXIS_MAX] para que los mensajes sean compactos.
   const AXIS_MAX = 100;

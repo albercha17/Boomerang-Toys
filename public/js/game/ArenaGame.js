@@ -39,6 +39,13 @@ export class ArenaGame {
     this.weapons = [];
     this.feedbackSent = new Map();
     this.feedbackVersion = -1;
+    // Los controla Match: en la sala se reaparece siempre; en una ronda, no. Congelado = cuenta atrás.
+    this.respawnEnabled = true;
+    this.frozen = false;
+  }
+
+  aliveCharacters() {
+    return [...this.characters.values()].filter((c) => c.alive);
   }
 
   /** Un fotograma: entradas -> rumbo de las armas -> física -> aspecto -> impactos. */
@@ -46,12 +53,13 @@ export class ArenaGame {
     this.syncRoster(now);
 
     for (const character of this.characters.values()) {
-      const input = character.isBot ? this.bots.get(character.id).update(now, this) : this.store.inputs.get(character.id) ?? null;
+      let input = null; // congelados: nadie se mueve ni ataca
+      if (!this.frozen) input = character.isBot ? this.bots.get(character.id).update(now, this) : this.store.inputs.get(character.id) ?? null;
       const actions = character.update(dt, now, input);
       if (actions.throwCharge !== null && character.weapon) character.weapon.throw(actions.throwCharge);
       if (actions.melee) this.melee(character, now);
       if (actions.dash) this.effects.burst(character.x, 0.1, character.z, [0xe8d3b0, 0xffffff], 10, 0.35); // polvo
-      if (!character.alive && now >= character.respawnAt) this.respawn(character, now);
+      if (this.respawnEnabled && !character.alive && now >= character.respawnAt) this.respawn(character, now);
     }
     for (const weapon of this.weapons) weapon.steer(dt);
 
@@ -137,6 +145,7 @@ export class ArenaGame {
     character.homeWeapon = weapon;
     this.weapons.push(weapon);
 
+    if (!this.respawnEnabled) character.waitForRound(); // entra a mitad de ronda: juega la siguiente
     this.characters.set(player.id, character);
     return character;
   }
@@ -238,7 +247,9 @@ export class ArenaGame {
     if (!this.store.serverConnected) return;
     for (const character of this.characters.values()) {
       if (character.isBot) continue; // los bots no tienen mando
-      const flags = (character.alive ? FEEDBACK.ALIVE : 0) | (character.weapon ? FEEDBACK.ARMED : 0);
+      const flags = (character.alive ? FEEDBACK.ALIVE : 0)
+        | (character.weapon ? FEEDBACK.ARMED : 0)
+        | (this.respawnEnabled ? 0 : FEEDBACK.IN_MATCH);
       if (this.feedbackSent.get(character.id) === flags) continue;
       this.feedbackSent.set(character.id, flags);
       this.network.sendFeedback(character.id, flags);

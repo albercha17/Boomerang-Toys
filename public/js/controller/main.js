@@ -35,8 +35,11 @@ function showFeedback(flags) {
 
   ui.aimStick.classList.toggle('ko', !alive);
   ui.aimStick.classList.toggle('unarmed', alive && !armed);
-  ui.actionLabel.textContent = !alive ? 'K.O.' : armed ? 'LANZAR' : 'SIN BÚMERANG';
-  ui.actionHint.innerHTML = !alive ? 'reapareces en un momento' : armed ? DEFAULT_HINT : 'pasa por encima de uno para cogerlo';
+  const inMatch = (flags & FEEDBACK.IN_MATCH) !== 0;
+  const deadLabel = inMatch ? 'ELIMINADO' : 'K.O.';
+  const deadHint = inMatch ? 'espera a la siguiente ronda' : 'reapareces en un momento';
+  ui.actionLabel.textContent = !alive ? deadLabel : armed ? 'LANZAR' : 'SIN BÚMERANG';
+  ui.actionHint.innerHTML = !alive ? deadHint : armed ? DEFAULT_HINT : 'pasa por encima de uno para cogerlo';
 }
 
 function resetFeedback() {

@@ -2,7 +2,7 @@
 
 Juego multijugador local para navegador inspirado en Boomerang Fu. El ordenador muestra la partida y cada móvil hace de mando (sin instalar nada).
 
-**Estado: Fase 3**: arenas generadas por procedimiento (bloques, torres y juguetes sueltos), en 3D con cámara cenital inclinada (como Boomerang Fu), búmerangs, cuchilladas, dash, muñecos que se desmontan y un bot. Aún no hay lobby, rondas ni puntuación (Fase 4).
+**Estado: Fase 4**: partidas por rondas con sala de pruebas, marcador y victoria; arenas generadas por procedimiento (bloques, torres y juguetes sueltos), en 3D con cámara cenital inclinada (como Boomerang Fu), búmerangs, cuchilladas, dash, muñecos que se desmontan y un bot.
 
 ## Requisitos
 
@@ -26,11 +26,22 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 
 ## Cómo jugar
 
+### La partida
+
+1. **Sala de pruebas.** Al abrir la pantalla, los jugadores que se conectan aparecen en un mapa aleatorio con **vidas infinitas** para practicar. Aquí se puede cambiar de mapa y añadir o quitar el bot.
+2. **«▶ Empezar partida»** (o la tecla **Intro**), cuando haya al menos 2 jugadores (vale el bot).
+3. Cada ronda empieza con una **cuenta atrás** (3, 2, 1) en un **mapa nuevo**, con todos quietos. En la ronda **no se reaparece**: quien cae queda eliminado (su móvil muestra **ELIMINADO · espera a la siguiente ronda**).
+4. **El último que queda vivo gana un punto.** Si caen todos a la vez, es empate y nadie suma. Se muestra el marcador y empieza la siguiente ronda en otro mapa.
+5. **Quien llega a 10 puntos gana la partida.** Pantalla de victoria y **«Volver a la sala»** para jugar otra, sin reiniciar nada.
+6. **Pausa** con el botón de la barra o la tecla **P** (o Esc): todo se congela; desde ahí se puede continuar o terminar la partida.
+
+Quien conecta su móvil con una ronda empezada espera a la siguiente. Los puntos se ven en la barra superior (`J1 · 3`). Para partidas cortas: `/?puntos=3` (de 1 a 50).
+
 1. Abre `http://localhost:3000/` en el ordenador (mejor a pantalla completa con F11).
 2. En cada móvil, abre la dirección que aparece arriba a la derecha (`http://<IP-del-ordenador>:3000/mando`).
 3. Cada jugador aparece en la arena con su color y su búmerang en la mano.
-4. Para jugar contra la máquina, pulsa **«+ Añadir bot»** en la barra superior de la pantalla (o la tecla **B**). El mismo botón lo quita. Por ahora hay un bot como máximo.
-5. **«Nuevo mapa»** (o la tecla **M**) genera otra arena al momento; todos reaparecen en ella con su búmerang. Pasando el ratón por el botón se ve la semilla del mapa actual.
+4. Para jugar contra la máquina, en la sala pulsa **«+ Añadir bot»** (o la tecla **B**). El mismo botón lo quita. Por ahora hay un bot como máximo.
+5. En la sala, **«Nuevo mapa»** (o la tecla **M**) genera otra arena al momento. Pasando el ratón por el botón se ve la semilla del mapa actual.
 
 ### Mando a pantalla completa y sin zoom
 
@@ -103,7 +114,8 @@ public/js/game/input/          ButtonGesture: toque / mantener / soltar
 public/js/game/arena/          presets (tamaños y límites), ArenaBuilder (3D y física de la arena)
 public/js/game/arena/generation/  Generador procedural puro: semillas, zonas, piezas, accesibilidad, apariciones
 public/js/game/bots/           BotBrain: inteligencia del bot (genera la misma entrada que un mando)
-public/js/game/ui/             Hud: barra superior en HTML (jugadores, botón del bot, dirección)
+public/js/game/match/          Match: sala, rondas, puntos, victoria y pausa
+public/js/game/ui/             Hud (barra superior: jugadores y puntos, botones, dirección) y MatchOverlay (pantallas de la partida)
 public/controller.html         Mando móvil (también en /mando)
 public/manifest.webmanifest    Mando como app de pantalla completa al abrirlo desde la pantalla de inicio
 public/icons/                  Iconos del mando
@@ -138,7 +150,7 @@ El rol se indica al conectar: `io({ auth: { role: 'screen' } })` o `io({ auth: {
 | `s:welcome` | servidor → mando | `{ id, number, name, color, token }` |
 | `s:rejected` | servidor → mando | `{ reason: 'full' }` |
 | `s:kicked` | servidor → mando | `{ reason: 'replaced' }` (mismo jugador abierto en otra pestaña) |
-| `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma |
+| `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma, 4 = ronda en juego (no se reaparece) |
 | `s:screenInit` | servidor → pantalla | `{ server, roster, state }` al conectar |
 | `s:roster` | servidor → pantalla | lista de jugadores (al entrar/salir; latencia como mucho 1/s) |
 | `s:state` | servidor → pantalla | `{ t, p: [[id, mx, my, ax, ay, botones, ataques, dashes, obsoleto]] }`, a 20 Hz y solo si hay cambios |
@@ -158,7 +170,9 @@ Reglas:
 - El bot es sencillo: no planifica rutas (si se atasca contra un bloque cambia de rumbo) y no usa los rebotes a propósito.
 - La cámara encuadra siempre la arena entera: en mapas muy grandes (más de unas 40×24 casillas) los muñecos se ven pequeños. Para escenarios expansivos hará falta una cámara que siga a los jugadores (la generación por zonas ya lo permite).
 - En iPhone la pantalla completa solo es posible abriendo el mando desde el icono de la pantalla de inicio (limitación de Safari). Al no haber HTTPS en la red local, en Android el mando no se puede «instalar» como app: la pantalla completa se consigue con el primer toque.
-- Reaparición automática e infinita, sin rondas ni marcador (Fase 4).
+- La partida (rondas y puntos) la lleva la pantalla del juego: si se recarga esa página, se vuelve a la sala y el marcador empieza de cero. Los jugadores conectados siguen ahí.
+- No hay límite de tiempo por ronda: si los dos últimos se esconden, la ronda sigue hasta que uno caiga.
+- Aún no se puede elegir personaje ni color (el color depende de la plaza del jugador).
 - Un jugador desconectado sigue en la arena (quieto, con «✕» en su etiqueta) hasta que caduca su plaza a los 60 s, y se le puede eliminar.
 - El 3D necesita la tarjeta gráfica del ordenador: con aceleración por hardware va a 60 fotogramas por segundo; sin ella (por ejemplo, Chrome sin pantalla) baja a unos 25 y la partida va más lenta.
 - Los muñecos y el búmerang son provisionales, hechos con formas básicas (sin modelos 3D ni animaciones elaboradas).

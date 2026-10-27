@@ -82,7 +82,9 @@ export class Character {
 
   setPlayerInfo(player) {
     this.connected = player.connected;
-    const text = `${player.label ?? `J${player.number}`}${player.connected ? '' : ' ✕'}`;
+    this.label = player.label ?? `J${player.number}`;
+    this.cssColor = player.color;
+    const text = `${this.label}${player.connected ? '' : ' ✕'}`;
     if (text !== this.tagText) {
       this.tagText = text;
       this.tag.draw(text);
@@ -203,6 +205,11 @@ export class Character {
     this.game.physics.remove(this.body);
     this.figure.group.visible = false;
     this.tag.material.opacity = 0.35;
+  }
+
+  /** Fuera de juego hasta la próxima ronda (sin desmontarse): entró con la ronda empezada. */
+  waitForRound() {
+    this.kill(Infinity);
   }
 
   respawn(x, z, now) {

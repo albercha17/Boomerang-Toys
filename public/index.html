@@ -23,8 +23,12 @@
     <div class="hud-players" id="hud-players"></div>
     <button class="hud-btn" id="map-btn" type="button" title="Tecla M">Nuevo mapa</button>
     <button class="hud-btn" id="bot-btn" type="button" title="Tecla B">+ Añadir bot</button>
+    <button class="hud-btn" id="pause-btn" type="button" title="Tecla P o Esc" hidden>Ⅱ Pausa</button>
     <span class="hud-url" id="hud-url"></span>
   </header>
+
+  <!-- Sala, cuenta atrás, resultados, victoria y pausa (ui/MatchOverlay.js) -->
+  <div class="match-overlay" id="match-overlay"></div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/shared/protocol.js"></script>
