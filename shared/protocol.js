@@ -19,6 +19,8 @@
     INPUT: 'c:input', // mando -> servidor: [seq, mx, my, ax, ay, botones]
     PING: 'c:ping', // mando -> servidor: (ultimoRttMs, ack)
     FEEDBACK_REPORT: 'g:feedback', // pantalla anfitriona -> servidor: [idJugador, estado]
+    ABILITIES_REPORT: 'g:abilities', // pantalla anfitriona -> servidor: [idJugador, [idPowerup, ...]]
+    ABILITIES: 's:abilities', // servidor -> mando: [idPowerup, ...] (de la más antigua a la más nueva)
     WELCOME: 's:welcome', // servidor -> mando: { id, number, name, color, token }
     REJECTED: 's:rejected', // servidor -> mando: { reason }
     KICKED: 's:kicked', // servidor -> mando: { reason }
@@ -45,8 +47,9 @@
     ALIVE: 1,
     ARMED: 2,
     IN_MATCH: 4, // ronda en juego: quien cae no reaparece hasta la siguiente
+    OUTSIDE: 8, // fuera de la línea roja: explota si no vuelve a tiempo
   });
-  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED | FEEDBACK.IN_MATCH;
+  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED | FEEDBACK.IN_MATCH | FEEDBACK.OUTSIDE;
 
   // Los ejes viajan como enteros en [-AXIS_MAX, AXIS_MAX] para que los mensajes sean compactos.
   const AXIS_MAX = 100;
@@ -108,7 +111,17 @@
     return { id, flags: flags & FEEDBACK_MASK };
   }
 
+  /** Valida un informe de power-ups. Devuelve { id, abilities } o null; `isValid` comprueba cada id. */
+  function decodeAbilitiesReport(packet, isValid, max) {
+    if (!Array.isArray(packet) || packet.length !== 2) return null;
+    const [id, abilities] = packet;
+    if (!Number.isInteger(id) || id < 1 || !Array.isArray(abilities) || abilities.length > max) return null;
+    if (!abilities.every(isValid)) return null;
+    return { id, abilities: [...abilities] };
+  }
+
   return Object.freeze({
+    decodeAbilitiesReport,
     ROLES,
     EVENTS,
     REASONS,

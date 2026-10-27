@@ -49,6 +49,7 @@ export class Match {
     this.scores.clear();
     this.round = 0;
     this.matchWinner = null;
+    this.game.clearAllAbilities(); // todos empiezan la partida sin power-ups
     this.nextRound(now);
   }
 
@@ -71,6 +72,7 @@ export class Match {
     this.matchWinner = null;
     this.game.frozen = false;
     this.game.respawnEnabled = true;
+    this.game.clearAllAbilities();
     this.game.newArena(now);
     this.setPhase(PHASE.LOBBY, now);
   }

@@ -35,18 +35,26 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 5. **Quien llega a 10 puntos gana la partida.** Pantalla de victoria y **«Volver a la sala»** para jugar otra, sin reiniciar nada.
 6. **Pausa** con el botón de la barra o la tecla **P** (o Esc): todo se congela; desde ahí se puede continuar o terminar la partida.
 
-### Power-ups
+### Power-ups (inspirados en Boomerang Fu)
 
-Cada pocos segundos aparece una **caja sorpresa** en el mapa (hasta 3 a la vez). Quien pasa por encima gana su habilidad. Se pueden llevar **3 habilidades** a la vez: al coger una cuarta se pierde la más antigua. Se pierden al morir y al cambiar de mapa. Los iconos de las habilidades se ven bajo el nombre de cada muñeco.
+Cada pocos segundos aparece una **caja sorpresa** en el mapa (hasta 3 a la vez). Quien pasa por encima gana su power-up. Se pueden llevar **3** a la vez: al coger un cuarto se pierde el más antiguo. **Se conservan durante toda la partida** (de ronda en ronda) y se reinician al empezar una partida nueva o al volver a la sala.
 
-| Caja | Habilidad |
+- Sobre el muñeco, sus iconos solo se ven **un momento al cogerlos** y **en la cuenta atrás** de cada ronda.
+- En el **móvil** de cada jugador se ven siempre en la barra de arriba; al coger uno avisa y vibra, y **tocando un icono** explica qué hace.
+
+| Power-up | Qué hace |
 |---|---|
-| 👟 Zapatillas | Corres un 35 % más rápido |
-| 🛡️ Escudo | Aguanta un golpe (se ve una burbuja verde) |
-| 🔶 Búmerang gigante | Tu búmerang es casi el doble de grande y acierta más fácil |
-| 🎯 Teledirigido | En la ida, tu búmerang tuerce hacia el rival que tenga delante |
-| 🔁 Súper rebote | Tu búmerang va más rápido, frena menos y rebota 3 veces más |
-| 💨 Turbo | Dash más rápido y con mucha menos recarga |
+| 🌀 Teletransporte | Con tu búmerang lanzado, toca el joystick de ataque: apareces donde está y lo recoges |
+| 🔱 Multibúmerang | Al lanzar, el búmerang se divide en tres en abanico (las copias desaparecen al volver) |
+| 🎭 Señuelo | Al hacer dash dejas una copia tuya que sigue corriendo y engaña a los rivales (y al bot) |
+| 💥 Explosivo | El búmerang explota al chocar (o al dar a alguien) y elimina a los que estén cerca, a ti no |
+| 🛡️ Escudo | Aguanta un golpe (burbuja verde) y se rompe |
+| 🧠 Telequinesis | En la ida, guías tu búmerang con el joystick de movimiento |
+| 🔥 Fuego | El búmerang deja un rastro de llamas que elimina a los rivales que lo pisan |
+
+### Mapas grandes y línea roja
+
+Los mapas son más grandes (pequeña 24×14, mediana 32×18 por defecto, grande 40×24). En la mayoría **no hay paredes en el borde**: hay una **línea roja**. Si la cruzas, tienes **5 segundos** para volver: parpadeas en rojo (cada vez más rápido), sobre tu cabeza se ve la cuenta atrás y el móvil vibra y muestra **«¡VUELVE A LA ZONA!»**. Si no vuelves, explotas. Más allá de la línea hay un poco de mesa y un tope invisible. Uno de cada cinco mapas tiene paredes de bloques; `/?paredes=si` o `/?paredes=no` lo fuerzan.
 
 ### Búmerangs, rebotes y cuchillada
 
@@ -73,7 +81,8 @@ Desde la dirección de la pantalla del juego (todo opcional):
 
 | Parámetro | Ejemplo | Qué hace |
 |---|---|---|
-| `mapa` | `/?mapa=grande` | Tamaño predefinido: `pequena` (20×12), `mediana` (26×14, por defecto), `grande` (34×20) |
+| `mapa` | `/?mapa=grande` | Tamaño predefinido: `pequena` (24×14), `mediana` (32×18, por defecto), `grande` (40×24) |
+| `paredes` | `/?paredes=si` | `si`: borde de bloques; `no`: línea roja (por defecto, al azar: 1 de cada 5 con paredes) |
 | `ancho`, `alto` | `/?ancho=30&alto=16` | Tamaño a medida en casillas, borde incluido (ancho 12–64, alto 10–40) |
 | `densidad` | `/?densidad=0.25` | Cantidad de obstáculos (0–0,3) |
 | `semilla` | `/?semilla=42` | Repite exactamente un mapa (misma semilla = mismo mapa) |
@@ -118,6 +127,7 @@ server/network.js              Detección de IPs locales
 server/PlayerManager.js        Estado autoritativo: plazas, tokens, reconexión, validación de entradas
 server/socketHandlers.js       Roles de socket, eventos y bucle de envío (20 Hz)
 shared/protocol.js             Protocolo común (Node y navegador)
+shared/powerups.js             Catálogo de power-ups (nombre, icono, explicación y parámetros), común a servidor, pantalla y mando
 public/index.html              Pantalla del juego (importmap de three y cannon-es)
 public/js/game/main.js         Arranque y bucle de fotogramas
 public/js/game/ArenaGame.js    Partida: jugadores, combate, impactos, reapariciones, avisos a los mandos
@@ -169,7 +179,9 @@ El rol se indica al conectar: `io({ auth: { role: 'screen' } })` o `io({ auth: {
 | `s:welcome` | servidor → mando | `{ id, number, name, color, token }` |
 | `s:rejected` | servidor → mando | `{ reason: 'full' }` |
 | `s:kicked` | servidor → mando | `{ reason: 'replaced' }` (mismo jugador abierto en otra pestaña) |
-| `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma, 4 = ronda en juego (no se reaparece) |
+| `g:abilities` | pantalla anfitriona → servidor | `[idJugador, [idPowerup…]]` cuando cambian (el servidor valida los ids con `shared/powerups.js`) |
+| `s:abilities` | servidor → mando | `[idPowerup…]`, de la más antigua a la más nueva |
+| `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma, 4 = ronda en juego (no se reaparece), 8 = fuera de la línea roja |
 | `s:screenInit` | servidor → pantalla | `{ server, roster, state }` al conectar |
 | `s:roster` | servidor → pantalla | lista de jugadores (al entrar/salir; latencia como mucho 1/s) |
 | `s:state` | servidor → pantalla | `{ t, p: [[id, mx, my, ax, ay, botones, ataques, dashes, obsoleto]] }`, a 20 Hz y solo si hay cambios |

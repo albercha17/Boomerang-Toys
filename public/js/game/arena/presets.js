@@ -5,9 +5,9 @@
  *   /?ancho=30&alto=16&densidad=0.2&simetria=no
  */
 export const ARENA_PRESETS = Object.freeze({
-  pequena: { cols: 20, rows: 12, density: 0.13 },
-  mediana: { cols: 26, rows: 14, density: 0.15 },
-  grande: { cols: 34, rows: 20, density: 0.16 },
+  pequena: { cols: 24, rows: 14, density: 0.13 },
+  mediana: { cols: 32, rows: 18, density: 0.14 },
+  grande: { cols: 40, rows: 24, density: 0.15 },
 });
 
 export const ARENA_LIMITS = Object.freeze({
@@ -22,6 +22,7 @@ const DEFAULTS = Object.freeze({
   symmetry: 'mirror-x', // 'mirror-x' (izquierda = derecha) o 'none'
   spawnCount: 8,
   propDensity: 0.02, // juguetes sueltos por casilla libre
+  wallChance: 0.2, // mapas con paredes en el borde; el resto tiene línea roja (salir 5 s = explotar)
   minOpenRatio: 0.6, // si queda menos suelo accesible, se repite con otra variante
   maxAttempts: 8,
 });
@@ -46,6 +47,7 @@ export function readArenaConfig(search = '') {
     rows: Math.round(clamp(number('alto', preset.rows), ARENA_LIMITS.rows)),
     density: clamp(number('densidad', preset.density), ARENA_LIMITS.density),
     symmetry: params.get('simetria') === 'no' ? 'none' : DEFAULTS.symmetry,
+    wallChance: params.has('paredes') ? (params.get('paredes') === 'si' ? 1 : 0) : DEFAULTS.wallChance,
     seed: Math.floor(number('semilla', randomSeed())),
   };
 }

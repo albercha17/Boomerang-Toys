@@ -92,6 +92,8 @@ function tryGenerate(config, attempt) {
     cols,
     rows,
     seed: config.seed,
+    // Borde: con paredes de bloques solo en algunos mapas; en el resto, línea roja (ver ArenaBuilder).
+    walled: createRandom(hashSeed(config.seed, 0xb0de)).next() < config.wallChance,
     chunkSize,
     grid,
     chunks,

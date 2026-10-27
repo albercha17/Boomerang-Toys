@@ -4,7 +4,7 @@ import { POWERUPS } from '../content/powerups.js';
 
 export const WEAPON_STATE = Object.freeze({
   HELD: 'held', // en la mano de alguien
-  OUT: 'out', // ida: frena poco a poco
+  OUT: 'out', // ida: frena poco a poco y rebota
   RETURN: 'return', // vuelta: busca a quien lo lanzó
   GROUND: 'ground', // en el suelo, lo puede recoger cualquiera sin arma
 });
@@ -13,7 +13,7 @@ const SPIN = 24; // rad/s en vuelo
 const HELD_SCALE = 0.75;
 const GROUND_HEIGHT = 0.07;
 const BOUNCE_DEBOUNCE_MS = 60; // un mismo choque puede avisar en varios pasos seguidos
-const NORMAL_FLIGHT = Object.freeze({ maxBounces: 0, decelerationFactor: 1, homing: false, big: false });
+const NORMAL_FLIGHT = Object.freeze({ explosive: false, fire: false, telekinesis: false });
 
 // Búmerang en V con volumen (extruido y biselado), tumbado en el plano del suelo.
 const GEOMETRY = (() => {
@@ -32,14 +32,17 @@ const GEOMETRY = (() => {
 })();
 
 /**
- * Búmerang: sale, frena, vuelve a su dueño y rebota en las paredes.
- * Interfaz de arma (para futuras armas): def, state, owner, holder, x, z, velocityAngle, dangerous, catchable,
- * attachTo, throw, dropAt, onWallHit, steer, sync, destroy.
+ * Búmerang: sale, frena, rebota en paredes y juguetes y vuelve a su dueño.
+ * Los power-ups de quien lo lanza cambian su vuelo (explosivo, fuego, telequinesis).
+ * Con `temporary` es una copia del Multibúmerang: desaparece al volver o al caer.
+ * Interfaz de arma (para futuras armas): def, state, owner, holder, x, z, hitRadius, velocityAngle, dangerous,
+ * catchable, attachTo, throw, throwFrom, dropAt, onWallHit, steer, sync, destroy.
  */
 export class Boomerang {
-  constructor(game, def) {
+  constructor(game, def, { temporary = false } = {}) {
     this.game = game;
     this.def = def;
+    this.temporary = temporary;
     this.mesh = new THREE.Mesh(GEOMETRY, plastic(0xffffff));
     this.mesh.scale.setScalar(def.scale);
     this.mesh.castShadow = true;
@@ -56,15 +59,13 @@ export class Boomerang {
     this.bounces = 0;
     this.lastBounceAt = -Infinity;
     this.pendingBounce = false;
-    this.flight = NORMAL_FLIGHT; // modificadores del vuelo actual según las habilidades de quien lo lanzó
+    this.lastFireAt = 0;
+    this.exploded = false;
+    this.flight = NORMAL_FLIGHT; // efectos del vuelo actual según los power-ups de quien lo lanzó
     this.hand = new THREE.Vector3();
   }
 
-  /** Radio con el que alcanza a los personajes (mayor con el búmerang gigante). */
-  get hitRadius() {
-    return this.def.radius * (this.flight.big ? POWERUPS.gigante.hitFactor : 1);
-  }
-
+  get hitRadius() { return this.def.radius; }
   get x() { return this.body.position.x; }
   get z() { return this.body.position.z; }
   get velocityAngle() { return Math.atan2(this.body.velocity.z, this.body.velocity.x); }
@@ -91,19 +92,26 @@ export class Boomerang {
   throw(charge) {
     const thrower = this.holder;
     this.release();
+    this.throwFrom(thrower, thrower.facing, charge);
+  }
+
+  /** Vuelo desde un personaje en una dirección (también para las copias del Multibúmerang). */
+  throwFrom(thrower, angle, charge) {
+    this.owner = thrower;
+    this.mesh.material = plastic(thrower.color);
     this.state = WEAPON_STATE.OUT;
     this.flightMs = 0;
     this.bounces = 0;
     this.pendingBounce = false;
-    const rebote = thrower.hasAbility('rebote');
+    this.exploded = false;
+    this.lastFireAt = 0;
     this.flight = {
-      maxBounces: this.def.maxBounces + (rebote ? POWERUPS.rebote.extraBounces : 0),
-      decelerationFactor: rebote ? POWERUPS.rebote.decelerationFactor : 1,
-      homing: thrower.hasAbility('teledirigido'),
-      big: thrower.hasAbility('gigante'),
+      explosive: thrower.hasAbility('explosivo'),
+      fire: thrower.hasAbility('fuego'),
+      telekinesis: thrower.hasAbility('telequinesis'),
     };
-    const speed = THREE.MathUtils.lerp(this.def.minSpeed, this.def.maxSpeed, charge) * (rebote ? POWERUPS.rebote.speedFactor : 1);
-    this.launch(thrower.x, thrower.z, Math.cos(thrower.facing) * speed, Math.sin(thrower.facing) * speed);
+    const speed = THREE.MathUtils.lerp(this.def.minSpeed, this.def.maxSpeed, charge);
+    this.launch(thrower.x, thrower.z, Math.cos(angle) * speed, Math.sin(angle) * speed);
     this.body.linearDamping = 0;
   }
 
@@ -123,26 +131,39 @@ export class Boomerang {
   release() {
     if (this.holder) this.holder.weapon = null;
     this.holder = null;
-    this.flight = NORMAL_FLIGHT;
     this.mesh.scale.setScalar(this.def.scale);
   }
 
   toGround() {
+    if (this.temporary) {
+      this.game.removeWeapon(this); // las copias del Multibúmerang no se quedan en el suelo
+      return;
+    }
     this.state = WEAPON_STATE.GROUND;
+    this.flight = NORMAL_FLIGHT;
     this.body.linearDamping = this.def.groundDamping;
   }
 
   /** Rebote en pared, torre o juguete: en la ida sigue rebotando hasta agotar sus rebotes. */
   onWallHit() {
     const now = performance.now();
-    if (this.state !== WEAPON_STATE.OUT || now - this.lastBounceAt < BOUNCE_DEBOUNCE_MS) return;
+    if (!this.dangerous || now - this.lastBounceAt < BOUNCE_DEBOUNCE_MS) return;
     this.lastBounceAt = now;
+    this.detonate(); // Explosivo: estalla en el primer choque
+    if (this.state !== WEAPON_STATE.OUT) return;
     this.bounces++;
     this.pendingBounce = true;
-    if (this.bounces > this.flight.maxBounces) this.state = WEAPON_STATE.RETURN;
+    if (this.bounces > this.def.maxBounces) this.state = WEAPON_STATE.RETURN;
   }
 
-  /** Antes del paso de física: frenado de ida y corrección de rumbo en la vuelta. */
+  /** Con Explosivo, estalla una vez por lanzamiento (al chocar o al dar a alguien). */
+  detonate() {
+    if (!this.flight.explosive || this.exploded) return;
+    this.exploded = true;
+    this.game.explode(this.x, this.z, this.owner, performance.now());
+  }
+
+  /** Antes del paso de física: frenado de ida, efectos de los power-ups y corrección de rumbo en la vuelta. */
   steer(dt) {
     if (!this.dangerous) return;
     const velocity = this.body.velocity;
@@ -158,10 +179,16 @@ export class Boomerang {
       velocity.scale(this.def.bounceSpeedKeep, velocity); // cada rebote le quita un poco de fuerza
     }
 
+    // Fuego: deja un rastro de llamas por donde pasa.
+    if (this.flight.fire && this.flightMs - this.lastFireAt >= POWERUPS.fuego.intervalMs) {
+      this.lastFireAt = this.flightMs;
+      this.game.fire.add(this.x, this.z, this.owner, performance.now());
+    }
+
     if (this.state === WEAPON_STATE.OUT) {
-      if (this.flight.homing) this.homeIn(dt);
+      if (this.flight.telekinesis) this.steerWithJoystick(dt);
       const speed = Math.hypot(velocity.x, velocity.z);
-      const next = speed - this.def.deceleration * this.flight.decelerationFactor * dt;
+      const next = speed - this.def.deceleration * dt;
       if (next <= this.def.turnSpeed) {
         this.state = WEAPON_STATE.RETURN;
       } else {
@@ -186,30 +213,17 @@ export class Boomerang {
     velocity.z += ((dz / distance) * this.def.returnSpeed - velocity.z) * k;
   }
 
-  /** Teledirigido: en la ida tuerce poco a poco hacia el rival más cercano que tenga delante. */
-  homeIn(dt) {
+  /** Telequinesis: en la ida, el búmerang gira hacia donde apunta el joystick de movimiento de su dueño. */
+  steerWithJoystick(dt) {
+    const { x, y } = this.owner.moveInput;
+    if (Math.hypot(x, y) < 0.3) return;
     const velocity = this.body.velocity;
     const speed = Math.hypot(velocity.x, velocity.z) || 1;
-    const { range, steer } = POWERUPS.teledirigido;
-    let target = null;
-    let best = range;
-    for (const other of this.game.characters.values()) {
-      if (other === this.owner || !other.alive) continue;
-      const dx = other.x - this.x;
-      const dz = other.z - this.z;
-      const distance = Math.hypot(dx, dz);
-      if (distance < best && (dx * velocity.x + dz * velocity.z) / (distance * speed) > 0.2) {
-        best = distance;
-        target = { dx: dx / distance, dz: dz / distance };
-      }
-    }
-    if (!target) return;
-    const k = Math.min(1, steer * dt);
-    const vx = velocity.x / speed + (target.dx - velocity.x / speed) * k;
-    const vz = velocity.z / speed + (target.dz - velocity.z / speed) * k;
-    const length = Math.hypot(vx, vz) || 1;
-    velocity.x = (vx / length) * speed;
-    velocity.z = (vz / length) * speed;
+    const current = Math.atan2(velocity.z, velocity.x);
+    const diff = Math.atan2(Math.sin(Math.atan2(y, x) - current), Math.cos(Math.atan2(y, x) - current));
+    const step = Math.sign(diff) * Math.min(Math.abs(diff), POWERUPS.telequinesis.steer * dt);
+    velocity.x = Math.cos(current + step) * speed;
+    velocity.z = Math.sin(current + step) * speed;
   }
 
   /** Después del paso de física: coloca la malla (en la mano, en vuelo o en el suelo). */
@@ -230,7 +244,6 @@ export class Boomerang {
     }
     mesh.position.set(this.x, this.def.flightHeight, this.z);
     mesh.rotation.y += SPIN * dt;
-    mesh.scale.setScalar(this.def.scale * (this.flight.big ? POWERUPS.gigante.scale : 1));
   }
 
   destroy() {

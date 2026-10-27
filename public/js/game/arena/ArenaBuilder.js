@@ -5,6 +5,7 @@ import { CELL } from './generation/cells.js';
 const BLOCK_HEIGHT = 0.9;
 const PILLAR_RADIUS = 0.38;
 const PILLAR_HEIGHT = 1.15;
+const OUTER_MARGIN = 2.5; // casillas de mesa fuera de la línea roja hasta el tope invisible
 const BLOCK_TINTS = [0xe63946, 0x1d7cf2, 0xf4b400, 0x2bb673, 0x9b5de5, 0xff7f11];
 const STUDS = [[-0.24, -0.24], [0.24, -0.24], [-0.24, 0.24], [0.24, 0.24]];
 const PROPS = {
@@ -85,7 +86,8 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
       for (let c = chunk.col0; c <= chunk.col1 + 1; c++) {
         const type = c <= chunk.col1 ? cellAt(c, r) : CELL.EMPTY;
         const { x, z } = toWorld({ col: c, row: r });
-        if (type === CELL.BLOCK || type === CELL.BORDER) {
+        // Sin paredes en el borde, las casillas del borde son suelo normal (la zona la marca la línea roja).
+        if (type === CELL.BLOCK || (type === CELL.BORDER && layout.walled)) {
           const tint = type === CELL.BORDER ? COLORS.border : BLOCK_TINTS[(c * 7 + r * 3) % BLOCK_TINTS.length];
           blocks.push({ x, y: BLOCK_HEIGHT / 2, z, tint });
           for (const [dx, dz] of STUDS) studs.push({ x: x + dx, y: BLOCK_HEIGHT + 0.05, z: z + dz, tint });
@@ -133,7 +135,28 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   });
 
   stats.colliders = bodies.length;
-  stage.frame(cols, rows);
+  if (!layout.walled) {
+    // Línea roja en el límite de la zona y, un poco más allá, un tope invisible para no perderse por la mesa.
+    const red = own(new THREE.MeshBasicMaterial({ color: 0xff2a2a }));
+    const thick = 0.14;
+    const lines = [
+      [cols + thick, thick, 0, originZ], [cols + thick, thick, 0, -originZ],
+      [thick, rows + thick, originX, 0], [thick, rows + thick, -originX, 0],
+    ];
+    for (const [w, d, x, z] of lines) {
+      const line = new THREE.Mesh(own(new THREE.BoxGeometry(w, 0.03, d)), red);
+      line.position.set(x, 0.02, z);
+      root.add(line);
+    }
+    const m = OUTER_MARGIN;
+    const outer = [
+      [cols / 2 + m + 0.5, 0, 0.5, rows / 2 + m + 1], [-(cols / 2 + m + 0.5), 0, 0.5, rows / 2 + m + 1],
+      [0, rows / 2 + m + 0.5, cols / 2 + m + 1, 0.5], [0, -(rows / 2 + m + 0.5), cols / 2 + m + 1, 0.5],
+    ];
+    for (const [x, z, hx, hz] of outer) bodies.push(physics.addWall(x, 1, z, hx, 1, hz));
+  }
+  // Con línea roja se encuadra también parte de la mesa, para ver a quien sale de la zona.
+  stage.frame(cols + (layout.walled ? 0 : OUTER_MARGIN * 1.6), rows + (layout.walled ? 0 : OUTER_MARGIN * 1.6));
 
   // Casillas libres con todo su alrededor libre (para colocar power-ups).
   const freePoints = [];
@@ -150,7 +173,8 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
     stats,
     spawnPoints: layout.spawnPoints.map(toWorld),
     freePoints,
-    bounds: { minX: originX, maxX: -originX, minZ: originZ, maxZ: -originZ },
+    bounds: { minX: originX, maxX: -originX, minZ: originZ, maxZ: -originZ }, // zona de juego (dentro de la línea roja)
+    walled: layout.walled,
 
     /** Después del paso de física: coloca los juguetes sueltos. */
     sync() {

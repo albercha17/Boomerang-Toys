@@ -157,6 +157,22 @@ export class PhysicsWorld {
     return body;
   }
 
+  /** Onda de choque: empuja hacia fuera (y hacia arriba) las piezas y juguetes cercanos. */
+  blast(x, z, radius, strength) {
+    for (const body of this.world.bodies) {
+      if (body.kind !== 'debris' && body.kind !== 'prop') continue;
+      const dx = body.position.x - x;
+      const dz = body.position.z - z;
+      const distance = Math.hypot(dx, dz);
+      if (distance > radius) continue;
+      const k = strength * body.mass * (1 - distance / radius);
+      const nx = distance > 0.01 ? dx / distance : 0;
+      const nz = distance > 0.01 ? dz / distance : 0;
+      body.wakeUp();
+      body.applyImpulse(new CANNON.Vec3(nx * k, k * 0.8, nz * k));
+    }
+  }
+
   /** true si no hay paredes ni torres entre dos puntos del suelo (a media altura). */
   lineOfSight(x1, z1, x2, z2) {
     const result = new CANNON.RaycastResult();

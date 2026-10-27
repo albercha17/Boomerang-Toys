@@ -20,6 +20,7 @@
   <header class="bar">
     <span class="swatch" id="swatch"></span>
     <span class="name" id="player-name">Conectando…</span>
+    <div class="abilities" id="abilities" hidden></div>
     <span class="status" id="status" data-state="connecting">Conectando</span>
     <span class="ping" id="ping"></span>
     <button class="fullscreen" id="fullscreen-btn" type="button" hidden>⛶</button>
@@ -44,6 +45,11 @@
     </section>
   </main>
 
+  <!-- Power-ups: explicación al tocar un icono y aviso al coger uno nuevo -->
+  <div class="ability-info" id="ability-info" hidden></div>
+  <div class="toast" id="toast" hidden></div>
+  <div class="outside-warning" id="outside-warning" hidden>¡VUELVE A LA ZONA!</div>
+
   <div class="ios-hint" id="ios-hint" hidden>
     <p><strong>Pantalla completa en iPhone:</strong> pulsa <b>Compartir</b> (el cuadrado con la flecha) → <b>Añadir a pantalla de inicio</b>, y abre el mando desde ese icono.</p>
     <button type="button" id="ios-hint-close">Entendido</button>
@@ -58,6 +64,7 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/shared/protocol.js"></script>
+  <script src="/shared/powerups.js"></script>
   <script type="module" src="/js/controller/main.js"></script>
 </body>
 </html>

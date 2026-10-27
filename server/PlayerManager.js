@@ -69,6 +69,7 @@ class PlayerManager {
       rateWindowStart: now,
       rateCount: 0,
       feedback: null, // último estado de juego que mostrar en el mando (FEEDBACK)
+      abilities: [], // power-ups que lleva (los informa la pantalla anfitriona)
     };
     this.players.set(player.id, player);
     this.byToken.set(player.token, player);

@@ -1,4 +1,5 @@
-const { ROLES, EVENTS, REASONS, decodeFeedbackReport } = require('../shared/protocol');
+const { ROLES, EVENTS, REASONS, decodeFeedbackReport, decodeAbilitiesReport } = require('../shared/protocol');
+const { isPowerupId, MAX_ABILITIES } = require('../shared/powerups');
 
 const SCREENS_ROOM = 'screens';
 
@@ -34,6 +35,15 @@ function registerSocketHandlers(io, players, config, serverInfo) {
       if (player.connected) io.to(player.socketId).emit(EVENTS.FEEDBACK, report.flags);
     });
 
+    socket.on(EVENTS.ABILITIES_REPORT, (packet) => {
+      if (screenIds[0] !== socket.id) return;
+      const report = decodeAbilitiesReport(packet, isPowerupId, MAX_ABILITIES);
+      const player = report && players.get(report.id);
+      if (!player) return;
+      player.abilities = report.abilities;
+      if (player.connected) io.to(player.socketId).emit(EVENTS.ABILITIES, player.abilities);
+    });
+
     socket.on('disconnect', () => {
       screenIds.splice(screenIds.indexOf(socket.id), 1);
     });
@@ -59,6 +69,7 @@ function registerSocketHandlers(io, players, config, serverInfo) {
 
     socket.emit(EVENTS.WELCOME, { ...players.publicInfo(player), token: player.token });
     if (player.feedback !== null) socket.emit(EVENTS.FEEDBACK, player.feedback);
+    socket.emit(EVENTS.ABILITIES, player.abilities);
     emitRoster();
 
     const isCurrent = () => player.socketId === socket.id;

@@ -4,8 +4,10 @@ import { buildArena } from './arena/ArenaBuilder.js';
 import { withNewSeed } from './arena/presets.js';
 import { Character } from './entities/Character.js';
 import { Boomerang, WEAPON_STATE } from './entities/Boomerang.js';
+import { Decoy } from './entities/Decoy.js';
 import { Effects } from './effects/Effects.js';
 import { DebrisSystem } from './effects/DebrisSystem.js';
+import { FireSystem } from './effects/FireSystem.js';
 import { CHARACTERS, DEFAULT_CHARACTER } from './content/characters.js';
 import { WEAPONS } from './content/weapons.js';
 import { BotBrain } from './bots/BotBrain.js';
@@ -15,13 +17,14 @@ import { POWERUPS } from './content/powerups.js';
 const { FEEDBACK } = window.Protocol;
 
 const RESPAWN_MS = 2500;
+const OUTSIDE_LIMIT_MS = 5000; // tiempo fuera de la línea roja antes de explotar
 // Clase que implementa cada tipo de arma del catálogo.
 const WEAPON_CLASSES = { boomerang: Boomerang };
 const MAX_BOTS = 1;
 const BOT_COLOR = '#8d99ae';
 
 /**
- * Partida en la arena: personajes, armas, impactos y reapariciones.
+ * Partida en la arena: personajes, armas, power-ups, impactos y reapariciones.
  * La simulación corre aquí (pantalla anfitriona); el servidor aporta jugadores y entradas validadas.
  */
 export class ArenaGame {
@@ -35,11 +38,14 @@ export class ArenaGame {
     this.arena = buildArena(stage, this.physics, generateArena(arenaConfig));
     this.effects = new Effects(stage);
     this.debris = new DebrisSystem(stage, this.physics, this.effects);
+    this.fire = new FireSystem(stage);
     this.characters = new Map(); // idJugador (o 'bot-N') -> Character
     this.bots = new Map(); // 'bot-N' -> BotBrain
     this.nextBotId = 1;
     this.weapons = [];
+    this.decoys = [];
     this.feedbackSent = new Map();
+    this.abilitiesSent = new Map();
     this.feedbackVersion = -1;
     // Los controla Match: en la sala se reaparece siempre; en una ronda, no. Congelado = cuenta atrás.
     this.respawnEnabled = true;
@@ -51,28 +57,41 @@ export class ArenaGame {
     return [...this.characters.values()].filter((c) => c.alive);
   }
 
+  /** Lo que se puede golpear: personajes y señuelos. */
+  targets() {
+    return [...this.characters.values(), ...this.decoys];
+  }
+
   /** Un fotograma: entradas -> rumbo de las armas -> física -> aspecto -> impactos. */
   update(now, dt) {
     this.syncRoster(now);
 
-    for (const character of this.characters.values()) {
+    for (const character of [...this.characters.values()]) {
       let input = null; // congelados: nadie se mueve ni ataca
       if (!this.frozen) input = character.isBot ? this.bots.get(character.id).update(now, this) : this.store.inputs.get(character.id) ?? null;
       const actions = character.update(dt, now, input);
-      if (actions.throwCharge !== null && character.weapon) character.weapon.throw(actions.throwCharge);
+      if (actions.throwCharge !== null && character.weapon) this.throwWeapon(character, actions.throwCharge, now);
       if (actions.melee) this.melee(character, now);
-      if (actions.dash) this.effects.burst(character.x, 0.1, character.z, [0xe8d3b0, 0xffffff], 10, 0.35); // polvo
+      if (actions.dash) this.onDash(character, now);
+      if (actions.teleport) this.teleport(character, now);
       if (this.respawnEnabled && !character.alive && now >= character.respawnAt) this.respawn(character, now);
     }
-    for (const weapon of this.weapons) weapon.steer(dt);
+    this.decoys = this.decoys.filter((decoy) => {
+      if (decoy.update(dt, now)) return true;
+      decoy.destroy();
+      return false;
+    });
+    for (const weapon of [...this.weapons]) weapon.steer(dt);
 
     this.physics.step(dt);
 
     this.arena.sync();
+    this.checkBoundary(now);
     for (const character of this.characters.values()) character.render(dt, now);
     for (const weapon of this.weapons) weapon.sync(dt);
     this.checkWeaponHits(now);
     this.resolveLunges(now);
+    this.fire.update(now, this.targets(), (target) => this.hit(target, 0, now));
     this.powerups.update(now);
     this.debris.sync(now);
     this.effects.update(dt);
@@ -81,15 +100,22 @@ export class ArenaGame {
 
   // --- Arena -------------------------------------------------------------
 
-  /** Genera y construye otra arena; todos reaparecen en ella con su búmerang. */
+  /** Genera y construye otra arena; todos reaparecen en ella con su búmerang (y conservan sus power-ups). */
   newArena(now, config = withNewSeed(this.arenaConfig)) {
     this.arenaConfig = config;
     this.arena.dispose();
     this.debris.clear();
+    this.fire.clear();
+    for (const decoy of this.decoys) decoy.destroy();
+    this.decoys = [];
     this.arena = buildArena(this.stage, this.physics, generateArena(config));
     this.powerups.reset(now);
 
-    for (const weapon of this.weapons) {
+    for (const weapon of [...this.weapons]) {
+      if (weapon.temporary) {
+        this.removeWeapon(weapon);
+        continue;
+      }
       weapon.release();
       weapon.toGround();
       this.physics.remove(weapon.body);
@@ -101,8 +127,34 @@ export class ArenaGame {
       character.respawn(spawn.x, spawn.z, now);
       character.facing = Math.atan2(-spawn.z, -spawn.x);
       character.lunge = null;
-      character.clearAbilities(); // cada mapa empieza sin power-ups
+      character.outsideSince = 0;
+      character.outsideLeftMs = null;
       character.homeWeapon.attachTo(character);
+    }
+  }
+
+  /** Al empezar una partida o volver a la sala, nadie conserva power-ups. */
+  clearAllAbilities() {
+    for (const character of this.characters.values()) character.clearAbilities();
+  }
+
+  /** Línea roja: fuera de la zona hay 5 s para volver; después, se explota. */
+  checkBoundary(now) {
+    const { minX, maxX, minZ, maxZ } = this.arena.bounds;
+    for (const character of this.characters.values()) {
+      const outside = character.alive && !this.frozen
+        && (character.x < minX || character.x > maxX || character.z < minZ || character.z > maxZ);
+      if (!outside) {
+        character.outsideSince = 0;
+        character.outsideLeftMs = null;
+        continue;
+      }
+      if (!character.outsideSince) character.outsideSince = now;
+      character.outsideLeftMs = Math.max(0, OUTSIDE_LIMIT_MS - (now - character.outsideSince));
+      if (character.outsideLeftMs === 0) {
+        this.explosionEffect(character.x, character.z);
+        this.hit(character, Math.random() * Math.PI * 2, now, { force: true });
+      }
     }
   }
 
@@ -147,11 +199,9 @@ export class ArenaGame {
     character.facing = Math.atan2(-spawn.z, -spawn.x); // mirando hacia el centro
     character.invulnerableUntil = now + def.spawnInvulnerableMs;
 
-    const weaponDef = WEAPONS[def.weapon];
-    const weapon = new WEAPON_CLASSES[weaponDef.type](this, weaponDef);
+    const weapon = this.createWeapon(def.weapon);
     weapon.attachTo(character);
     character.homeWeapon = weapon;
-    this.weapons.push(weapon);
 
     if (!this.respawnEnabled) character.waitForRound(); // entra a mitad de ronda: juega la siguiente
     this.characters.set(player.id, character);
@@ -162,23 +212,33 @@ export class ArenaGame {
     if (character.weapon && character.weapon !== character.homeWeapon) {
       character.weapon.dropAt(character.x, character.z, 0);
     }
-    const home = character.homeWeapon;
-    home.destroy();
-    this.weapons = this.weapons.filter((weapon) => weapon !== home);
+    for (const weapon of this.weapons.filter((w) => w.temporary && w.owner === character)) this.removeWeapon(weapon);
+    this.removeWeapon(character.homeWeapon);
     character.destroy();
     this.characters.delete(character.id);
     this.feedbackSent.delete(character.id);
+    this.abilitiesSent.delete(character.id);
   }
 
-  /** Punto de aparición más alejado de los personajes vivos. */
-  /** @param occupied posiciones a evitar; por defecto, los personajes vivos */
+  createWeapon(id, options) {
+    const def = WEAPONS[id];
+    const weapon = new WEAPON_CLASSES[def.type](this, def, options);
+    this.weapons.push(weapon);
+    return weapon;
+  }
+
+  removeWeapon(weapon) {
+    weapon.destroy();
+    this.weapons = this.weapons.filter((w) => w !== weapon);
+  }
+
+  /** @param occupied posiciones a evitar; por defecto, los personajes vivos. Devuelve el punto de aparición más alejado. */
   pickSpawn(occupied = [...this.characters.values()].filter((c) => c.alive)) {
-    const alive = occupied;
     let best = null;
     let bestDistance = -1;
     const points = [...this.arena.spawnPoints].sort(() => Math.random() - 0.5);
     for (const point of points) {
-      const nearest = alive.reduce((min, c) => Math.min(min, Math.hypot(point.x - c.x, point.z - c.z)), Infinity);
+      const nearest = occupied.reduce((min, c) => Math.min(min, Math.hypot(point.x - c.x, point.z - c.z)), Infinity);
       if (nearest > bestDistance) {
         best = point;
         bestDistance = nearest;
@@ -194,29 +254,95 @@ export class ArenaGame {
     if (!character.weapon && home.state === WEAPON_STATE.GROUND) home.attachTo(character);
   }
 
+  // --- Power-ups ---------------------------------------------------------
+
+  /** Lanzamiento; con Multibúmerang salen dos copias temporales en abanico. */
+  throwWeapon(character, charge, now) {
+    const weapon = character.weapon;
+    weapon.throw(charge);
+    character.thrownWeapon = weapon;
+    if (!character.hasAbility('multi')) return;
+    const { extra, spread } = POWERUPS.multi;
+    for (let i = 0; i < extra; i++) {
+      const side = i % 2 === 0 ? 1 : -1;
+      const copy = this.createWeapon(weapon.def.id, { temporary: true });
+      copy.throwFrom(character, character.facing + side * spread * (1 + Math.floor(i / 2)), charge);
+    }
+  }
+
+  onDash(character, now) {
+    this.effects.burst(character.x, 0.1, character.z, [0xe8d3b0, 0xffffff], 10, 0.35); // polvo
+    if (character.hasAbility('senuelo')) {
+      // Un señuelo por jugador: el nuevo sustituye al anterior.
+      for (const old of this.decoys.filter((d) => d.owner === character)) old.destroy();
+      this.decoys = this.decoys.filter((d) => d.alive);
+      this.decoys.push(new Decoy(this, character, character.dashAngle, now));
+    }
+  }
+
+  /** Teletransporte: apareces donde está tu búmerang lanzado y lo recoges. */
+  teleport(character, now) {
+    const weapon = character.thrownWeapon;
+    if (!weapon || weapon.holder || weapon.temporary || now < (character.teleportReadyAt ?? 0)) return;
+    if (weapon.state === WEAPON_STATE.HELD) return;
+    character.teleportReadyAt = now + POWERUPS.teletransporte.cooldownMs;
+    const color = POWERUPS.teletransporte.color;
+    this.effects.burst(character.x, 0.7, character.z, [color, 0xffffff], 16, 0.6);
+    character.body.position.set(weapon.x, character.body.position.y, weapon.z);
+    character.body.velocity.set(0, 0, 0);
+    this.effects.burst(weapon.x, 0.7, weapon.z, [color, 0xffffff], 16, 0.6);
+    this.effects.ring(weapon.x, weapon.z);
+    weapon.attachTo(character);
+  }
+
+  /** Explosión (búmerang Explosivo): elimina a quien esté cerca, salvo a quien lo lanzó, y empuja piezas y juguetes. */
+  explode(x, z, owner, now) {
+    const { radius } = POWERUPS.explosivo;
+    this.explosionEffect(x, z);
+    for (const target of this.targets()) {
+      if (!target.alive || target === owner || target.owner === owner) continue;
+      if (Math.hypot(target.x - x, target.z - z) <= radius + target.def.radius) this.hit(target, Math.atan2(target.z - z, target.x - x), now);
+    }
+  }
+
+  explosionEffect(x, z) {
+    this.effects.burst(x, 0.6, z, [0xff4d00, 0xffd000, 0xffffff, 0x2a1d14], 44, 1.3);
+    this.effects.ring(x, z);
+    this.physics.blast(x, z, POWERUPS.explosivo.radius * 1.6, 7);
+    this.stage.shake(260, 0.5);
+  }
+
   // --- Combate -----------------------------------------------------------
 
   /** Las armas atraviesan a los personajes en la física; el contacto se comprueba aquí en el plano. */
   checkWeaponHits(now) {
-    for (const weapon of this.weapons) {
+    for (const weapon of [...this.weapons]) {
       if (weapon.state === WEAPON_STATE.HELD) continue;
-      for (const character of this.characters.values()) {
-        if (!character.alive) continue;
-        const reach = character.def.radius + weapon.hitRadius;
-        if (Math.hypot(weapon.x - character.x, weapon.z - character.z) < reach) this.onWeaponTouch(weapon, character, now);
+      for (const target of this.targets()) {
+        if (!target.alive) continue;
+        const reach = target.def.radius + weapon.hitRadius;
+        if (Math.hypot(weapon.x - target.x, weapon.z - target.z) < reach) this.onWeaponTouch(weapon, target, now);
       }
     }
   }
 
-  onWeaponTouch(weapon, character, now) {
+  onWeaponTouch(weapon, target, now) {
+    if (target.isDecoy) {
+      if (weapon.dangerous && target.owner !== weapon.owner) this.hit(target, weapon.velocityAngle, now);
+      return;
+    }
     if (weapon.dangerous) {
-      if (character === weapon.owner) {
-        if (!character.weapon && weapon.catchable) weapon.attachTo(character);
+      if (target === weapon.owner) {
+        if (!weapon.catchable) return;
+        if (weapon.temporary) this.removeWeapon(weapon); // la copia vuelve a la mano y desaparece
+        else if (!target.weapon) weapon.attachTo(target);
         return;
       }
-      this.kill(character, weapon.velocityAngle, now);
-    } else if (weapon.state === WEAPON_STATE.GROUND && !character.weapon) {
-      weapon.attachTo(character);
+      if (!target.isVulnerable(now)) return;
+      weapon.detonate();
+      this.hit(target, weapon.velocityAngle, now);
+    } else if (weapon.state === WEAPON_STATE.GROUND && !target.weapon) {
+      weapon.attachTo(target);
     }
   }
 
@@ -239,12 +365,12 @@ export class ArenaGame {
     }
   }
 
-  /** Rival vivo más cercano dentro del alcance de la embestida y a la vista. */
+  /** Rival (o señuelo ajeno) vivo más cercano dentro del alcance de la embestida y a la vista. */
   lungeTarget(attacker) {
     let best = null;
     let bestDistance = attacker.def.lunge.range + 0.001;
-    for (const other of this.characters.values()) {
-      if (other === attacker || !other.alive) continue;
+    for (const other of this.targets()) {
+      if (other === attacker || other.owner === attacker || !other.alive) continue;
       const distance = Math.hypot(other.x - attacker.x, other.z - attacker.z);
       if (distance >= bestDistance) continue;
       if (!this.physics.lineOfSight(attacker.x, attacker.z, other.x, other.z)) continue;
@@ -281,20 +407,32 @@ export class ArenaGame {
     const fz = Math.sin(attacker.facing);
     this.effects.slash(attacker.x, attacker.z, attacker.facing, def.meleeRange, attacker.color);
 
-    for (const other of this.characters.values()) {
-      if (other === attacker || !other.alive) continue;
+    for (const other of this.targets()) {
+      if (other === attacker || other.owner === attacker || !other.alive) continue;
       const dx = other.x - attacker.x;
       const dz = other.z - attacker.z;
       const distance = Math.hypot(dx, dz);
       if (distance > def.meleeRange + other.def.radius) continue;
       if (distance > 0.01 && (dx * fx + dz * fz) / distance < def.meleeArc) continue;
-      this.kill(other, Math.atan2(dz, dx), now);
+      this.hit(other, Math.atan2(dz, dx), now);
     }
   }
 
-  kill(victim, angle, now) {
-    if (!victim.isVulnerable(now)) return;
-    if (victim.hasAbility('escudo')) {
+  /** Impacto sobre un personaje o un señuelo. `force` ignora escudo e invulnerabilidad (explotar fuera de la zona). */
+  hit(target, angle, now, { force = false } = {}) {
+    if (target.isDecoy) {
+      if (!target.alive) return;
+      this.debris.burst(target, angle, now);
+      target.destroy();
+      this.decoys = this.decoys.filter((d) => d !== target);
+      return;
+    }
+    this.kill(target, angle, now, { force });
+  }
+
+  kill(victim, angle, now, { force = false } = {}) {
+    if (!victim.alive || (!force && !victim.isVulnerable(now))) return;
+    if (!force && victim.hasAbility('escudo')) {
       // El escudo aguanta un golpe y se rompe; un instante de invulnerabilidad para no caer justo después.
       victim.removeAbility('escudo');
       victim.invulnerableUntil = now + POWERUPS.escudo.graceMs;
@@ -314,16 +452,24 @@ export class ArenaGame {
     if (this.feedbackVersion !== this.store.serverInfoVersion) {
       this.feedbackVersion = this.store.serverInfoVersion;
       this.feedbackSent.clear();
+      this.abilitiesSent.clear();
     }
     if (!this.store.serverConnected) return;
     for (const character of this.characters.values()) {
       if (character.isBot) continue; // los bots no tienen mando
       const flags = (character.alive ? FEEDBACK.ALIVE : 0)
         | (character.weapon ? FEEDBACK.ARMED : 0)
-        | (this.respawnEnabled ? 0 : FEEDBACK.IN_MATCH);
-      if (this.feedbackSent.get(character.id) === flags) continue;
-      this.feedbackSent.set(character.id, flags);
-      this.network.sendFeedback(character.id, flags);
+        | (this.respawnEnabled ? 0 : FEEDBACK.IN_MATCH)
+        | (character.outsideLeftMs !== null ? FEEDBACK.OUTSIDE : 0);
+      if (this.feedbackSent.get(character.id) !== flags) {
+        this.feedbackSent.set(character.id, flags);
+        this.network.sendFeedback(character.id, flags);
+      }
+      const abilities = character.abilities.join(',');
+      if (this.abilitiesSent.get(character.id) !== abilities) {
+        this.abilitiesSent.set(character.id, abilities);
+        this.network.sendAbilities(character.id, [...character.abilities]);
+      }
     }
   }
 }

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { ToyFigure } from './ToyFigure.js';
 import { AimIndicator } from './AimIndicator.js';
 import { ButtonGesture } from '../input/ButtonGesture.js';
-import { POWERUPS, MAX_ABILITIES } from '../content/powerups.js';
+import { POWERUPS, MAX_ABILITIES, ICONS_ON_PICKUP_MS } from '../content/powerups.js';
 
 const { BUTTONS } = window.Protocol;
 
@@ -13,6 +13,7 @@ function rotateTowards(current, target, maxStep) {
 }
 
 const SHIELD_GEOMETRY = new THREE.SphereGeometry(1, 24, 16);
+const WARNING_COLOR = 0xff2a2a;
 
 /** Etiqueta "J1" flotando sobre la cabeza, con los iconos de sus habilidades debajo. */
 function createTag(color) {
@@ -24,7 +25,7 @@ function createTag(color) {
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true }));
   sprite.scale.set(2, 0.875, 1);
   sprite.renderOrder = 10;
-  sprite.draw = (text, icons) => {
+  sprite.draw = (text, icons, iconColor = color) => {
     const g = canvas.getContext('2d');
     g.clearRect(0, 0, canvas.width, canvas.height);
     g.textAlign = 'center';
@@ -36,7 +37,10 @@ function createTag(color) {
     g.fillStyle = color;
     g.fillText(text, 128, 34);
     if (icons) {
-      g.font = '34px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+      g.font = 'bold 34px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", Trebuchet MS, sans-serif';
+      g.lineWidth = 7;
+      g.strokeText(icons, 128, 84);
+      g.fillStyle = iconColor;
       g.fillText(icons, 128, 84);
     }
     texture.needsUpdate = true;
@@ -65,7 +69,14 @@ export class Character {
     this.shield = new THREE.Mesh(SHIELD_GEOMETRY, new THREE.MeshStandardMaterial({ color: POWERUPS.escudo.color, transparent: true, opacity: 0.25, depthWrite: false }));
     this.shield.scale.setScalar(def.radius * 2.1);
     this.shield.visible = false;
-    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield);
+    // Halo rojo que parpadea fuera de la línea roja.
+    this.warning = new THREE.Mesh(SHIELD_GEOMETRY, new THREE.MeshBasicMaterial({ color: WARNING_COLOR, transparent: true, opacity: 0.45, depthWrite: false }));
+    this.warning.scale.setScalar(def.radius * 2.3);
+    this.warning.visible = false;
+    this.outsideLeftMs = null; // tiempo que le queda fuera de la zona antes de explotar (null = dentro)
+    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield, this.warning);
+    this.iconsUntil = 0; // los iconos de los power-ups se ven al cogerlos y en la cuenta atrás
+    this.moveInput = { x: 0, y: 0 }; // último joystick de movimiento (Telequinesis guía el búmerang con él)
     this.abilities = []; // ids de power-up, de la más antigua a la más nueva
     this.lunge = null; // embestida de la cuchillada: { target, until }
 
@@ -101,12 +112,20 @@ export class Character {
     this.refreshTag();
   }
 
-  refreshTag() {
-    const icons = this.abilities.map((id) => POWERUPS[id].icon).join(' ');
-    const key = `${this.tagLabel}|${icons}`;
+  /** Etiqueta: nombre y, debajo, la cuenta atrás fuera de la zona o los iconos de los power-ups (si toca verlos). */
+  refreshTag(now = performance.now()) {
+    let line = '';
+    let lineColor;
+    if (this.outsideLeftMs !== null && this.outsideLeftMs !== undefined) {
+      line = `⚠ ${Math.ceil(this.outsideLeftMs / 1000)}`;
+      lineColor = '#ff4d4d';
+    } else if (now < this.iconsUntil || this.game.frozen) {
+      line = this.abilities.map((id) => POWERUPS[id].icon).join(' ');
+    }
+    const key = `${this.tagLabel}|${line}`;
     if (key === this.tagText) return;
     this.tagText = key;
-    this.tag.draw(this.tagLabel, icons);
+    this.tag.draw(this.tagLabel, line, lineColor);
   }
 
   // --- Habilidades (power-ups) ---------------------------------------------
@@ -120,8 +139,10 @@ export class Character {
     this.abilities = this.abilities.filter((a) => a !== id);
     this.abilities.push(id);
     while (this.abilities.length > MAX_ABILITIES) this.abilities.shift();
+    this.iconsUntil = performance.now() + ICONS_ON_PICKUP_MS;
     this.refreshTag();
   }
+
 
   removeAbility(id) {
     this.abilities = this.abilities.filter((a) => a !== id);
@@ -157,7 +178,7 @@ export class Character {
     const input = rawInput && this.connected && !rawInput.stale ? rawInput : null;
     const attack = this.gesture.update(input && { pressed: (input.buttons & BUTTONS.ACTION) !== 0, presses: input.presses }, now);
     const dashPressed = this.readDash(input);
-    const actions = { melee: false, throwCharge: null, dash: false };
+    const actions = { melee: false, throwCharge: null, dash: false, teleport: false };
     if (!this.alive) {
       this.aimedThisPress = false;
       return actions;
@@ -179,6 +200,8 @@ export class Character {
       } else if (weapon && attack.tap && now >= this.meleeReadyAt) {
         actions.melee = true;
         this.meleeReadyAt = now + weapon.def.meleeCooldownMs;
+      } else if (!weapon && attack.tap && this.hasAbility('teletransporte')) {
+        actions.teleport = true; // sin búmerang en la mano: un toque te lleva hasta él
       }
       this.aimedThisPress = false;
     }
@@ -196,29 +219,27 @@ export class Character {
     const mx = input ? input.x : 0;
     const my = input ? input.y : 0;
     const magnitude = Math.min(1, Math.hypot(mx, my));
+    this.moveInput = { x: mx, y: my };
     if (!this.charging && magnitude > 0.25) {
       this.facing = rotateTowards(this.facing, Math.atan2(my, mx), this.def.turnRate * dt);
     }
 
     // Dash: impulso corto hacia donde se mueve (o hacia donde mira), con tiempo de recarga.
     const dash = this.def.dash;
-    const turbo = this.hasAbility('turbo') ? POWERUPS.turbo : null;
     if (dashPressed && now >= this.dashReadyAt) {
       this.dashAngle = magnitude > 0.2 ? Math.atan2(my, mx) : this.facing;
       this.dashStart = now;
-      this.dashReadyAt = now + dash.cooldownMs * (turbo ? turbo.cooldownFactor : 1);
+      this.dashReadyAt = now + dash.cooldownMs;
       if (!this.charging) this.facing = this.dashAngle;
       actions.dash = true;
     }
     if (this.isDashing(now)) {
-      const dashSpeed = dash.speed * (turbo ? turbo.speedFactor : 1);
-      this.body.velocity.set(Math.cos(this.dashAngle) * dashSpeed, 0, Math.sin(this.dashAngle) * dashSpeed);
+      this.body.velocity.set(Math.cos(this.dashAngle) * dash.speed, 0, Math.sin(this.dashAngle) * dash.speed);
       this.moving = 1;
       return actions;
     }
 
-    const boost = this.hasAbility('zapatillas') ? POWERUPS.zapatillas.speedFactor : 1;
-    const speed = this.def.speed * boost * (this.charging ? this.def.aimSpeedFactor : 1);
+    const speed = this.def.speed * (this.charging ? this.def.aimSpeedFactor : 1);
     this.body.velocity.set(mx * speed, 0, my * speed);
     this.moving = this.charging ? magnitude * this.def.aimSpeedFactor : magnitude;
     return actions;
@@ -253,6 +274,13 @@ export class Character {
     this.tag.position.set(x, 1.3 * this.def.scale + 0.55, z);
     this.shield.visible = this.alive && this.hasAbility('escudo');
     this.shield.position.set(x, this.def.radius * 1.6, z);
+    this.refreshTag(now);
+
+    // Fuera de la línea roja: parpadeo rojo, cada vez más rápido según se acaba el tiempo.
+    const outside = this.alive && this.outsideLeftMs !== null;
+    const period = outside ? 90 + (this.outsideLeftMs / 5000) * 260 : 1;
+    this.warning.visible = outside && Math.floor(now / period) % 2 === 0;
+    this.warning.position.set(x, this.def.radius * 1.6, z);
 
     const blinking = now < this.invulnerableUntil && Math.floor(now / 90) % 2 === 1;
     group.visible = this.alive && !blinking;
@@ -266,7 +294,7 @@ export class Character {
   kill(respawnAt) {
     this.alive = false;
     this.lunge = null;
-    this.clearAbilities(); // al morir se pierden los power-ups
+    this.outsideLeftMs = null; // los power-ups se conservan durante toda la partida
     this.respawnAt = respawnAt;
     this.charging = false;
     this.charge = 0;
@@ -293,8 +321,9 @@ export class Character {
   destroy() {
     this.alive = false;
     this.game.physics.remove(this.body);
-    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield);
+    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield, this.warning);
     this.shield.material.dispose();
+    this.warning.material.dispose();
     this.tag.material.map.dispose();
     this.tag.material.dispose();
   }
