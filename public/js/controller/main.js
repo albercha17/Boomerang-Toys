@@ -3,6 +3,7 @@ import { ActionButton } from './ActionButton.js';
 import { InputSender } from './InputSender.js';
 import { setupScreenMode } from './screenMode.js';
 import { AbilitiesPanel } from './AbilitiesPanel.js';
+import { CharacterSelect } from './CharacterSelect.js';
 
 const { ROLES, EVENTS, REASONS, FEEDBACK, BUTTONS } = window.Protocol;
 
@@ -122,6 +123,47 @@ socket.on(EVENTS.WELCOME, (player) => {
   setStatus('connected', 'Conectado');
   resetFeedback(); // si el servidor conoce el estado, llega justo después
   sender.start();
+  myNumber = player.number;
+});
+
+// --- Elección de personaje ----------------------------------------------------
+// Para entrar en la partida hay que elegir personaje y pulsar JUGAR; en la sala se puede cambiar.
+let myNumber = null;
+let myCharacter = null;
+let phase = 'lobby';
+const changeButton = document.getElementById('change-btn');
+const select = new CharacterSelect({
+  root: document.getElementById('select-screen'),
+  grid: document.getElementById('char-grid'),
+  playButton: document.getElementById('play-btn'),
+  message: document.getElementById('select-message'),
+  onPlay: (id) => {
+    if (id === myCharacter) select.hide();
+    else socket.emit(EVENTS.CHOOSE, id);
+  },
+});
+
+function refreshChangeButton() {
+  changeButton.hidden = !myCharacter || phase !== 'lobby';
+}
+changeButton.addEventListener('click', () => select.show(myCharacter));
+
+socket.on(EVENTS.CHOSEN, (id) => {
+  myCharacter = id;
+  if (id) {
+    select.hide();
+    const { BY_ID } = window.CharacterCatalog;
+    ui.name.textContent = `${BY_ID[id]?.emoji ?? ''} ${BY_ID[id]?.name ?? ''}`;
+  } else {
+    select.show(null);
+  }
+  refreshChangeButton();
+});
+socket.on(EVENTS.CHARACTERS, (taken) => select.setTaken(taken ?? {}, myNumber));
+socket.on(EVENTS.CHOOSE_REJECTED, ({ reason }) => select.reject(reason));
+socket.on(EVENTS.PHASE, (value) => {
+  phase = value;
+  refreshChangeButton();
 });
 
 socket.on(EVENTS.ABILITIES, (list) => {

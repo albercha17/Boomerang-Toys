@@ -35,6 +35,14 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 5. **Quien llega a 10 puntos gana la partida.** Pantalla de victoria y **«Volver a la sala»** para jugar otra, sin reiniciar nada.
 6. **Pausa** con el botón de la barra o la tecla **P** (o Esc): todo se congela; desde ahí se puede continuar o terminar la partida.
 
+### Personajes
+
+Al abrir el mando hay que **elegir personaje** y pulsar **JUGAR** para entrar en la sala de espera. Los personajes no se repiten: los que ya tiene otro jugador salen **tachados** («Elegido por J2») y no se pueden escoger; el servidor es quien decide, así que dos jugadores nunca se quedan el mismo. En la sala, el botón **👤 Cambiar** del mando permite elegir otro; con la partida empezada no se puede cambiar. El bot coge uno libre (y se cambia si un jugador elige el suyo).
+
+12 juguetes, todos con el mismo cuerpo físico (solo cambia el aspecto) y desmontables en sus 6 piezas con los accesorios incluidos: peón de madera, muñeca fashion, héroe de acción, soldadito verde (con su peana), ranger espacial, bichito amarillo, robot de hojalata, osito de peluche, caballero, dinosaurio de goma, pirata y vaquero. Los retratos del mando los dibuja el propio móvil en 3D con el mismo código. El color del jugador va en el aro de los pies y en su nombre.
+
+Para añadir uno: entrada en `shared/characters.js` (nombre, icono, descripción) y su aspecto en `public/js/game/content/figures.js` (proporciones, materiales, texturas y accesorios sobre el esqueleto común de `figures/rig.js`).
+
 ### Power-ups (inspirados en Boomerang Fu)
 
 Cada pocos segundos aparece una **caja sorpresa** en el mapa (hasta 3 a la vez). Quien pasa por encima gana su power-up. Se pueden llevar **3** a la vez: al coger un cuarto se pierde el más antiguo. **Se conservan durante toda la partida** (de ronda en ronda) y se reinician al empezar una partida nueva o al volver a la sala.
@@ -127,6 +135,7 @@ server/network.js              Detección de IPs locales
 server/PlayerManager.js        Estado autoritativo: plazas, tokens, reconexión, validación de entradas
 server/socketHandlers.js       Roles de socket, eventos y bucle de envío (20 Hz)
 shared/protocol.js             Protocolo común (Node y navegador)
+shared/characters.js           Catálogo de personajes elegibles (el servidor valida que no se repitan)
 shared/powerups.js             Catálogo de power-ups (nombre, icono, explicación y parámetros), común a servidor, pantalla y mando
 public/index.html              Pantalla del juego (importmap de three y cannon-es)
 public/js/game/main.js         Arranque y bucle de fotogramas
@@ -179,6 +188,12 @@ El rol se indica al conectar: `io({ auth: { role: 'screen' } })` o `io({ auth: {
 | `s:welcome` | servidor → mando | `{ id, number, name, color, token }` |
 | `s:rejected` | servidor → mando | `{ reason: 'full' }` |
 | `s:kicked` | servidor → mando | `{ reason: 'replaced' }` (mismo jugador abierto en otra pestaña) |
+| `c:choose` | mando → servidor | `idPersonaje`: pide jugar con él |
+| `g:phase` | pantalla anfitriona → servidor | `'lobby'` o `'match'` (en la sala se puede cambiar de personaje) |
+| `s:chosen` | servidor → mando | personaje aceptado, o `null` si aún no ha elegido |
+| `s:chooseRejected` | servidor → mando | `{ reason: 'taken' \| 'locked' \| 'invalid' }` |
+| `s:characters` | servidor → mandos | `{ idPersonaje: númeroDeJugador }` de los ya cogidos |
+| `s:phase` | servidor → mandos | `'lobby'` o `'match'` |
 | `g:abilities` | pantalla anfitriona → servidor | `[idJugador, [idPowerup…]]` cuando cambian (el servidor valida los ids con `shared/powerups.js`) |
 | `s:abilities` | servidor → mando | `[idPowerup…]`, de la más antigua a la más nueva |
 | `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma, 4 = ronda en juego (no se reaparece), 8 = fuera de la línea roja |

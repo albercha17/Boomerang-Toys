@@ -42,7 +42,7 @@ export const M = {
   plastic: (color, map) => material('plastic', color, map, { roughness: 0.4, metalness: 0.05 }),
   matte: (color, map) => material('matte', color, map, { roughness: 0.85 }),
   rubber: (color, map) => material('rubber', color, map, { roughness: 0.65 }),
-  metal: (color, map) => material('metal', color, map, { roughness: 0.28, metalness: 0.8 }),
+  metal: (color, map) => material('metal', color, map, { roughness: 0.35, metalness: 0.35 }), // poco metálico: sin reflejos alrededor, el metal puro sale casi negro
   fabric: (color, map) => material('fabric', color, map, { roughness: 1 }),
   glass: (color) => cached(`glass:${color}`, () => new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0.1, depthWrite: false })),
   glow: (color) => cached(`glow:${color}`, () => new THREE.MeshBasicMaterial({ color })),

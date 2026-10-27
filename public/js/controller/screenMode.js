@@ -57,7 +57,9 @@ function blockZoom() {
   let lastTouchEnd = 0;
   document.addEventListener('touchend', (event) => {
     const now = event.timeStamp;
-    if (now - lastTouchEnd < DOUBLE_TAP_MS && event.cancelable) event.preventDefault();
+    // En los botones no: ahí el doble toque no amplía y anularlo se comería el segundo toque rápido.
+    const onButton = event.target instanceof Element && event.target.closest('button');
+    if (!onButton && now - lastTouchEnd < DOUBLE_TAP_MS && event.cancelable) event.preventDefault();
     lastTouchEnd = now;
   }, { passive: false });
   document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false });

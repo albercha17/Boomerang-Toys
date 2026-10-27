@@ -15,6 +15,10 @@
   <link rel="icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <link rel="stylesheet" href="/css/controller.css">
+  <!-- three se usa para dibujar los retratos de los personajes -->
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three/three.module.js" } }
+  </script>
 </head>
 <body>
   <header class="bar">
@@ -22,6 +26,7 @@
     <span class="name" id="player-name">Conectando…</span>
     <div class="abilities" id="abilities" hidden></div>
     <span class="status" id="status" data-state="connecting">Conectando</span>
+    <button class="change-btn" id="change-btn" type="button" hidden>👤 Cambiar</button>
     <span class="ping" id="ping"></span>
     <button class="fullscreen" id="fullscreen-btn" type="button" hidden>⛶</button>
   </header>
@@ -44,6 +49,14 @@
       </div>
     </section>
   </main>
+
+  <!-- Elección de personaje: hay que elegir uno y pulsar JUGAR para entrar en la sala -->
+  <div class="select-screen" id="select-screen" hidden>
+    <h1>Elige tu juguete</h1>
+    <div class="char-grid" id="char-grid"></div>
+    <p class="select-message" id="select-message"></p>
+    <button class="play-btn" id="play-btn" type="button" disabled>Elige un personaje</button>
+  </div>
 
   <!-- Power-ups: explicación al tocar un icono y aviso al coger uno nuevo -->
   <div class="ability-info" id="ability-info" hidden></div>
