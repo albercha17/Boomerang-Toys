@@ -159,7 +159,8 @@ def main():
                 print(f"procesado {clave} -> {destino(clave).relative_to(RAIZ)}", flush=True)
         return
 
-    pend = [e for e in encargos if args.forzar or not (BRUTO / f"{e[0]}.png").exists()]
+    hecha = lambda clave: (BRUTO / f"{clave}.png").exists() or destino(clave).exists()  # noqa: E731
+    pend = [e for e in encargos if args.forzar or not hecha(e[0])]
     print(f"{len(pend)} imágenes por hacer", flush=True)
     if not pend:
         return
