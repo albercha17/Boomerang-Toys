@@ -1,3 +1,6 @@
+import * as THREE from 'three';
+import { plastic } from '../render/materials.js';
+
 export const WEAPON_STATE = Object.freeze({
   HELD: 'held', // en la mano de alguien
   OUT: 'out', // ida: frena poco a poco
@@ -7,30 +10,52 @@ export const WEAPON_STATE = Object.freeze({
 
 const SPIN = 24; // rad/s en vuelo
 const HELD_SCALE = 0.75;
+const GROUND_HEIGHT = 0.07;
+
+// Búmerang en V con volumen (extruido y biselado), tumbado en el plano del suelo.
+const GEOMETRY = (() => {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.38, -0.2);
+  shape.lineTo(0, 0.22);
+  shape.lineTo(0.38, -0.2);
+  shape.lineTo(0.27, -0.27);
+  shape.lineTo(0, 0.06);
+  shape.lineTo(-0.27, -0.27);
+  shape.closePath();
+  const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.05, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 2 });
+  geometry.rotateX(-Math.PI / 2);
+  geometry.center();
+  return geometry;
+})();
 
 /**
- * Búmerang: proyectil que sale, frena, vuelve a su dueño y rebota en las paredes.
- * Interfaz de arma (para futuras armas): def, state, owner, dangerous, attachTo, throw, dropAt, onWallHit, update, destroy.
+ * Búmerang: sale, frena, vuelve a su dueño y rebota en las paredes.
+ * Interfaz de arma (para futuras armas): def, state, owner, holder, x, z, velocityAngle, dangerous, catchable,
+ * attachTo, throw, dropAt, onWallHit, steer, sync, destroy.
  */
 export class Boomerang {
-  constructor(scene, group, def) {
-    this.scene = scene;
+  constructor(game, def) {
+    this.game = game;
     this.def = def;
-    this.sprite = scene.physics.add.image(0, 0, def.texture).setDepth(12);
-    group.add(this.sprite); // el grupo aplica sus valores por defecto: configurar el cuerpo después
-    this.sprite.entity = this;
+    this.mesh = new THREE.Mesh(GEOMETRY, plastic(0xffffff));
+    this.mesh.scale.setScalar(def.scale);
+    this.mesh.castShadow = true;
+    game.stage.scene.add(this.mesh);
 
-    const body = this.sprite.body;
-    const half = this.sprite.width / 2;
-    body.setCircle(def.radius, half - def.radius, half - def.radius);
-    body.setBounce(1, 1);
-    body.setDamping(true);
+    this.body = game.physics.createWeaponBody(def.radius);
+    this.body.entity = this;
+    this.body.addEventListener('collide', () => this.onWallHit()); // solo choca con paredes
 
     this.state = WEAPON_STATE.GROUND;
     this.holder = null;
     this.owner = null;
     this.flightMs = 0;
+    this.hand = new THREE.Vector3();
   }
+
+  get x() { return this.body.position.x; }
+  get z() { return this.body.position.z; }
+  get velocityAngle() { return Math.atan2(this.body.velocity.z, this.body.velocity.x); }
 
   get dangerous() {
     return this.state === WEAPON_STATE.OUT || this.state === WEAPON_STATE.RETURN;
@@ -45,9 +70,9 @@ export class Boomerang {
     this.holder = character;
     this.owner = character;
     character.weapon = this;
-    this.sprite.body.stop();
-    this.sprite.body.enable = false;
-    this.sprite.setTint(character.color).setScale(HELD_SCALE);
+    this.game.physics.remove(this.body);
+    this.mesh.material = plastic(character.color);
+    this.mesh.scale.setScalar(this.def.scale * HELD_SCALE);
   }
 
   /** Lanza el arma desde el centro del portador (nunca empieza dentro de una pared). */
@@ -56,86 +81,100 @@ export class Boomerang {
     this.release();
     this.state = WEAPON_STATE.OUT;
     this.flightMs = 0;
-    const speed = Phaser.Math.Linear(this.def.minSpeed, this.def.maxSpeed, charge);
-    const body = this.sprite.body;
-    body.enable = true;
-    body.reset(thrower.x, thrower.y);
-    body.setDrag(1, 1);
-    body.setVelocity(Math.cos(thrower.facing) * speed, Math.sin(thrower.facing) * speed);
+    const speed = THREE.MathUtils.lerp(this.def.minSpeed, this.def.maxSpeed, charge);
+    this.launch(thrower.x, thrower.z, Math.cos(thrower.facing) * speed, Math.sin(thrower.facing) * speed);
+    this.body.linearDamping = 0;
   }
 
   /** Suelta el arma en el suelo (p. ej. al morir el portador). */
-  dropAt(x, y, angle) {
+  dropAt(x, z, angle) {
     this.release();
-    const body = this.sprite.body;
-    body.enable = true;
-    body.reset(x, y);
+    this.launch(x, z, Math.cos(angle) * 2.5, Math.sin(angle) * 2.5);
     this.toGround();
-    body.setVelocity(Math.cos(angle) * 160, Math.sin(angle) * 160);
+  }
+
+  launch(x, z, vx, vz) {
+    this.body.position.set(x, this.def.flightHeight, z);
+    this.body.velocity.set(vx, 0, vz);
+    this.game.physics.add(this.body);
   }
 
   release() {
     if (this.holder) this.holder.weapon = null;
     this.holder = null;
-    this.sprite.setScale(1); // antes de activar el cuerpo, que escala con el sprite
+    this.mesh.scale.setScalar(this.def.scale);
   }
 
   toGround() {
     this.state = WEAPON_STATE.GROUND;
-    this.sprite.body.setDrag(this.def.groundDrag, this.def.groundDrag);
+    this.body.linearDamping = this.def.groundDamping;
   }
 
   onWallHit() {
     if (this.state === WEAPON_STATE.OUT) this.state = WEAPON_STATE.RETURN;
   }
 
-  update(dt) {
-    const sprite = this.sprite;
-    const body = sprite.body;
-
-    if (this.state === WEAPON_STATE.HELD) {
-      const hand = this.holder.handPosition();
-      sprite.setPosition(hand.x, hand.y);
-      sprite.rotation = this.holder.facing + Math.PI / 2;
-      return;
-    }
-    if (this.state === WEAPON_STATE.GROUND) {
-      sprite.rotation += body.speed * 0.02 * dt;
-      return;
-    }
-
+  /** Antes del paso de física: frenado de ida y corrección de rumbo en la vuelta. */
+  steer(dt) {
+    if (!this.dangerous) return;
+    const velocity = this.body.velocity;
     this.flightMs += dt * 1000;
-    sprite.rotation += SPIN * dt;
     if (this.flightMs > this.def.maxFlightMs) {
       this.toGround();
-      body.velocity.scale(0.4);
+      velocity.scale(0.4, velocity);
       return;
     }
 
     if (this.state === WEAPON_STATE.OUT) {
-      const speed = body.velocity.length() - this.def.deceleration * dt;
-      if (speed <= this.def.turnSpeed) this.state = WEAPON_STATE.RETURN;
-      else body.velocity.setLength(speed);
+      const speed = Math.hypot(velocity.x, velocity.z);
+      const next = speed - this.def.deceleration * dt;
+      if (next <= this.def.turnSpeed) {
+        this.state = WEAPON_STATE.RETURN;
+      } else {
+        velocity.x *= next / speed;
+        velocity.z *= next / speed;
+      }
       return;
     }
 
-    // Vuelta: corrige el rumbo hacia el dueño; si ya no está, cae al suelo.
+    // Vuelta: si el dueño ya no está, cae al suelo.
     const owner = this.owner;
     if (!owner || !owner.alive) {
       this.toGround();
-      body.velocity.scale(0.5);
+      velocity.scale(0.5, velocity);
       return;
     }
-    const dx = owner.x - sprite.x;
-    const dy = owner.y - sprite.y;
-    const distance = Math.hypot(dx, dy) || 1;
-    const steer = Math.min(1, this.def.returnSteer * dt);
-    body.velocity.x += ((dx / distance) * this.def.returnSpeed - body.velocity.x) * steer;
-    body.velocity.y += ((dy / distance) * this.def.returnSpeed - body.velocity.y) * steer;
+    const dx = owner.x - this.x;
+    const dz = owner.z - this.z;
+    const distance = Math.hypot(dx, dz) || 1;
+    const k = Math.min(1, this.def.returnSteer * dt);
+    velocity.x += ((dx / distance) * this.def.returnSpeed - velocity.x) * k;
+    velocity.z += ((dz / distance) * this.def.returnSpeed - velocity.z) * k;
+  }
+
+  /** Después del paso de física: coloca la malla (en la mano, en vuelo o en el suelo). */
+  sync(dt) {
+    const mesh = this.mesh;
+    if (this.state === WEAPON_STATE.HELD) {
+      this.holder.handPosition(this.hand);
+      mesh.position.copy(this.hand);
+      mesh.rotation.set(0, -this.holder.facing - Math.PI / 2, 0);
+      mesh.visible = this.holder.figure.group.visible;
+      return;
+    }
+    mesh.visible = true;
+    if (this.state === WEAPON_STATE.GROUND) {
+      mesh.position.set(this.x, GROUND_HEIGHT, this.z);
+      mesh.rotation.y += Math.hypot(this.body.velocity.x, this.body.velocity.z) * 2 * dt;
+      return;
+    }
+    mesh.position.set(this.x, this.def.flightHeight, this.z);
+    mesh.rotation.y += SPIN * dt;
   }
 
   destroy() {
     this.release();
-    this.sprite.destroy();
+    this.game.physics.remove(this.body);
+    this.game.stage.scene.remove(this.mesh);
   }
 }

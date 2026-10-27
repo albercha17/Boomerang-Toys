@@ -1,31 +1,24 @@
 import { PlayerStore } from './PlayerStore.js';
 import { GameNetwork } from './GameNetwork.js';
-import { BootScene } from './scenes/BootScene.js';
-import { ArenaScene } from './scenes/ArenaScene.js';
-import { HudScene } from './scenes/HudScene.js';
+import { Stage } from './render/Stage.js';
+import { ArenaGame } from './ArenaGame.js';
+import { Hud } from './ui/Hud.js';
 
 const store = new PlayerStore();
 const network = new GameNetwork(store);
+const stage = new Stage(document.getElementById('game'));
+const game = new ArenaGame(store, network, stage);
+const hud = new Hud(store);
 
-// Añade ?debug a la dirección para ver los cuerpos físicos.
-const debug = new URLSearchParams(location.search).has('debug');
-
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: 'game',
-  backgroundColor: '#2a1d14',
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 1280,
-    height: 720,
-  },
-  physics: {
-    default: 'arcade',
-    arcade: { gravity: { x: 0, y: 0 }, debug },
-  },
-  // El orden define el dibujo: el marcador (hud) queda encima de la arena.
-  scene: [new BootScene(), new ArenaScene(store, network), new HudScene(store)],
-});
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(now - last, 50) / 1000; // evita saltos enormes si la pestaña estuvo en segundo plano
+  last = now;
+  game.update(now, dt);
+  hud.update();
+  stage.render(now);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
 
 window.game = game; // útil para depurar desde la consola del navegador

@@ -6,11 +6,24 @@
   <title>Bumerán de Juguete</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/css/game.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/three.module.js",
+        "cannon-es": "/vendor/cannon/cannon-es.js"
+      }
+    }
+  </script>
 </head>
 <body>
   <div id="game"></div>
 
-  <script src="/vendor/phaser.min.js"></script>
+  <header class="hud">
+    <span class="hud-title">BUMERÁN DE JUGUETE</span>
+    <div class="hud-players" id="hud-players"></div>
+    <span class="hud-url" id="hud-url"></span>
+  </header>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="/shared/protocol.js"></script>
   <script type="module" src="/js/game/main.js"></script>

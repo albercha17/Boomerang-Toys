@@ -2,7 +2,7 @@ const { STATE_FIELDS: F, AXIS_MAX } = window.Protocol;
 
 /**
  * Copia local (solo lectura) del estado que envía el servidor.
- * Las escenas de Phaser la consultan en cada fotograma.
+ * La partida y la barra superior la consultan en cada fotograma.
  */
 export class PlayerStore {
   constructor() {

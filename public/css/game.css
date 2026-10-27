@@ -3,9 +3,34 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: #2a1d14;
+  font-family: "Trebuchet MS", Arial, sans-serif;
 }
 
 #game {
-  width: 100vw;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
 }
+
+/* Barra superior sobre la escena 3D */
+.hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 16px;
+  background: rgba(42, 29, 20, 0.88);
+  color: #fff4e0;
+  pointer-events: none;
+}
+.hud-title { font-size: 22px; font-weight: bold; white-space: nowrap; }
+.hud-players { display: flex; gap: 14px; flex: 1; }
+.hud-chip { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 16px; opacity: 0.25; }
+.hud-chip.on { opacity: 1; }
+.hud-chip.off { opacity: 0.5; }
+.hud-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff4e0; background: transparent; }
+.hud-url { font-size: 15px; font-weight: bold; color: #ffd166; white-space: nowrap; }
+.hud-url.error { color: #ff8a8a; }

@@ -1,9 +1,11 @@
-import { createTestArena } from '../arena/TestArena.js';
-import { Character } from '../entities/Character.js';
-import { Boomerang, WEAPON_STATE } from '../entities/Boomerang.js';
-import { DebrisSystem } from '../effects/DebrisSystem.js';
-import { CHARACTERS, DEFAULT_CHARACTER } from '../content/characters.js';
-import { WEAPONS } from '../content/weapons.js';
+import { PhysicsWorld } from './physics/PhysicsWorld.js';
+import { createTestArena } from './arena/TestArena.js';
+import { Character } from './entities/Character.js';
+import { Boomerang, WEAPON_STATE } from './entities/Boomerang.js';
+import { Effects } from './effects/Effects.js';
+import { DebrisSystem } from './effects/DebrisSystem.js';
+import { CHARACTERS, DEFAULT_CHARACTER } from './content/characters.js';
+import { WEAPONS } from './content/weapons.js';
 
 const { FEEDBACK } = window.Protocol;
 
@@ -12,48 +14,43 @@ const RESPAWN_MS = 2500;
 const WEAPON_CLASSES = { boomerang: Boomerang };
 
 /**
- * Escena de juego: personajes, armas, colisiones e impactos.
+ * Partida en la arena: personajes, armas, impactos y reapariciones.
  * La simulación corre aquí (pantalla anfitriona); el servidor aporta jugadores y entradas validadas.
  */
-export class ArenaScene extends Phaser.Scene {
-  constructor(store, network) {
-    super('arena');
+export class ArenaGame {
+  constructor(store, network, stage) {
     this.store = store;
     this.network = network;
-  }
-
-  create() {
-    this.arena = createTestArena(this);
+    this.stage = stage;
+    this.physics = new PhysicsWorld();
+    this.arena = createTestArena(stage, this.physics);
+    this.effects = new Effects(stage);
+    this.debris = new DebrisSystem(stage, this.physics, this.effects);
     this.characters = new Map(); // idJugador -> Character
     this.weapons = [];
-    this.characterGroup = this.physics.add.group();
-    this.weaponGroup = this.physics.add.group();
-    this.debris = new DebrisSystem(this);
     this.feedbackSent = new Map();
     this.feedbackVersion = -1;
-
-    const physics = this.physics;
-    physics.add.collider(this.characterGroup, this.arena.walls);
-    physics.add.collider(this.characterGroup, this.characterGroup);
-    physics.add.collider(this.weaponGroup, this.arena.walls, (sprite) => sprite.entity.onWallHit());
-    physics.add.overlap(this.weaponGroup, this.characterGroup, (sprite, hitbox) => this.onWeaponTouch(sprite.entity, hitbox.entity));
-    this.debris.addColliders(this.arena.walls, this.characterGroup);
   }
 
-  update(time, delta) {
-    const dt = Math.min(delta, 50) / 1000;
-    this.syncRoster(time);
+  /** Un fotograma: entradas -> rumbo de las armas -> física -> aspecto -> impactos. */
+  update(now, dt) {
+    this.syncRoster(now);
 
     for (const character of this.characters.values()) {
-      const actions = character.update(dt, time, this.store.inputs.get(character.id) ?? null);
+      const actions = character.update(dt, now, this.store.inputs.get(character.id) ?? null);
       if (actions.throwCharge !== null && character.weapon) character.weapon.throw(actions.throwCharge);
-      if (actions.melee) this.melee(character, time);
-      if (!character.alive && time >= character.respawnAt) this.respawn(character, time);
-      character.render(dt, time);
+      if (actions.melee) this.melee(character, now);
+      if (!character.alive && now >= character.respawnAt) this.respawn(character, now);
     }
-    for (const weapon of this.weapons) weapon.update(dt);
+    for (const weapon of this.weapons) weapon.steer(dt);
 
-    this.debris.update(time);
+    this.physics.step(dt);
+
+    for (const character of this.characters.values()) character.render(dt, now);
+    for (const weapon of this.weapons) weapon.sync(dt);
+    this.checkWeaponHits(now);
+    this.debris.sync(now);
+    this.effects.update(dt);
     this.sendFeedback();
   }
 
@@ -73,11 +70,12 @@ export class ArenaScene extends Phaser.Scene {
   addCharacter(player, now) {
     const def = CHARACTERS[DEFAULT_CHARACTER];
     const spawn = this.pickSpawn();
-    const character = new Character(this, this.characterGroup, player, def, spawn.x, spawn.y);
+    const character = new Character(this, player, def, spawn.x, spawn.z);
+    character.facing = Math.atan2(-spawn.z, -spawn.x); // mirando hacia el centro
     character.invulnerableUntil = now + def.spawnInvulnerableMs;
 
     const weaponDef = WEAPONS[def.weapon];
-    const weapon = new WEAPON_CLASSES[weaponDef.type](this, this.weaponGroup, weaponDef);
+    const weapon = new WEAPON_CLASSES[weaponDef.type](this, weaponDef);
     weapon.attachTo(character);
     character.homeWeapon = weapon;
     this.weapons.push(weapon);
@@ -88,7 +86,7 @@ export class ArenaScene extends Phaser.Scene {
 
   removeCharacter(character) {
     if (character.weapon && character.weapon !== character.homeWeapon) {
-      character.weapon.dropAt(character.x, character.y, 0);
+      character.weapon.dropAt(character.x, character.z, 0);
     }
     const home = character.homeWeapon;
     home.destroy();
@@ -103,8 +101,9 @@ export class ArenaScene extends Phaser.Scene {
     const alive = [...this.characters.values()].filter((c) => c.alive);
     let best = null;
     let bestDistance = -1;
-    for (const point of Phaser.Utils.Array.Shuffle([...this.arena.spawnPoints])) {
-      const nearest = alive.reduce((min, c) => Math.min(min, Phaser.Math.Distance.Between(point.x, point.y, c.x, c.y)), Infinity);
+    const points = [...this.arena.spawnPoints].sort(() => Math.random() - 0.5);
+    for (const point of points) {
+      const nearest = alive.reduce((min, c) => Math.min(min, Math.hypot(point.x - c.x, point.z - c.z)), Infinity);
       if (nearest > bestDistance) {
         best = point;
         bestDistance = nearest;
@@ -115,22 +114,32 @@ export class ArenaScene extends Phaser.Scene {
 
   respawn(character, now) {
     const spawn = this.pickSpawn();
-    character.respawn(spawn.x, spawn.y, now);
+    character.respawn(spawn.x, spawn.z, now);
     const home = character.homeWeapon;
     if (!character.weapon && home.state === WEAPON_STATE.GROUND) home.attachTo(character);
   }
 
   // --- Combate -----------------------------------------------------------
 
-  onWeaponTouch(weapon, character) {
-    if (!weapon || !character || !character.alive) return;
+  /** Las armas atraviesan a los personajes en la física; el contacto se comprueba aquí en el plano. */
+  checkWeaponHits(now) {
+    for (const weapon of this.weapons) {
+      if (weapon.state === WEAPON_STATE.HELD) continue;
+      for (const character of this.characters.values()) {
+        if (!character.alive) continue;
+        const reach = character.def.radius + weapon.def.radius;
+        if (Math.hypot(weapon.x - character.x, weapon.z - character.z) < reach) this.onWeaponTouch(weapon, character, now);
+      }
+    }
+  }
+
+  onWeaponTouch(weapon, character, now) {
     if (weapon.dangerous) {
       if (character === weapon.owner) {
         if (!character.weapon && weapon.catchable) weapon.attachTo(character);
         return;
       }
-      const velocity = weapon.sprite.body.velocity;
-      this.kill(character, Math.atan2(velocity.y, velocity.x), this.time.now);
+      this.kill(character, weapon.velocityAngle, now);
     } else if (weapon.state === WEAPON_STATE.GROUND && !character.weapon) {
       weapon.attachTo(character);
     }
@@ -139,24 +148,24 @@ export class ArenaScene extends Phaser.Scene {
   melee(attacker, now) {
     const def = attacker.weapon.def;
     const fx = Math.cos(attacker.facing);
-    const fy = Math.sin(attacker.facing);
-    this.debris.slash(attacker.x, attacker.y, attacker.facing, def.meleeRange, attacker.color);
+    const fz = Math.sin(attacker.facing);
+    this.effects.slash(attacker.x, attacker.z, attacker.facing, def.meleeRange, attacker.color);
 
     for (const other of this.characters.values()) {
       if (other === attacker || !other.alive) continue;
       const dx = other.x - attacker.x;
-      const dy = other.y - attacker.y;
-      const distance = Math.hypot(dx, dy);
+      const dz = other.z - attacker.z;
+      const distance = Math.hypot(dx, dz);
       if (distance > def.meleeRange + other.def.radius) continue;
-      if (distance > 1 && (dx * fx + dy * fy) / distance < def.meleeArc) continue;
-      this.kill(other, Math.atan2(dy, dx), now);
+      if (distance > 0.01 && (dx * fx + dz * fz) / distance < def.meleeArc) continue;
+      this.kill(other, Math.atan2(dz, dx), now);
     }
   }
 
   kill(victim, angle, now) {
     if (!victim.isVulnerable(now)) return;
-    this.debris.burst(victim, angle); // antes de ocultar la figura: usa la posición de sus piezas
-    if (victim.weapon) victim.weapon.dropAt(victim.x, victim.y, angle);
+    this.debris.burst(victim, angle, now); // antes de ocultar la figura: usa la posición de sus piezas
+    if (victim.weapon) victim.weapon.dropAt(victim.x, victim.z, angle);
     victim.kill(now + RESPAWN_MS);
   }
 

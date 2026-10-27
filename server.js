@@ -20,7 +20,9 @@ const io = new Server(server, {
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
-app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist')));
+// Librerías del cliente (módulos ES), referenciadas desde el importmap de public/index.html.
+app.use('/vendor/three', express.static(path.join(__dirname, 'node_modules', 'three', 'build')));
+app.use('/vendor/cannon', express.static(path.join(__dirname, 'node_modules', 'cannon-es', 'dist')));
 app.get(CONTROLLER_PATH, (req, res) => res.sendFile(path.join(__dirname, 'public', 'controller.html')));
 
 const addresses = getLanAddresses();

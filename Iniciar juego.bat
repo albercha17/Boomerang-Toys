@@ -10,11 +10,10 @@ if errorlevel 1 (
   goto :fin
 )
 
-if not exist node_modules (
-  echo Instalando dependencias, solo la primera vez...
-  call npm install
-  if errorlevel 1 goto :fin
-)
+rem Instala o actualiza las dependencias (tarda unos segundos si ya estan al dia).
+echo Comprobando dependencias...
+call npm install --no-audit --no-fund --loglevel=error
+if errorlevel 1 goto :fin
 
 rem Abre la pantalla del juego en el navegador cuando el servidor ya esta escuchando.
 start "" /b cmd /c "timeout /t 2 /nobreak >nul & start "" http://localhost:3000/"
