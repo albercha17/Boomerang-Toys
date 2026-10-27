@@ -1,0 +1,24 @@
+const { ROLES, EVENTS } = window.Protocol;
+
+/**
+ * Conexión de la pantalla de juego con el servidor. Solo escucha: la pantalla no envía entradas.
+ * Vuelca lo recibido en el PlayerStore.
+ */
+export class GameNetwork {
+  constructor(store) {
+    this.store = store;
+    this.socket = io({ auth: { role: ROLES.SCREEN }, transports: ['websocket', 'polling'] });
+
+    this.socket.on('connect', () => store.setServerConnected(true));
+    this.socket.on('disconnect', () => store.setServerConnected(false));
+
+    // Al (re)conectar el servidor manda el estado completo, así la pantalla se puede recargar sin problema.
+    this.socket.on(EVENTS.SCREEN_INIT, ({ server, roster, state }) => {
+      store.setServerInfo(server);
+      store.setRoster(roster);
+      store.applyState(state);
+    });
+    this.socket.on(EVENTS.ROSTER, (roster) => store.setRoster(roster));
+    this.socket.on(EVENTS.STATE, (state) => store.applyState(state));
+  }
+}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2a1d14">
+  <title>Mando · Bumerán de Juguete</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/controller.css">
+</head>
+<body>
+  <header class="bar">
+    <span class="swatch" id="swatch"></span>
+    <span class="name" id="player-name">Conectando…</span>
+    <span class="status" id="status" data-state="connecting">Conectando</span>
+    <span class="ping" id="ping"></span>
+    <button class="fullscreen" id="fullscreen-btn" type="button" hidden>⛶</button>
+  </header>
+
+  <main class="pad">
+    <section class="stick-zone" id="stick-zone">
+      <div class="stick-hint">Arrastra aquí para moverte</div>
+      <div class="stick-base" id="stick-base">
+        <div class="stick-knob" id="stick-knob"></div>
+      </div>
+    </section>
+    <section class="action-zone">
+      <button class="action-btn" id="action-btn" type="button">ACCIÓN</button>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="overlay-box">
+      <p id="overlay-text"></p>
+      <button type="button" id="overlay-btn">Reintentar</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/protocol.js"></script>
+  <script type="module" src="/js/controller/main.js"></script>
+</body>
+</html>
