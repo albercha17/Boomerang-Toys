@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { decodeInput, REASONS } = require('../shared/protocol');
+const { decodeInput, REASONS, BUTTONS } = require('../shared/protocol');
 
 // Colores de juguete por número de plaza (1..8).
 const PLAYER_COLORS = [
@@ -59,8 +59,9 @@ class PlayerManager {
       socketId,
       connected: true,
       disconnectedAt: 0,
-      input: { x: 0, y: 0, buttons: 0 },
-      presses: 0,
+      input: { x: 0, y: 0, aimX: 0, aimY: 0, buttons: 0 },
+      presses: 0, // pulsaciones del ataque (contadas aquí para no perder toques cortos)
+      dashes: 0, // pulsaciones del dash
       lastSeq: -1,
       lastPacketAt: now,
       stale: false,
@@ -93,7 +94,7 @@ class PlayerManager {
   }
 
   resetConnectionState(player, now) {
-    player.input = { x: 0, y: 0, buttons: 0 };
+    player.input = { x: 0, y: 0, aimX: 0, aimY: 0, buttons: 0 };
     player.lastSeq = -1; // el mando reinicia su secuencia al reconectar
     player.lastPacketAt = now;
     player.stale = false;
@@ -118,12 +119,14 @@ class PlayerManager {
     player.lastSeq = input.seq;
     player.lastPacketAt = now;
 
-    const pressedNow = (input.buttons & ~player.input.buttons) !== 0;
-    if (pressedNow) player.presses++;
+    const pressedNow = input.buttons & ~player.input.buttons;
+    if (pressedNow & BUTTONS.ACTION) player.presses++;
+    if (pressedNow & BUTTONS.DASH) player.dashes++;
 
-    const changed = input.x !== player.input.x || input.y !== player.input.y || input.buttons !== player.input.buttons;
+    const old = player.input;
+    const changed = input.x !== old.x || input.y !== old.y || input.aimX !== old.aimX || input.aimY !== old.aimY || input.buttons !== old.buttons;
     if (changed || player.stale) {
-      player.input = { x: input.x, y: input.y, buttons: input.buttons };
+      player.input = { x: input.x, y: input.y, aimX: input.aimX, aimY: input.aimY, buttons: input.buttons };
       player.stale = false;
       this.stateDirty = true;
     }
@@ -149,7 +152,7 @@ class PlayerManager {
     player.connected = false;
     player.socketId = null;
     player.disconnectedAt = now;
-    player.input = { x: 0, y: 0, buttons: 0 };
+    player.input = { x: 0, y: 0, aimX: 0, aimY: 0, buttons: 0 };
     player.rtt = null;
     this.stateDirty = true;
   }
@@ -172,7 +175,7 @@ class PlayerManager {
       }
       if (!player.stale && now - player.lastPacketAt > this.inputStaleMs) {
         player.stale = true;
-        player.input = { x: 0, y: 0, buttons: 0 };
+        player.input = { x: 0, y: 0, aimX: 0, aimY: 0, buttons: 0 };
         this.stateDirty = true;
       }
     }
@@ -195,11 +198,12 @@ class PlayerManager {
     return [...this.players.values()].sort((a, b) => a.number - b.number).map((p) => this.publicInfo(p));
   }
 
-  /** Estado compacto de entradas: [[id, x, y, botones, pulsaciones, obsoleto]]. */
+  /** Estado compacto de entradas (orden de Protocol.STATE_FIELDS). */
   snapshot() {
     const result = [];
     for (const p of this.players.values()) {
-      result.push([p.id, p.input.x, p.input.y, p.input.buttons, p.presses, p.stale ? 1 : 0]);
+      const i = p.input;
+      result.push([p.id, i.x, i.y, i.aimX, i.aimY, i.buttons, p.presses, p.dashes, p.stale ? 1 : 0]);
     }
     return result;
   }

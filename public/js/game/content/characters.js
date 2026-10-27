@@ -10,10 +10,16 @@ export const CHARACTERS = Object.freeze({
     radius: 0.45, // radio del cuerpo físico
     speed: 5, // unidades/s a joystick completo
     turnRate: 16, // rad/s al girar hacia la dirección del joystick
-    aimSpeedFactor: 0.15, // mientras se carga un lanzamiento: casi quieto y apuntando con el joystick
-    aimDeadZone: 0.15, // inclinación mínima del joystick para cambiar la puntería
-    tapMs: 170, // pulsación más corta que esto = golpe; más larga = cargar lanzamiento
+    aimSpeedFactor: 0.2, // mientras se apunta con el joystick de ataque se avanza muy despacio
+    aimDeadZone: 0.2, // arrastre mínimo del joystick de ataque para apuntar (menos = toque = cuchillada)
+    tapMs: 170, // pulsación sin apuntar más corta que esto = cuchillada; más larga = lanzar hacia delante
     spawnInvulnerableMs: 1200,
+    dash: Object.freeze({
+      speed: 14, // unidades/s durante el impulso
+      durationMs: 170, // ≈ 2,4 unidades de recorrido
+      cooldownMs: 700,
+      hopHeight: 0.5, // altura del saltito (solo visual)
+    }),
     weapon: 'boomerang',
   }),
 });

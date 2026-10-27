@@ -113,37 +113,72 @@ body {
   box-shadow: 0 5px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* Lado derecho: joystick de ataque (abajo) y botón de dash (arriba a la izquierda), como en Brawl Stars */
 .action-zone {
+  position: relative;
   flex: 1;
-  display: grid;
-  place-items: center;
   touch-action: none;
 }
-.action-btn {
-  width: min(42vmin, 210px);
-  height: min(42vmin, 210px);
-  border-radius: 50%;
-  border: 6px solid var(--cream);
-  background: var(--player-color);
-  color: var(--cream);
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.4);
-  touch-action: none;
-  transition: transform 40ms, box-shadow 40ms;
+
+.aim-stick {
+  position: absolute;
+  right: 6%;
+  bottom: 6%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 4px;
+  padding: 8px;
+  touch-action: none;
 }
-.action-btn > * { pointer-events: none; }
-.action-btn small { font-size: 11px; font-weight: 700; letter-spacing: 0; line-height: 1.3; opacity: 0.85; }
-.action-btn.pressed { transform: translateY(8px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4); filter: brightness(1.15); }
+.aim-stick > * { pointer-events: none; }
+.aim-base {
+  position: relative;
+  width: min(40vmin, 190px);
+  height: min(40vmin, 190px);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--player-color) 55%, transparent);
+  border: 6px solid var(--cream);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.4);
+}
+.aim-stick.active .aim-base { background: var(--player-color); }
+.aim-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40%;
+  height: 40%;
+  margin: -20% 0 0 -20%;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 4px solid var(--player-color);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+}
+.aim-label { font-size: 18px; font-weight: 900; letter-spacing: 1px; }
+.aim-hint { font-size: 11px; font-weight: 700; opacity: 0.75; text-align: center; max-width: 200px; }
 /* Estado que envía la pantalla de juego */
-.action-btn.unarmed { filter: grayscale(0.75) brightness(0.8); }
-.action-btn.ko { background: #5b4a3d; filter: none; }
+.aim-stick.unarmed .aim-base { filter: grayscale(0.8) brightness(0.75); }
+.aim-stick.ko .aim-base { background: #5b4a3d; filter: none; }
+
+.dash-btn {
+  position: absolute;
+  left: 4%;
+  top: 8%;
+  width: min(24vmin, 112px);
+  height: min(24vmin, 112px);
+  border-radius: 50%;
+  border: 5px solid var(--cream);
+  background: var(--wood);
+  color: var(--cream);
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.4);
+  touch-action: none;
+  transition: transform 40ms, box-shadow 40ms;
+}
+.dash-btn > * { pointer-events: none; }
+.dash-btn.pressed { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4); background: var(--player-color); }
 
 /* Avisos a pantalla completa */
 .overlay {

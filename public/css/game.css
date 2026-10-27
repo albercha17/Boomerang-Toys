@@ -20,17 +20,35 @@ html, body {
   height: 48px;
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 0 16px;
+  gap: 18px;
+  padding: 0 14px;
   background: rgba(42, 29, 20, 0.88);
   color: #fff4e0;
   pointer-events: none;
 }
 .hud-title { font-size: 22px; font-weight: bold; white-space: nowrap; }
-.hud-players { display: flex; gap: 14px; flex: 1; }
+/* Los jugadores ceden espacio (se recortan) antes que el botón del bot o la dirección. */
+.hud-players { display: flex; gap: 10px; flex: 1; min-width: 0; overflow: hidden; }
+.hud-chip { flex: none; }
+.hud-btn, .hud-url, .hud-title { flex: none; }
+@media (max-width: 1100px) { .hud-url { display: none; } }
 .hud-chip { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 16px; opacity: 0.25; }
 .hud-chip.on { opacity: 1; }
 .hud-chip.off { opacity: 0.5; }
 .hud-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff4e0; background: transparent; }
+.hud-btn {
+  pointer-events: auto;
+  font: bold 15px "Trebuchet MS", Arial, sans-serif;
+  color: #2a1d14;
+  background: #ffd166;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+.hud-btn:hover { filter: brightness(1.08); }
+.hud-btn.on { background: #8d99ae; color: #fff4e0; }
 .hud-url { font-size: 15px; font-weight: bold; color: #ffd166; white-space: nowrap; }
 .hud-url.error { color: #ff8a8a; }

@@ -1,7 +1,5 @@
-const { BUTTONS } = window.Protocol;
-
 /**
- * Convierte el estado del botón (que llega a 20 Hz) en gestos: toque, mantener y soltar.
+ * Convierte el estado de un botón (que llega a 20 Hz) en gestos: toque, mantener y soltar.
  * Usa el contador de pulsaciones del servidor para no perder toques más cortos que un envío.
  */
 export class ButtonGesture {
@@ -14,28 +12,29 @@ export class ButtonGesture {
   }
 
   /**
-   * @param {{ buttons: number, presses: number } | null} input  null = mando sin señal
-   * @returns {{ tap: boolean, release: boolean, holding: boolean, holdTime: number }}
+   * @param {{ pressed: boolean, presses: number } | null} button  null = mando sin señal
+   * @returns {{ pressed: boolean, tap: boolean, release: boolean, holding: boolean, holdTime: number }}
+   *   pressed: pulsación en curso (válida); tap: se soltó antes de tapMs; release: se soltó después.
    */
-  update(input, now) {
-    const result = { tap: false, release: false, holding: false, holdTime: 0 };
-    if (!input) {
+  update(button, now) {
+    const result = { pressed: false, tap: false, release: false, holding: false, holdTime: 0 };
+    if (!button) {
       this.presses = null;
       this.down = false;
       return result;
     }
 
-    const pressed = (input.buttons & BUTTONS.ACTION) !== 0;
+    const { pressed } = button;
     if (this.presses === null) {
-      this.presses = input.presses;
+      this.presses = button.presses;
       this.down = pressed;
       this.blocked = pressed;
       this.downAt = now;
       return result;
     }
 
-    const newPresses = input.presses - this.presses;
-    this.presses = input.presses;
+    const newPresses = button.presses - this.presses;
+    this.presses = button.presses;
 
     if (newPresses > 0) {
       if (this.down) this.finish(now, result); // se soltó y se volvió a pulsar entre dos envíos
@@ -49,6 +48,7 @@ export class ButtonGesture {
     }
 
     if (this.down && !this.blocked) {
+      result.pressed = true;
       result.holdTime = now - this.downAt;
       result.holding = result.holdTime >= this.tapMs;
     }

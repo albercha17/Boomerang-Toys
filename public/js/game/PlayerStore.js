@@ -10,7 +10,7 @@ export class PlayerStore {
     this.serverInfo = null;
     this.serverInfoVersion = 0; // aumenta en cada (re)conexión con el servidor
     this.roster = new Map(); // id -> { id, number, name, color, connected, rtt }
-    this.inputs = new Map(); // id -> { x, y, buttons, presses, stale }
+    this.inputs = new Map(); // id -> { x, y, aimX, aimY, buttons, presses, dashes, stale }
   }
 
   setServerConnected(connected) {
@@ -32,8 +32,12 @@ export class PlayerStore {
       next.set(entry[F.ID], {
         x: entry[F.X] / AXIS_MAX,
         y: entry[F.Y] / AXIS_MAX,
+        aimX: entry[F.AIM_X] / AXIS_MAX,
+        aimY: entry[F.AIM_Y] / AXIS_MAX,
         buttons: entry[F.BUTTONS],
-        presses: entry[F.PRESSES], // contadas en el servidor: no se pierden toques más cortos que un envío
+        // Contadas en el servidor: no se pierden toques más cortos que un envío.
+        presses: entry[F.PRESSES],
+        dashes: entry[F.DASHES],
         stale: entry[F.STALE] === 1,
       });
     }

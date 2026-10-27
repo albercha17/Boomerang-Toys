@@ -1,11 +1,11 @@
-const { encodeInput, BUTTONS } = window.Protocol;
+const { encodeInput } = window.Protocol;
 
-const MIN_SEND_INTERVAL_MS = 33; // ~30 Hz máximo para el movimiento
+const MIN_SEND_INTERVAL_MS = 33; // ~30 Hz máximo para los joysticks
 const KEEPALIVE_MS = 500; // reenvía el estado aunque no cambie, para que el servidor no lo dé por obsoleto
 
 /**
- * Acumula el estado del mando y lo envía de forma compacta:
- * al instante si cambia un botón, limitado a ~30 Hz si cambia el joystick,
+ * Acumula el estado del mando (dos joysticks y botones) y lo envía de forma compacta:
+ * al instante si cambia un botón, limitado a ~30 Hz si cambia un joystick,
  * y cada 500 ms como señal de vida.
  */
 export class InputSender {
@@ -14,8 +14,8 @@ export class InputSender {
     this.event = event;
     this.active = false;
     this.seq = 0;
-    this.x = 0;
-    this.y = 0;
+    this.move = { x: 0, y: 0 };
+    this.aim = { x: 0, y: 0 };
     this.buttons = 0;
     this.lastPacket = null;
     this.lastSentAt = 0;
@@ -27,21 +27,24 @@ export class InputSender {
   }
 
   setMove(x, y) {
-    this.x = x;
-    this.y = y;
+    this.move = { x, y };
     this.schedule();
   }
 
-  setAction(pressed) {
-    this.buttons = pressed ? this.buttons | BUTTONS.ACTION : this.buttons & ~BUTTONS.ACTION;
+  setAim(x, y) {
+    this.aim = { x, y };
+    this.schedule();
+  }
+
+  /** @param {number} bit Protocol.BUTTONS.* */
+  setButton(bit, pressed) {
+    this.buttons = pressed ? this.buttons | bit : this.buttons & ~bit;
     this.flush(false);
   }
 
   /** Pone el mando en neutro (al ocultar la página o perder la conexión). */
   reset() {
-    this.x = 0;
-    this.y = 0;
-    this.buttons = 0;
+    this.clear();
     this.flush(false);
   }
 
@@ -56,8 +59,12 @@ export class InputSender {
   /** Deja de enviar hasta la próxima bienvenida (desconexión). */
   stop() {
     this.active = false;
-    this.x = 0;
-    this.y = 0;
+    this.clear();
+  }
+
+  clear() {
+    this.move = { x: 0, y: 0 };
+    this.aim = { x: 0, y: 0 };
     this.buttons = 0;
   }
 
@@ -75,9 +82,9 @@ export class InputSender {
     this.pendingTimer = null;
     if (!this.active || !this.socket.connected) return;
 
-    const packet = encodeInput(this.seq, this.x, this.y, this.buttons);
+    const packet = encodeInput(this.seq, this.move, this.aim, this.buttons);
     const last = this.lastPacket;
-    const same = last && last[1] === packet[1] && last[2] === packet[2] && last[3] === packet[3];
+    const same = last && packet.every((value, i) => i === 0 || value === last[i]);
     if (same && !force) return;
 
     this.socket.emit(this.event, packet);

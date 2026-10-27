@@ -3,6 +3,8 @@ import { ToyFigure } from './ToyFigure.js';
 import { AimIndicator } from './AimIndicator.js';
 import { ButtonGesture } from '../input/ButtonGesture.js';
 
+const { BUTTONS } = window.Protocol;
+
 /** Gira un ángulo hacia otro sin pasar de maxStep radianes. */
 function rotateTowards(current, target, maxStep) {
   const diff = Math.atan2(Math.sin(target - current), Math.cos(target - current));
@@ -65,6 +67,11 @@ export class Character {
     this.weapon = null; // arma en la mano
     this.homeWeapon = null; // arma con la que reaparece
     this.meleeReadyAt = 0;
+    this.aimedThisPress = false; // se arrastró el joystick de ataque en la pulsación actual
+    this.lastDashes = null;
+    this.dashStart = -Infinity;
+    this.dashAngle = 0;
+    this.dashReadyAt = 0;
     this.invulnerableUntil = 0;
     this.respawnAt = 0;
     this.setPlayerInfo(player);
@@ -75,7 +82,7 @@ export class Character {
 
   setPlayerInfo(player) {
     this.connected = player.connected;
-    const text = `J${player.number}${player.connected ? '' : ' ✕'}`;
+    const text = `${player.label ?? `J${player.number}`}${player.connected ? '' : ' ✕'}`;
     if (text !== this.tagText) {
       this.tagText = text;
       this.tag.draw(text);
@@ -86,37 +93,83 @@ export class Character {
     return this.alive && now >= this.invulnerableUntil;
   }
 
-  /** Aplica la entrada del mando. Devuelve las acciones que debe resolver la partida. */
+  /**
+   * Aplica la entrada del mando (estilo Brawl Stars: joystick de movimiento + joystick de ataque + dash).
+   * Devuelve las acciones que debe resolver la partida.
+   */
   update(dt, now, rawInput) {
     const input = rawInput && this.connected && !rawInput.stale ? rawInput : null;
-    const gesture = this.gesture.update(input, now);
-    const actions = { melee: false, throwCharge: null };
-    if (!this.alive) return actions;
-
-    const weapon = this.weapon;
-    if (gesture.release && this.charging) actions.throwCharge = this.charge;
-    this.charging = Boolean(weapon && gesture.holding);
-    this.charge = this.charging ? Math.min(1, (gesture.holdTime - this.def.tapMs) / weapon.def.chargeMs) : 0;
-    if (gesture.tap && weapon && now >= this.meleeReadyAt) {
-      actions.melee = true;
-      this.meleeReadyAt = now + weapon.def.meleeCooldownMs;
+    const attack = this.gesture.update(input && { pressed: (input.buttons & BUTTONS.ACTION) !== 0, presses: input.presses }, now);
+    const dashPressed = this.readDash(input);
+    const actions = { melee: false, throwCharge: null, dash: false };
+    if (!this.alive) {
+      this.aimedThisPress = false;
+      return actions;
     }
+
+    // Al soltar el joystick de ataque: si se apuntó (o se mantuvo) se lanza; un toque sin apuntar es una cuchillada.
+    const weapon = this.weapon;
+    if (attack.tap || attack.release) {
+      if (weapon && (this.aimedThisPress || attack.release)) {
+        actions.throwCharge = this.charge;
+      } else if (weapon && attack.tap && now >= this.meleeReadyAt) {
+        actions.melee = true;
+        this.meleeReadyAt = now + weapon.def.meleeCooldownMs;
+      }
+      this.aimedThisPress = false;
+    }
+
+    // Mientras se arrastra el joystick de ataque, el personaje mira al instante hacia donde se apunta.
+    const aimX = input ? input.aimX : 0;
+    const aimY = input ? input.aimY : 0;
+    if (attack.pressed && Math.hypot(aimX, aimY) > this.def.aimDeadZone) {
+      this.aimedThisPress = true;
+      this.facing = Math.atan2(aimY, aimX);
+    }
+    this.charging = Boolean(weapon && attack.pressed && (this.aimedThisPress || attack.holding));
+    this.charge = this.charging ? Math.min(1, attack.holdTime / weapon.def.chargeMs) : 0;
 
     const mx = input ? input.x : 0;
     const my = input ? input.y : 0;
     const magnitude = Math.min(1, Math.hypot(mx, my));
-    const target = Math.atan2(my, mx);
-    if (this.charging) {
-      // Apuntando: el joystick marca la dirección al instante y apenas se avanza.
-      if (magnitude > this.def.aimDeadZone) this.facing = target;
-    } else if (magnitude > 0.25) {
-      this.facing = rotateTowards(this.facing, target, this.def.turnRate * dt);
+    if (!this.charging && magnitude > 0.25) {
+      this.facing = rotateTowards(this.facing, Math.atan2(my, mx), this.def.turnRate * dt);
+    }
+
+    // Dash: impulso corto hacia donde se mueve (o hacia donde mira), con tiempo de recarga.
+    const dash = this.def.dash;
+    if (dashPressed && now >= this.dashReadyAt) {
+      this.dashAngle = magnitude > 0.2 ? Math.atan2(my, mx) : this.facing;
+      this.dashStart = now;
+      this.dashReadyAt = now + dash.cooldownMs;
+      if (!this.charging) this.facing = this.dashAngle;
+      actions.dash = true;
+    }
+    if (this.isDashing(now)) {
+      this.body.velocity.set(Math.cos(this.dashAngle) * dash.speed, 0, Math.sin(this.dashAngle) * dash.speed);
+      this.moving = 1;
+      return actions;
     }
 
     const speed = this.def.speed * (this.charging ? this.def.aimSpeedFactor : 1);
     this.body.velocity.set(mx * speed, 0, my * speed);
     this.moving = this.charging ? magnitude * this.def.aimSpeedFactor : magnitude;
     return actions;
+  }
+
+  /** true una vez por cada pulsación nueva del dash (contadas en el servidor). */
+  readDash(input) {
+    if (!input) {
+      this.lastDashes = null;
+      return false;
+    }
+    const pressed = this.lastDashes !== null && input.dashes > this.lastDashes;
+    this.lastDashes = input.dashes;
+    return pressed;
+  }
+
+  isDashing(now) {
+    return now < this.dashStart + this.def.dash.durationMs;
   }
 
   /** Sincroniza el aspecto con el cuerpo físico (después del paso de física). */
@@ -126,6 +179,10 @@ export class Character {
     group.position.set(x, 0, z);
     group.rotation.y = -this.facing;
     this.figure.animate(dt, this.moving, this.charging);
+    if (this.isDashing(now)) {
+      const t = (now - this.dashStart) / this.def.dash.durationMs;
+      group.position.y += Math.sin(Math.PI * t) * this.def.dash.hopHeight; // saltito durante el dash
+    }
     this.tag.position.set(x, 1.3 * this.def.scale + 0.3, z);
 
     const blinking = now < this.invulnerableUntil && Math.floor(now / 90) % 2 === 1;

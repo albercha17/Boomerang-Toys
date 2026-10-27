@@ -16,7 +16,7 @@
 
   // Prefijo c: = lo envía un mando; g: = lo envía la pantalla de juego; s: = lo envía el servidor.
   const EVENTS = Object.freeze({
-    INPUT: 'c:input', // mando -> servidor: [seq, x, y, botones]
+    INPUT: 'c:input', // mando -> servidor: [seq, mx, my, ax, ay, botones]
     PING: 'c:ping', // mando -> servidor: (ultimoRttMs, ack)
     FEEDBACK_REPORT: 'g:feedback', // pantalla anfitriona -> servidor: [idJugador, estado]
     WELCOME: 's:welcome', // servidor -> mando: { id, number, name, color, token }
@@ -25,7 +25,7 @@
     FEEDBACK: 's:feedback', // servidor -> mando: estado (máscara FEEDBACK)
     SCREEN_INIT: 's:screenInit', // servidor -> pantalla: { server, roster, state }
     ROSTER: 's:roster', // servidor -> pantalla: [PlayerInfo]
-    STATE: 's:state', // servidor -> pantalla: { t, p: [[id, x, y, botones, pulsaciones, obsoleto]] }
+    STATE: 's:state', // servidor -> pantalla: { t, p: [[id, mx, my, ax, ay, botones, ataques, dashes, obsoleto]] }
   });
 
   const REASONS = Object.freeze({
@@ -33,11 +33,12 @@
     REPLACED: 'replaced',
   });
 
-  // Máscara de bits de botones (extensible: 2, 4, 8...).
+  // Máscara de bits de botones (extensible: 4, 8...).
   const BUTTONS = Object.freeze({
-    ACTION: 1,
+    ACTION: 1, // joystick de ataque pulsado: toque = golpe, arrastrar y soltar = lanzar
+    DASH: 2, // salto rápido hacia delante
   });
-  const BUTTON_MASK = BUTTONS.ACTION;
+  const BUTTON_MASK = BUTTONS.ACTION | BUTTONS.DASH;
 
   // Estado del personaje que se muestra en el mando (máscara de bits).
   const FEEDBACK = Object.freeze({
@@ -52,38 +53,50 @@
   // Índices de cada jugador dentro de STATE.p
   const STATE_FIELDS = Object.freeze({
     ID: 0,
-    X: 1,
+    X: 1, // joystick de movimiento
     Y: 2,
-    BUTTONS: 3,
-    PRESSES: 4,
-    STALE: 5,
+    AIM_X: 3, // joystick de ataque (puntería)
+    AIM_Y: 4,
+    BUTTONS: 5,
+    PRESSES: 6, // pulsaciones acumuladas del ataque
+    DASHES: 7, // pulsaciones acumuladas del dash
+    STALE: 8,
   });
 
   function clampAxis(value) {
     return Math.max(-AXIS_MAX, Math.min(AXIS_MAX, Math.round(value)));
   }
 
-  /** x e y en [-1, 1]. Devuelve el paquete compacto que viaja por la red. */
-  function encodeInput(seq, x, y, buttons) {
-    return [seq, clampAxis(x * AXIS_MAX), clampAxis(y * AXIS_MAX), buttons & BUTTON_MASK];
-  }
-
-  /** Valida un paquete recibido. Devuelve { seq, x, y, buttons } o null si es inválido. */
-  function decodeInput(packet) {
-    if (!Array.isArray(packet) || packet.length !== 4) return null;
-    const [seq, rawX, rawY, rawButtons] = packet;
-    if (!Number.isInteger(seq) || seq < 0) return null;
-    if (!Number.isFinite(rawX) || !Number.isFinite(rawY) || !Number.isInteger(rawButtons)) return null;
-
+  /** Vector en enteros [-AXIS_MAX, AXIS_MAX] con la magnitud limitada al círculo unidad. */
+  function clampVector(rawX, rawY) {
     let x = clampAxis(rawX);
     let y = clampAxis(rawY);
-    // Limita la magnitud del vector al círculo unidad (evita diagonales más rápidas).
     const length = Math.hypot(x, y);
     if (length > AXIS_MAX) {
       x = Math.round((x / length) * AXIS_MAX);
       y = Math.round((y / length) * AXIS_MAX);
     }
-    return { seq, x, y, buttons: rawButtons & BUTTON_MASK };
+    return [x, y];
+  }
+
+  /**
+   * @param {{x: number, y: number}} move joystick de movimiento, ejes en [-1, 1]
+   * @param {{x: number, y: number}} aim joystick de ataque, ejes en [-1, 1]
+   * @returns paquete compacto [seq, mx, my, ax, ay, botones]
+   */
+  function encodeInput(seq, move, aim, buttons) {
+    return [seq, ...clampVector(move.x * AXIS_MAX, move.y * AXIS_MAX), ...clampVector(aim.x * AXIS_MAX, aim.y * AXIS_MAX), buttons & BUTTON_MASK];
+  }
+
+  /** Valida un paquete recibido. Devuelve { seq, x, y, aimX, aimY, buttons } o null si es inválido. */
+  function decodeInput(packet) {
+    if (!Array.isArray(packet) || packet.length !== 6) return null;
+    const [seq, rawX, rawY, rawAimX, rawAimY, rawButtons] = packet;
+    if (!Number.isInteger(seq) || seq < 0 || !Number.isInteger(rawButtons)) return null;
+    if (![rawX, rawY, rawAimX, rawAimY].every(Number.isFinite)) return null;
+    const [x, y] = clampVector(rawX, rawY);
+    const [aimX, aimY] = clampVector(rawAimX, rawAimY);
+    return { seq, x, y, aimX, aimY, buttons: rawButtons & BUTTON_MASK };
   }
 
   /** Valida un informe de estado de la pantalla. Devuelve { id, flags } o null. */

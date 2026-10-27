@@ -2,7 +2,7 @@ import { Joystick } from './Joystick.js';
 import { ActionButton } from './ActionButton.js';
 import { InputSender } from './InputSender.js';
 
-const { ROLES, EVENTS, REASONS, FEEDBACK } = window.Protocol;
+const { ROLES, EVENTS, REASONS, FEEDBACK, BUTTONS } = window.Protocol;
 
 const TOKEN_KEY = 'bumeran.playerToken';
 const PING_INTERVAL_MS = 2000;
@@ -16,15 +16,15 @@ const ui = {
   overlay: document.getElementById('overlay'),
   overlayText: document.getElementById('overlay-text'),
   overlayBtn: document.getElementById('overlay-btn'),
-  actionBtn: document.getElementById('action-btn'),
+  aimStick: document.getElementById('aim-stick'),
   actionLabel: document.getElementById('action-label'),
   actionHint: document.getElementById('action-hint'),
 };
 
-const DEFAULT_HINT = 'toca: golpe<br>mantén y suelta: lanzar';
+const DEFAULT_HINT = 'arrastra y suelta: lanzar · toca: cuchillada';
 let lastFeedback = null;
 
-/** Refleja en el botón el estado del personaje (vivo, con o sin búmerang). */
+/** Refleja en el joystick de ataque el estado del personaje (vivo, con o sin búmerang). */
 function showFeedback(flags) {
   const alive = (flags & FEEDBACK.ALIVE) !== 0;
   const armed = (flags & FEEDBACK.ARMED) !== 0;
@@ -32,16 +32,16 @@ function showFeedback(flags) {
   if (wasAlive && !alive && navigator.vibrate) navigator.vibrate([90, 50, 160]);
   lastFeedback = flags;
 
-  ui.actionBtn.classList.toggle('ko', !alive);
-  ui.actionBtn.classList.toggle('unarmed', alive && !armed);
+  ui.aimStick.classList.toggle('ko', !alive);
+  ui.aimStick.classList.toggle('unarmed', alive && !armed);
   ui.actionLabel.textContent = !alive ? 'K.O.' : armed ? 'LANZAR' : 'SIN BÚMERANG';
-  ui.actionHint.innerHTML = !alive ? 'reapareces en un momento' : armed ? DEFAULT_HINT : 'pasa por encima<br>de uno para cogerlo';
+  ui.actionHint.innerHTML = !alive ? 'reapareces en un momento' : armed ? DEFAULT_HINT : 'pasa por encima de uno para cogerlo';
 }
 
 function resetFeedback() {
   lastFeedback = null;
-  ui.actionBtn.classList.remove('ko', 'unarmed');
-  ui.actionLabel.textContent = 'ACCIÓN';
+  ui.aimStick.classList.remove('ko', 'unarmed');
+  ui.actionLabel.textContent = 'LANZAR';
   ui.actionHint.innerHTML = DEFAULT_HINT;
 }
 
@@ -79,7 +79,22 @@ const joystick = new Joystick({
   onChange: (x, y) => sender.setMove(x, y),
 });
 
-const actionButton = new ActionButton(document.getElementById('action-btn'), (pressed) => sender.setAction(pressed));
+// Joystick de ataque (fijo, a la derecha): arrastrar apunta, soltar lanza; un toque es una cuchillada.
+const aimStick = new Joystick({
+  zone: ui.aimStick,
+  base: document.getElementById('aim-base'),
+  knob: document.getElementById('aim-knob'),
+  floating: false,
+  radius: 55,
+  deadZone: 0.2,
+  onChange: (x, y) => sender.setAim(x, y),
+  onPress: (pressed) => {
+    if (pressed && navigator.vibrate) navigator.vibrate(10);
+    sender.setButton(BUTTONS.ACTION, pressed);
+  },
+});
+
+const dashButton = new ActionButton(document.getElementById('dash-btn'), (pressed) => sender.setButton(BUTTONS.DASH, pressed));
 
 socket.on(EVENTS.WELCOME, (player) => {
   saveToken(player.token);
@@ -119,7 +134,8 @@ socket.on('connect', () => setStatus('connecting', 'Uniéndose…'));
 socket.on('disconnect', (reason) => {
   sender.stop();
   joystick.release();
-  actionButton.release();
+  aimStick.release();
+  dashButton.release();
   ui.ping.textContent = '';
   // Si lo desconecta el servidor (rechazo/expulsión), Socket.io no reintenta solo.
   setStatus('offline', reason === 'io server disconnect' ? 'Desconectado' : 'Reconectando…');
@@ -141,7 +157,8 @@ setInterval(() => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     joystick.release();
-    actionButton.release();
+    aimStick.release();
+    dashButton.release();
     sender.reset();
   }
 });

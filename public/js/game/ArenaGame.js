@@ -6,12 +6,15 @@ import { Effects } from './effects/Effects.js';
 import { DebrisSystem } from './effects/DebrisSystem.js';
 import { CHARACTERS, DEFAULT_CHARACTER } from './content/characters.js';
 import { WEAPONS } from './content/weapons.js';
+import { BotBrain } from './bots/BotBrain.js';
 
 const { FEEDBACK } = window.Protocol;
 
 const RESPAWN_MS = 2500;
 // Clase que implementa cada tipo de arma del catálogo.
 const WEAPON_CLASSES = { boomerang: Boomerang };
+const MAX_BOTS = 1;
+const BOT_COLOR = '#8d99ae';
 
 /**
  * Partida en la arena: personajes, armas, impactos y reapariciones.
@@ -26,7 +29,9 @@ export class ArenaGame {
     this.arena = createTestArena(stage, this.physics);
     this.effects = new Effects(stage);
     this.debris = new DebrisSystem(stage, this.physics, this.effects);
-    this.characters = new Map(); // idJugador -> Character
+    this.characters = new Map(); // idJugador (o 'bot-N') -> Character
+    this.bots = new Map(); // 'bot-N' -> BotBrain
+    this.nextBotId = 1;
     this.weapons = [];
     this.feedbackSent = new Map();
     this.feedbackVersion = -1;
@@ -37,9 +42,11 @@ export class ArenaGame {
     this.syncRoster(now);
 
     for (const character of this.characters.values()) {
-      const actions = character.update(dt, now, this.store.inputs.get(character.id) ?? null);
+      const input = character.isBot ? this.bots.get(character.id).update(now, this) : this.store.inputs.get(character.id) ?? null;
+      const actions = character.update(dt, now, input);
       if (actions.throwCharge !== null && character.weapon) character.weapon.throw(actions.throwCharge);
       if (actions.melee) this.melee(character, now);
+      if (actions.dash) this.effects.burst(character.x, 0.1, character.z, [0xe8d3b0, 0xffffff], 10, 0.35); // polvo
       if (!character.alive && now >= character.respawnAt) this.respawn(character, now);
     }
     for (const weapon of this.weapons) weapon.steer(dt);
@@ -59,12 +66,33 @@ export class ArenaGame {
   syncRoster(now) {
     const roster = this.store.roster;
     for (const [id, character] of this.characters) {
-      if (!roster.has(id)) this.removeCharacter(character);
+      if (!character.isBot && !roster.has(id)) this.removeCharacter(character);
     }
     for (const player of roster.values()) {
       const character = this.characters.get(player.id) ?? this.addCharacter(player, now);
       character.setPlayerInfo(player);
     }
+  }
+
+  // --- Bots (se controlan desde esta pantalla, no pasan por el servidor) ---
+
+  addBot(now) {
+    if (this.bots.size >= MAX_BOTS) return;
+    const id = `bot-${this.nextBotId++}`;
+    const character = this.addCharacter({ id, label: 'BOT', color: BOT_COLOR, connected: true }, now);
+    character.isBot = true;
+    this.bots.set(id, new BotBrain(character));
+  }
+
+  removeBots() {
+    for (const id of this.bots.keys()) this.removeCharacter(this.characters.get(id));
+    this.bots.clear();
+  }
+
+  /** Botón de la pantalla: añade un bot o, si ya está el máximo, los quita. */
+  toggleBot(now) {
+    if (this.bots.size >= MAX_BOTS) this.removeBots();
+    else this.addBot(now);
   }
 
   addCharacter(player, now) {
@@ -179,6 +207,7 @@ export class ArenaGame {
     }
     if (!this.store.serverConnected) return;
     for (const character of this.characters.values()) {
+      if (character.isBot) continue; // los bots no tienen mando
       const flags = (character.alive ? FEEDBACK.ALIVE : 0) | (character.weapon ? FEEDBACK.ARMED : 0);
       if (this.feedbackSent.get(character.id) === flags) continue;
       this.feedbackSent.set(character.id, flags);

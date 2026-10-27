@@ -29,19 +29,25 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 1. Abre `http://localhost:3000/` en el ordenador (mejor a pantalla completa con F11).
 2. En cada móvil, abre la dirección que aparece arriba a la derecha (`http://<IP-del-ordenador>:3000/mando`).
 3. Cada jugador aparece en la arena con su color y su búmerang en la mano.
+4. Para jugar contra la máquina, pulsa **«+ Añadir bot»** en la barra superior de la pantalla (o la tecla **B**). El mismo botón lo quita. Por ahora hay un bot como máximo.
+
+El mando funciona como en Brawl Stars (mejor con el móvil en horizontal):
 
 | En el mando | Qué hace |
 |---|---|
-| Joystick | Moverse y apuntar |
-| **Toque** corto en el botón | Golpe cuerpo a cuerpo con el búmerang en la mano |
-| **Mantener** el botón | Cargar el lanzamiento: casi te quedas quieto y el joystick apunta al instante (flecha en el suelo) |
-| **Soltar** | Lanzar hacia donde apunta la flecha. Cuanto más cargues, más lejos llega |
+| Joystick izquierdo | Moverse |
+| Joystick derecho (**LANZAR**): arrastrar | Apuntar y cargar el lanzamiento. Mientras apuntas avanzas muy despacio y una flecha en el suelo marca la dirección |
+| Joystick derecho: soltar | Lanzar hacia donde apuntabas. Cuanto más tiempo cargues, más lejos llega |
+| Joystick derecho: **toque** sin arrastrar | Cuchillada cuerpo a cuerpo |
+| Joystick derecho: mantener sin arrastrar | Lanzar hacia donde mira el muñeco |
+| Botón **DASH** | Saltito rápido hacia donde te mueves (o hacia delante). Se recarga en 0,7 s |
 
 - El búmerang sale, frena, vuelve hacia ti y rebota en los bloques. Recógelo pasando por encima cuando vuelve.
 - Cualquier búmerang en vuelo (o un golpe) elimina al instante: el muñeco se desmonta en cabeza, torso, brazos y piernas, que saltan, ruedan, pueden quedar encima de los bloques y se pueden empujar.
 - Si muere su dueño, el búmerang cae al suelo; quien no tenga arma puede cogerlo.
 - A los 2,5 s reapareces lejos de los demás, con 1,2 s de invulnerabilidad (parpadeas).
-- El botón del móvil muestra tu estado: **LANZAR**, **SIN BÚMERANG** o **K.O.** (y vibra al morir).
+- El joystick de ataque del móvil muestra tu estado: **LANZAR**, **SIN BÚMERANG** o **K.O.** (y vibra al morir).
+- El bot busca al rival más cercano, mantiene la distancia, apunta con algo de error, da cuchilladas de cerca, esquiva con dash los búmerangs que le vienen encima y recoge su búmerang si lo pierde.
 
 En la consola del navegador de la pantalla, `game` da acceso a la partida para depurar (personajes, armas, piezas).
 
@@ -76,9 +82,10 @@ public/js/game/entities/       Character, ToyFigure (muñeco por piezas), Boomer
 public/js/game/effects/        DebrisSystem (piezas con física) y Effects (confeti, ondas, tajos)
 public/js/game/input/          ButtonGesture: toque / mantener / soltar
 public/js/game/arena/          TestArena: arena fija con bloques de construcción (la sustituirá la Fase 3)
-public/js/game/ui/             Hud: barra superior en HTML
+public/js/game/bots/           BotBrain: inteligencia del bot (genera la misma entrada que un mando)
+public/js/game/ui/             Hud: barra superior en HTML (jugadores, botón del bot, dirección)
 public/controller.html         Mando móvil (también en /mando)
-public/js/controller/          Joystick, botón y envío de entradas
+public/js/controller/          Joysticks (movimiento y ataque), botón de dash y envío de entradas
 ```
 
 ### Añadir personajes y armas
@@ -92,7 +99,7 @@ El rol se indica al conectar: `io({ auth: { role: 'screen' } })` o `io({ auth: {
 
 | Evento | Sentido | Contenido |
 |---|---|---|
-| `c:input` | mando → servidor | `[seq, x, y, botones]`: ejes enteros −100..100, botones como máscara de bits (1 = acción) |
+| `c:input` | mando → servidor | `[seq, mx, my, ax, ay, botones]`: movimiento y puntería con ejes enteros −100..100; botones como máscara de bits (1 = ataque, 2 = dash) |
 | `c:ping` | mando → servidor | `(últimoRttMs, ack)` cada 2 s |
 | `g:feedback` | pantalla anfitriona → servidor | `[idJugador, estado]`: solo cuando cambia |
 | `s:welcome` | servidor → mando | `{ id, number, name, color, token }` |
@@ -101,19 +108,21 @@ El rol se indica al conectar: `io({ auth: { role: 'screen' } })` o `io({ auth: {
 | `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma |
 | `s:screenInit` | servidor → pantalla | `{ server, roster, state }` al conectar |
 | `s:roster` | servidor → pantalla | lista de jugadores (al entrar/salir; latencia como mucho 1/s) |
-| `s:state` | servidor → pantalla | `{ t, p: [[id, x, y, botones, pulsaciones, obsoleto]] }`, a 20 Hz y solo si hay cambios |
+| `s:state` | servidor → pantalla | `{ t, p: [[id, mx, my, ax, ay, botones, ataques, dashes, obsoleto]] }`, a 20 Hz y solo si hay cambios |
 
 Reglas:
 
 - El mando envía al momento los cambios de botón, el joystick a 30 Hz como máximo y una señal de vida cada 500 ms.
 - El servidor valida cada paquete (formato, rango, vector limitado al círculo unidad, secuencia creciente y un máximo de 60 paquetes/s).
 - Si un mando no envía nada en 1,5 s, su entrada pasa a neutro y se marca *obsoleta*.
-- Las pulsaciones se cuentan en el servidor, así que un toque muy corto no se pierde entre dos envíos.
+- Las pulsaciones de ataque y de dash se cuentan en el servidor, así que un toque muy corto no se pierde entre dos envíos.
+- Los bots no pasan por el servidor: viven en la pantalla anfitriona y no ocupan plaza de jugador.
 - Un jugador desconectado conserva la plaza 60 s; al volver con su token recupera id, número, color y estado del botón.
 
 ## Limitaciones conocidas
 
 - La simulación del combate corre en la pantalla anfitriona, no en el servidor. Si se abren dos pantallas, cada una simula su propia partida (solo la primera avisa a los mandos). La puntuación de la Fase 4 deberá guardarse en el servidor.
+- El bot es sencillo: no planifica rutas (si se atasca contra un bloque cambia de rumbo) y no usa los rebotes a propósito.
 - Arena fija de pruebas; los puntos de aparición son fijos (la Fase 3 traerá generación procedural).
 - Reaparición automática e infinita, sin rondas ni marcador (Fase 4).
 - Un jugador desconectado sigue en la arena (quieto, con «✕» en su etiqueta) hasta que caduca su plaza a los 60 s, y se le puede eliminar.

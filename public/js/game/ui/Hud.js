@@ -1,13 +1,26 @@
 const MAX_SLOTS = 8;
 
 /**
- * Barra superior (HTML sobre la escena 3D): jugadores conectados y dirección para los mandos.
+ * Barra superior (HTML sobre la escena 3D): jugadores conectados, botón de bot y dirección para los mandos.
  * Solo toca el DOM cuando algo cambia.
  */
 export class Hud {
-  constructor(store) {
+  constructor(store, game) {
     this.store = store;
+    this.game = game;
     this.url = document.getElementById('hud-url');
+
+    // Bot para jugar contra la máquina: botón o tecla B.
+    this.botButton = document.getElementById('bot-btn');
+    this.botButton.addEventListener('click', () => {
+      game.toggleBot(performance.now());
+      this.botButton.blur();
+    });
+    window.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'b' && !event.repeat) game.toggleBot(performance.now());
+    });
+    this.botsShown = -1;
+
     const container = document.getElementById('hud-players');
     this.chips = Array.from({ length: MAX_SLOTS }, (_, i) => {
       const chip = document.createElement('span');
@@ -20,6 +33,13 @@ export class Hud {
   }
 
   update() {
+    const bots = this.game.bots.size;
+    if (bots !== this.botsShown) {
+      this.botsShown = bots;
+      this.botButton.textContent = bots ? '− Quitar bot' : '+ Añadir bot';
+      this.botButton.classList.toggle('on', bots > 0);
+    }
+
     const store = this.store;
     const slots = this.chips.map((_, i) => store.playerByNumber(i + 1));
     const key = JSON.stringify([

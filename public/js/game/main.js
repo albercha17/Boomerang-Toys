@@ -8,7 +8,7 @@ const store = new PlayerStore();
 const network = new GameNetwork(store);
 const stage = new Stage(document.getElementById('game'));
 const game = new ArenaGame(store, network, stage);
-const hud = new Hud(store);
+const hud = new Hud(store, game);
 
 let last = performance.now();
 function frame(now) {

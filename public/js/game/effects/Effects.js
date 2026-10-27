@@ -15,15 +15,16 @@ export class Effects {
     this.transients = []; // { mesh, age, life, tick(t) }
   }
 
-  burst(x, y, z, colors, count = 28) {
+  /** Confeti en todas direcciones. `power` escala la fuerza (1 = estallido de un muñeco). */
+  burst(x, y, z, colors, count = 28, power = 1) {
     for (let i = 0; i < count; i++) {
       const mesh = new THREE.Mesh(PARTICLE_GEOMETRY, flat(colors[i % colors.length]));
       mesh.position.set(x, y, z);
       const angle = Math.random() * Math.PI * 2;
-      const speed = 2 + Math.random() * 4.5;
+      const speed = (2 + Math.random() * 4.5) * power;
       this.particles.push({
         mesh,
-        velocity: new THREE.Vector3(Math.cos(angle) * speed, 3 + Math.random() * 4.5, Math.sin(angle) * speed),
+        velocity: new THREE.Vector3(Math.cos(angle) * speed, (3 + Math.random() * 4.5) * power, Math.sin(angle) * speed),
         spin: new THREE.Vector3(Math.random() * 12, Math.random() * 12, 0),
         age: 0,
         life: 0.5 + Math.random() * 0.45,
