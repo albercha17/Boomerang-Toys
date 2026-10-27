@@ -1,3 +1,5 @@
 node_modules/
 npm-debug.log*
 .claude/
+herramientas/arte_bruto/
+__pycache__/

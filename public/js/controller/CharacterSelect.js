@@ -33,15 +33,27 @@ export class CharacterSelect {
     this.loadPortraits();
   }
 
-  /** Los retratos se dibujan en 3D en el propio móvil (mientras, se ve un emoji). */
+  /**
+   * Retratos: la ilustración del personaje (public/art) si está generada; si no, se dibuja en 3D en el propio
+   * móvil. Mientras tanto se ve un emoji.
+   */
   async loadPortraits() {
+    let drawn = [];
     try {
-      const { renderPortraits } = await import('/js/game/figures/portraits.js');
-      this.portraits = renderPortraits(CHARACTERS.map((c) => c.id));
-      this.render();
-    } catch (error) {
-      console.warn('Sin retratos 3D:', error);
+      const res = await fetch('/art/manifest.json', { cache: 'no-cache' });
+      if (res.ok) drawn = (await res.json()).characters ?? [];
+    } catch { /* sin ilustraciones */ }
+    for (const id of drawn) this.portraits[id] = `/art/personajes/${id}.png`;
+    const missing = CHARACTERS.map((c) => c.id).filter((id) => !drawn.includes(id));
+    if (missing.length) {
+      try {
+        const { renderPortraits } = await import('/js/game/figures/portraits.js');
+        Object.assign(this.portraits, renderPortraits(missing));
+      } catch (error) {
+        console.warn('Sin retratos 3D:', error);
+      }
     }
+    this.render();
   }
 
   isTakenByOther(id) {

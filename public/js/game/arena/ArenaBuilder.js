@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CELL } from './generation/cells.js';
 import { THEMES, THEME_IDS, floorTexture, buildProp, buildDecor } from './themes.js';
 import { toonMaterial, instancedOutline } from '../render/toon.js';
+import { ART } from '../render/art.js';
 
 const BLOCK_HEIGHT = 0.9;
 const PILLAR_RADIUS = 0.38;
@@ -31,12 +32,15 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   const own = (resource) => { owned.push(resource); return resource; };
   const bodies = [];
   // Zona de la casa: la elegida en la configuración o una según la semilla del mapa.
-  const theme = THEMES[layout.theme] ?? THEMES[THEME_IDS[Math.abs(layout.seed) % THEME_IDS.length]];
+  const themeId = THEMES[layout.theme] ? layout.theme : THEME_IDS[Math.abs(layout.seed) % THEME_IDS.length];
+  const theme = THEMES[themeId];
   const BLOCK_TINTS = theme.blocks;
 
-  // Suelo de la zona y alrededores.
-  const floorMap = own(floorTexture(theme));
-  floorMap.repeat.set(cols / 4, rows / 4);
+  // Suelo de la zona y alrededores: el ilustrado (ChatGPT) si existe; si no, el pintado por código.
+  const drawnFloor = ART.floors[themeId];
+  const floorMap = own(drawnFloor ? drawnFloor.clone() : floorTexture(theme));
+  const tile = drawnFloor ? 6 : 4; // casillas que ocupa cada repetición de la textura
+  floorMap.repeat.set(cols / tile, rows / tile);
   const floor = new THREE.Mesh(own(new THREE.PlaneGeometry(cols, rows)), own(toonMaterial(0xffffff, floorMap)));
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
@@ -52,6 +56,8 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   const pillarGeometry = own(new THREE.CylinderGeometry(PILLAR_RADIUS, PILLAR_RADIUS * 1.08, PILLAR_HEIGHT, 20));
   const capGeometry = own(new THREE.CylinderGeometry(PILLAR_RADIUS * 1.1, PILLAR_RADIUS * 1.1, 0.14, 20));
   const instanced = own(toonMaterial(0xffffff));
+  // Cara ilustrada de los bloques (blanca: se tiñe con el color de cada bloque); los tetones siguen lisos.
+  const blockMaterial = ART.textures.bloque ? own(toonMaterial(0xffffff, ART.textures.bloque)) : instanced;
   const wood = own(toonMaterial(theme.pillar));
 
   const matrix = new THREE.Matrix4();
@@ -111,7 +117,7 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   }
   for (const { blocks, studs, pillars, caps } of batches) {
     const group = new THREE.Group();
-    addInstanced(group, blockGeometry, instanced, blocks);
+    addInstanced(group, blockGeometry, blockMaterial, blocks);
     addInstanced(group, studGeometry, instanced, studs, false);
     addInstanced(group, pillarGeometry, wood, pillars);
     addInstanced(group, capGeometry, instanced, caps);

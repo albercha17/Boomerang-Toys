@@ -6,6 +6,10 @@ import { Match } from './match/Match.js';
 import { Hud } from './ui/Hud.js';
 import { MatchOverlay } from './ui/MatchOverlay.js';
 import { readArenaConfig } from './arena/presets.js';
+import { loadArt } from './render/art.js';
+
+// Ilustraciones de personajes y suelos (las que estén generadas); lo demás se dibuja por código.
+await loadArt();
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);

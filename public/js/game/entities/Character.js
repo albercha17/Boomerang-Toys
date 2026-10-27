@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ToyFigure } from './ToyFigure.js';
+import { makeFigure } from './makeFigure.js';
 import { AimIndicator } from './AimIndicator.js';
 import { ButtonGesture } from '../input/ButtonGesture.js';
 import { POWERUPS, MAX_ABILITIES, ICONS_ON_PICKUP_MS } from '../content/powerups.js';
@@ -63,7 +63,7 @@ export class Character {
     this.body = game.physics.createCharacterBody(def.radius, x, z);
     this.body.entity = this;
     this.figureId = player.character ?? 'peon';
-    this.figure = new ToyFigure(this.figureId, this.color, def.scale);
+    this.figure = makeFigure(this.figureId, this.color, def.scale);
     this.aim = new AimIndicator(this.color);
     this.tag = createTag(player.color);
     // Burbuja del escudo (solo visible con esa habilidad).
