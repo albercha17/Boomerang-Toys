@@ -286,6 +286,15 @@ export const THEMES = Object.freeze({
 
 export const THEME_IDS = Object.keys(THEMES);
 
+/** Colores de plástico de los muebles de juguete de cada zona (la madera de los modelos se pinta con ellos). */
+export const TOY_COLORS = {
+  salon: [0xff6b6b, 0x4ecdc4, 0xffc93c, 0x6c8cff, 0xff9f43],
+  cocina: [0x6fcf97, 0xff8fa3, 0x56ccf2, 0xffd166],
+  dormitorio: [0xb388ff, 0xff8fab, 0x4dd0e1, 0xffd54f],
+  bano: [0x64b5f6, 0xf48fb1, 0x9ccc65, 0xffb74d],
+  patio: [0xff7043, 0x42a5f5, 0xffca28],
+};
+
 /**
  * Muebles 3D de cada zona (render/furniture.js). blocks: uno por casilla de obstáculo; pillars: en las columnas;
  * decor: [modelo, posición x (fracción del ancho), escala, giro] al fondo, a tamaño de casa real (gigante para

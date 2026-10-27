@@ -1,4 +1,18 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { HorizontalTiltShiftShader } from 'three/addons/shaders/HorizontalTiltShiftShader.js';
+import { VerticalTiltShiftShader } from 'three/addons/shaders/VerticalTiltShiftShader.js';
+import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
+import { HueSaturationShader } from 'three/addons/shaders/HueSaturationShader.js';
+
+// Acabado de maqueta (oclusión ambiental, desenfoque de miniatura, viñeta); /?calidad=baja lo quita
+const FANCY = new URLSearchParams(location.search).get('calidad') !== 'baja';
+const TILT_FOCUS = 0.52; // altura de la pantalla que queda nítida (0 abajo, 1 arriba)
+const TILT_BLUR = 2.2; // fuerza del desenfoque hacia arriba y abajo
 
 const CAMERA_TILT = THREE.MathUtils.degToRad(60); // inclinación sobre el suelo, como en Boomerang Fu
 const HUD_ROOM = 0.6; // margen (en unidades) para que la barra superior no tape la arena
@@ -32,10 +46,38 @@ export class Stage {
     this.sun.shadow.mapSize.set(2048, 2048);
     this.sun.shadow.bias = -0.0005;
     this.sun.shadow.normalBias = 0.02;
+    this.sun.shadow.radius = 3;
     this.scene.add(this.sun);
 
+    if (FANCY) this.setupEffects();
     window.addEventListener('resize', () => this.resize());
     this.resize();
+  }
+
+  /** Cadena de efectos: escena -> oclusión ambiental -> color -> desenfoque de miniatura -> viñeta -> salida. */
+  setupEffects() {
+    const composer = new EffectComposer(this.renderer);
+    composer.addPass(new RenderPass(this.scene, this.camera));
+    const ao = new GTAOPass(this.scene, this.camera, 1, 1);
+    ao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 12 });
+    ao.blendIntensity = 0.85;
+    composer.addPass(ao);
+    const color = new ShaderPass(HueSaturationShader);
+    color.uniforms.saturation.value = 0.12;
+    composer.addPass(color);
+    this.tiltH = new ShaderPass(HorizontalTiltShiftShader);
+    this.tiltV = new ShaderPass(VerticalTiltShiftShader);
+    for (const pass of [this.tiltH, this.tiltV]) {
+      pass.uniforms.r.value = TILT_FOCUS;
+      composer.addPass(pass);
+    }
+    const vignette = new ShaderPass(VignetteShader);
+    vignette.uniforms.offset.value = 0.95;
+    vignette.uniforms.darkness.value = 1.05;
+    composer.addPass(vignette);
+    composer.addPass(new OutputPass());
+    this.composer = composer;
+    this.ao = ao;
   }
 
   /** Ambiente de la zona de la casa: color de fondo y luz. */
@@ -62,6 +104,11 @@ export class Stage {
     const width = window.innerWidth;
     const height = window.innerHeight;
     this.renderer.setSize(width, height);
+    if (this.composer) {
+      this.composer.setSize(width, height);
+      this.tiltH.uniforms.h.value = TILT_BLUR / width;
+      this.tiltV.uniforms.v.value = TILT_BLUR / height;
+    }
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
@@ -88,6 +135,7 @@ export class Stage {
       this.camera.position.y += (Math.random() - 0.5) * s;
     }
     this.camera.lookAt(this.target);
-    this.renderer.render(this.scene, this.camera);
+    if (this.composer) this.composer.render();
+    else this.renderer.render(this.scene, this.camera);
   }
 }
