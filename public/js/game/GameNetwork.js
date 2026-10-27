@@ -27,6 +27,11 @@ export class GameNetwork {
     this.socket.emit(EVENTS.FEEDBACK_REPORT, [playerId, flags]);
   }
 
+  /** @param {'lobby'|'match'} phase en la sala se puede cambiar de personaje desde el móvil */
+  sendPhase(phase) {
+    this.socket.emit(EVENTS.PHASE_REPORT, phase);
+  }
+
   /** @param {string[]} abilities ids de power-up que lleva el jugador */
   sendAbilities(playerId, abilities) {
     this.socket.emit(EVENTS.ABILITIES_REPORT, [playerId, abilities]);

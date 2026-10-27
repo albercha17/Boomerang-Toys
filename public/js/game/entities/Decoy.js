@@ -18,7 +18,7 @@ export class Decoy {
     this.isDecoy = true;
 
     this.body = game.physics.createCharacterBody(owner.def.radius, owner.x, owner.z);
-    this.figure = new ToyFigure(owner.color, owner.def.scale);
+    this.figure = new ToyFigure(owner.figureId, owner.color, owner.def.scale);
     this.figure.group.position.set(owner.x, 0, owner.z);
     game.stage.scene.add(this.figure.group);
   }

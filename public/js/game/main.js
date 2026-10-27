@@ -20,11 +20,22 @@ const match = new Match(game, { targetScore });
 const hud = new Hud(store, game, match);
 const overlay = new MatchOverlay(document.getElementById('match-overlay'), match);
 
+// La fase (sala o partida) se avisa a los móviles: en la sala se puede cambiar de personaje.
+let phaseSent = '';
+function reportPhase() {
+  const phase = match.phase === 'lobby' ? 'lobby' : 'match';
+  const key = `${phase}:${store.serverInfoVersion}`;
+  if (!store.serverConnected || key === phaseSent) return;
+  phaseSent = key;
+  network.sendPhase(phase);
+}
+
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(now - last, 50) / 1000; // evita saltos enormes si la pestaña estuvo en segundo plano
   last = now;
   match.update(now);
+  reportPhase();
   if (!match.paused) game.update(now, dt);
   hud.update();
   overlay.update(now);

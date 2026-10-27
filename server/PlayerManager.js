@@ -70,6 +70,7 @@ class PlayerManager {
       rateCount: 0,
       feedback: null, // último estado de juego que mostrar en el mando (FEEDBACK)
       abilities: [], // power-ups que lleva (los informa la pantalla anfitriona)
+      character: null, // personaje elegido en el mando (no se puede repetir)
     };
     this.players.set(player.id, player);
     this.byToken.set(player.token, player);
@@ -79,6 +80,26 @@ class PlayerManager {
 
   get(id) {
     return this.players.get(id) ?? null;
+  }
+
+  /** { idPersonaje: número del jugador que lo tiene } (las plazas reservadas por desconexión también cuentan). */
+  takenCharacters() {
+    const taken = {};
+    for (const p of this.players.values()) if (p.character) taken[p.character] = p.number;
+    return taken;
+  }
+
+  /**
+   * Elige personaje. En partida solo puede elegir quien aún no tiene (entra en la siguiente ronda).
+   * @returns {{ ok: true } | { error: 'invalid'|'taken'|'locked' }}
+   */
+  chooseCharacter(player, characterId, isValid, phase) {
+    if (!isValid(characterId)) return { error: 'invalid' };
+    if (phase !== 'lobby' && player.character) return { error: 'locked' };
+    const owner = [...this.players.values()].find((p) => p.character === characterId);
+    if (owner && owner !== player) return { error: 'taken' };
+    player.character = characterId;
+    return { ok: true };
   }
 
   /** Guarda el estado de juego del jugador. Devuelve true si cambió. */
@@ -190,6 +211,7 @@ class PlayerManager {
       number: player.number,
       name: player.name,
       color: player.color,
+      character: player.character,
       connected: player.connected,
       rtt: player.rtt,
     };

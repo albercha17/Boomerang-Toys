@@ -62,7 +62,8 @@ export class Character {
 
     this.body = game.physics.createCharacterBody(def.radius, x, z);
     this.body.entity = this;
-    this.figure = new ToyFigure(this.color, def.scale);
+    this.figureId = player.character ?? 'peon';
+    this.figure = new ToyFigure(this.figureId, this.color, def.scale);
     this.aim = new AimIndicator(this.color);
     this.tag = createTag(player.color);
     // Burbuja del escudo (solo visible con esa habilidad).

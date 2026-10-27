@@ -19,6 +19,12 @@
     INPUT: 'c:input', // mando -> servidor: [seq, mx, my, ax, ay, botones]
     PING: 'c:ping', // mando -> servidor: (ultimoRttMs, ack)
     FEEDBACK_REPORT: 'g:feedback', // pantalla anfitriona -> servidor: [idJugador, estado]
+    CHOOSE: 'c:choose', // mando -> servidor: idPersonaje (pide jugar con él)
+    PHASE_REPORT: 'g:phase', // pantalla anfitriona -> servidor: 'lobby' | 'match'
+    CHOSEN: 's:chosen', // servidor -> mando: idPersonaje aceptado, o null (aún sin elegir)
+    CHOOSE_REJECTED: 's:chooseRejected', // servidor -> mando: { reason: 'taken' | 'locked' | 'invalid' }
+    CHARACTERS: 's:characters', // servidor -> mandos: { idPersonaje: númeroDelJugadorQueLoTiene }
+    PHASE: 's:phase', // servidor -> mandos: 'lobby' | 'match'
     ABILITIES_REPORT: 'g:abilities', // pantalla anfitriona -> servidor: [idJugador, [idPowerup, ...]]
     ABILITIES: 's:abilities', // servidor -> mando: [idPowerup, ...] (de la más antigua a la más nueva)
     WELCOME: 's:welcome', // servidor -> mando: { id, number, name, color, token }

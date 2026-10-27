@@ -75,7 +75,7 @@ export class Hud {
       match.paused,
       game.bots.size,
       match.canStart(),
-      slots.map((s) => s && [s.player.color, s.player.connected, Boolean(s.input?.stale), match.scoreOf(s.player.id)]),
+      slots.map((s) => s && [s.player.color, s.player.connected, s.player.character, Boolean(s.input?.stale), match.scoreOf(s.player.id)]),
     ]);
     if (key === this.renderedKey) return;
     this.renderedKey = key;
@@ -106,7 +106,7 @@ export class Hud {
       chip.classList.toggle('on', Boolean(slot?.player.connected));
       chip.classList.toggle('off', Boolean(slot && !slot.player.connected));
       dot.style.background = slot ? slot.player.color : 'transparent';
-      const status = !slot ? '' : !slot.player.connected ? ' ✕' : slot.input?.stale ? ' …' : '';
+      const status = !slot ? '' : !slot.player.connected ? ' ✕' : !slot.player.character ? ' eligiendo…' : slot.input?.stale ? ' …' : '';
       const score = slot && showScores ? ` · ${match.scoreOf(slot.player.id)}` : '';
       label.textContent = `J${i + 1}${score}${status}`;
     });

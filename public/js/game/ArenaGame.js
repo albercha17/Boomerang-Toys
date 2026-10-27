@@ -15,6 +15,7 @@ import { PowerUpSpawner } from './powerups/PowerUpSpawner.js';
 import { POWERUPS } from './content/powerups.js';
 
 const { FEEDBACK } = window.Protocol;
+const { CharacterCatalog } = window;
 
 const RESPAWN_MS = 2500;
 const OUTSIDE_LIMIT_MS = 5000; // tiempo fuera de la línea roja antes de explotar
@@ -160,23 +161,50 @@ export class ArenaGame {
 
   // --- Jugadores ---------------------------------------------------------
 
+  /** Solo juegan los que ya han elegido personaje en el móvil; si alguien lo cambia (en la sala), se reconstruye. */
   syncRoster(now) {
     const roster = this.store.roster;
     for (const [id, character] of this.characters) {
-      if (!character.isBot && !roster.has(id)) this.removeCharacter(character);
+      if (character.isBot) continue;
+      const player = roster.get(id);
+      if (!player || !player.character || player.character !== character.figureId) this.removeCharacter(character);
     }
     for (const player of roster.values()) {
+      if (!player.character) continue;
       const character = this.characters.get(player.id) ?? this.addCharacter(player, now);
       character.setPlayerInfo(player);
+    }
+    this.keepBotsUnique(now);
+  }
+
+  /** Personajes cogidos por los jugadores (el bot elige entre los que quedan). */
+  takenFigures() {
+    return new Set([...this.store.roster.values()].map((p) => p.character).filter(Boolean));
+  }
+
+  freeFigure(except = new Set()) {
+    const taken = this.takenFigures();
+    for (const c of this.characters.values()) if (c.isBot) taken.add(c.figureId);
+    const free = CharacterCatalog.CHARACTERS.map((c) => c.id).filter((id) => !taken.has(id) && !except.has(id));
+    return free[Math.floor(Math.random() * free.length)] ?? 'peon';
+  }
+
+  /** Si un jugador elige el personaje que llevaba el bot, el bot se cambia a otro libre. */
+  keepBotsUnique(now) {
+    const taken = this.takenFigures();
+    for (const [id, bot] of [...this.characters]) {
+      if (!bot.isBot || !taken.has(bot.figureId)) continue;
+      this.removeCharacter(bot);
+      this.bots.delete(id);
+      this.addBot(now, id);
     }
   }
 
   // --- Bots (se controlan desde esta pantalla, no pasan por el servidor) ---
 
-  addBot(now) {
+  addBot(now, id = `bot-${this.nextBotId++}`) {
     if (this.bots.size >= MAX_BOTS) return;
-    const id = `bot-${this.nextBotId++}`;
-    const character = this.addCharacter({ id, label: 'BOT', color: BOT_COLOR, connected: true }, now);
+    const character = this.addCharacter({ id, label: 'BOT', color: BOT_COLOR, connected: true, character: this.freeFigure() }, now);
     character.isBot = true;
     this.bots.set(id, new BotBrain(character));
   }

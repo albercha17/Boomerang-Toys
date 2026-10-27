@@ -1,5 +1,6 @@
 const { ROLES, EVENTS, REASONS, decodeFeedbackReport, decodeAbilitiesReport } = require('../shared/protocol');
 const { isPowerupId, MAX_ABILITIES } = require('../shared/powerups');
+const { isCharacterId } = require('../shared/characters');
 
 const SCREENS_ROOM = 'screens';
 
@@ -11,6 +12,13 @@ function registerSocketHandlers(io, players, config, serverInfo) {
   let lastRosterAt = 0;
   // La primera pantalla conectada es la anfitriona: la única cuyos informes llegan a los mandos.
   const screenIds = [];
+  let phase = 'lobby'; // lo informa la pantalla anfitriona: en la sala se puede cambiar de personaje
+
+  /** A todos los mandos: qué personajes están cogidos y por quién. */
+  function emitCharacters() {
+    const taken = players.takenCharacters();
+    for (const p of players.players.values()) if (p.connected) io.to(p.socketId).emit(EVENTS.CHARACTERS, taken);
+  }
 
   function emitRoster() {
     io.to(SCREENS_ROOM).emit(EVENTS.ROSTER, players.roster());
@@ -33,6 +41,12 @@ function registerSocketHandlers(io, players, config, serverInfo) {
       const player = report && players.get(report.id);
       if (!player || !players.setFeedback(player, report.flags)) return;
       if (player.connected) io.to(player.socketId).emit(EVENTS.FEEDBACK, report.flags);
+    });
+
+    socket.on(EVENTS.PHASE_REPORT, (value) => {
+      if (screenIds[0] !== socket.id || (value !== 'lobby' && value !== 'match') || value === phase) return;
+      phase = value;
+      for (const p of players.players.values()) if (p.connected) io.to(p.socketId).emit(EVENTS.PHASE, phase);
     });
 
     socket.on(EVENTS.ABILITIES_REPORT, (packet) => {
@@ -70,12 +84,28 @@ function registerSocketHandlers(io, players, config, serverInfo) {
     socket.emit(EVENTS.WELCOME, { ...players.publicInfo(player), token: player.token });
     if (player.feedback !== null) socket.emit(EVENTS.FEEDBACK, player.feedback);
     socket.emit(EVENTS.ABILITIES, player.abilities);
+    socket.emit(EVENTS.PHASE, phase);
+    socket.emit(EVENTS.CHOSEN, player.character);
+    socket.emit(EVENTS.CHARACTERS, players.takenCharacters());
     emitRoster();
 
     const isCurrent = () => player.socketId === socket.id;
 
     socket.on(EVENTS.INPUT, (packet) => {
       if (isCurrent()) players.handleInput(player, packet, Date.now());
+    });
+
+    socket.on(EVENTS.CHOOSE, (characterId) => {
+      if (!isCurrent()) return;
+      const result = players.chooseCharacter(player, characterId, isCharacterId, phase);
+      if (result.error) {
+        socket.emit(EVENTS.CHOOSE_REJECTED, { reason: result.error });
+        socket.emit(EVENTS.CHARACTERS, players.takenCharacters());
+        return;
+      }
+      socket.emit(EVENTS.CHOSEN, player.character);
+      emitCharacters();
+      emitRoster();
     });
 
     socket.on(EVENTS.PING, (rtt, ack) => {
@@ -99,7 +129,10 @@ function registerSocketHandlers(io, players, config, serverInfo) {
 
   setInterval(() => {
     const now = Date.now();
-    if (players.update(now)) emitRoster();
+    if (players.update(now)) {
+      emitRoster();
+      emitCharacters(); // una plaza caducada libera su personaje
+    }
 
     if (players.stateDirty) {
       io.to(SCREENS_ROOM).emit(EVENTS.STATE, { t: now, p: players.snapshot() });
