@@ -2,7 +2,7 @@ import { Joystick } from './Joystick.js';
 import { ActionButton } from './ActionButton.js';
 import { InputSender } from './InputSender.js';
 
-const { ROLES, EVENTS, REASONS } = window.Protocol;
+const { ROLES, EVENTS, REASONS, FEEDBACK } = window.Protocol;
 
 const TOKEN_KEY = 'bumeran.playerToken';
 const PING_INTERVAL_MS = 2000;
@@ -16,7 +16,34 @@ const ui = {
   overlay: document.getElementById('overlay'),
   overlayText: document.getElementById('overlay-text'),
   overlayBtn: document.getElementById('overlay-btn'),
+  actionBtn: document.getElementById('action-btn'),
+  actionLabel: document.getElementById('action-label'),
+  actionHint: document.getElementById('action-hint'),
 };
+
+const DEFAULT_HINT = 'toca: golpe<br>mantén y suelta: lanzar';
+let lastFeedback = null;
+
+/** Refleja en el botón el estado del personaje (vivo, con o sin búmerang). */
+function showFeedback(flags) {
+  const alive = (flags & FEEDBACK.ALIVE) !== 0;
+  const armed = (flags & FEEDBACK.ARMED) !== 0;
+  const wasAlive = lastFeedback === null || (lastFeedback & FEEDBACK.ALIVE) !== 0;
+  if (wasAlive && !alive && navigator.vibrate) navigator.vibrate([90, 50, 160]);
+  lastFeedback = flags;
+
+  ui.actionBtn.classList.toggle('ko', !alive);
+  ui.actionBtn.classList.toggle('unarmed', alive && !armed);
+  ui.actionLabel.textContent = !alive ? 'K.O.' : armed ? 'LANZAR' : 'SIN BÚMERANG';
+  ui.actionHint.innerHTML = !alive ? 'reapareces en un momento' : armed ? DEFAULT_HINT : 'pasa por encima<br>de uno para cogerlo';
+}
+
+function resetFeedback() {
+  lastFeedback = null;
+  ui.actionBtn.classList.remove('ko', 'unarmed');
+  ui.actionLabel.textContent = 'ACCIÓN';
+  ui.actionHint.innerHTML = DEFAULT_HINT;
+}
 
 // sessionStorage: sobrevive a recargar la pestaña, pero cada pestaña es un jugador distinto.
 function readToken() {
@@ -61,7 +88,12 @@ socket.on(EVENTS.WELCOME, (player) => {
   ui.name.textContent = player.name;
   ui.overlay.hidden = true;
   setStatus('connected', 'Conectado');
+  resetFeedback(); // si el servidor conoce el estado, llega justo después
   sender.start();
+});
+
+socket.on(EVENTS.FEEDBACK, (flags) => {
+  if (Number.isInteger(flags)) showFeedback(flags);
 });
 
 socket.on(EVENTS.REJECTED, ({ reason }) => {

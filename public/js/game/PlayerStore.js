@@ -8,9 +8,9 @@ export class PlayerStore {
   constructor() {
     this.serverConnected = false;
     this.serverInfo = null;
-    this.serverInfoVersion = 0;
+    this.serverInfoVersion = 0; // aumenta en cada (re)conexión con el servidor
     this.roster = new Map(); // id -> { id, number, name, color, connected, rtt }
-    this.inputs = new Map(); // id -> { x, y, buttons, presses, stale, lastPressAt }
+    this.inputs = new Map(); // id -> { x, y, buttons, presses, stale }
   }
 
   setServerConnected(connected) {
@@ -29,17 +29,12 @@ export class PlayerStore {
   applyState(state) {
     const next = new Map();
     for (const entry of state.p) {
-      const id = entry[F.ID];
-      const previous = this.inputs.get(id);
-      const presses = entry[F.PRESSES];
-      next.set(id, {
+      next.set(entry[F.ID], {
         x: entry[F.X] / AXIS_MAX,
         y: entry[F.Y] / AXIS_MAX,
         buttons: entry[F.BUTTONS],
-        presses,
+        presses: entry[F.PRESSES], // contadas en el servidor: no se pierden toques más cortos que un envío
         stale: entry[F.STALE] === 1,
-        // Las pulsaciones se cuentan en el servidor: así no se pierde un toque más corto que un tick.
-        lastPressAt: previous && presses > previous.presses ? performance.now() : previous?.lastPressAt ?? 0,
       });
     }
     this.inputs = next;
@@ -51,9 +46,5 @@ export class PlayerStore {
       if (player.number === number) return { player, input: this.inputs.get(player.id) ?? null };
     }
     return null;
-  }
-
-  get playerCount() {
-    return this.roster.size;
   }
 }

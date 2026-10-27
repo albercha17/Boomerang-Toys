@@ -67,11 +67,23 @@ class PlayerManager {
       rtt: null,
       rateWindowStart: now,
       rateCount: 0,
+      feedback: null, // último estado de juego que mostrar en el mando (FEEDBACK)
     };
     this.players.set(player.id, player);
     this.byToken.set(player.token, player);
     this.stateDirty = true;
     return { player, resumed: false, replacedSocketId: null };
+  }
+
+  get(id) {
+    return this.players.get(id) ?? null;
+  }
+
+  /** Guarda el estado de juego del jugador. Devuelve true si cambió. */
+  setFeedback(player, flags) {
+    if (player.feedback === flags) return false;
+    player.feedback = flags;
+    return true;
   }
 
   findFreeNumber() {

@@ -1,8 +1,8 @@
 const { ROLES, EVENTS } = window.Protocol;
 
 /**
- * Conexión de la pantalla de juego con el servidor. Solo escucha: la pantalla no envía entradas.
- * Vuelca lo recibido en el PlayerStore.
+ * Conexión de la pantalla de juego con el servidor.
+ * Recibe jugadores y entradas (los vuelca en el PlayerStore) y envía el estado de cada personaje para su mando.
  */
 export class GameNetwork {
   constructor(store) {
@@ -20,5 +20,10 @@ export class GameNetwork {
     });
     this.socket.on(EVENTS.ROSTER, (roster) => store.setRoster(roster));
     this.socket.on(EVENTS.STATE, (state) => store.applyState(state));
+  }
+
+  /** @param {number} flags máscara Protocol.FEEDBACK */
+  sendFeedback(playerId, flags) {
+    this.socket.emit(EVENTS.FEEDBACK_REPORT, [playerId, flags]);
   }
 }

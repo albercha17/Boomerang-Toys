@@ -1,4 +1,4 @@
-const { ROLES, EVENTS, REASONS } = require('../shared/protocol');
+const { ROLES, EVENTS, REASONS, decodeFeedbackReport } = require('../shared/protocol');
 
 const SCREENS_ROOM = 'screens';
 
@@ -8,6 +8,8 @@ const SCREENS_ROOM = 'screens';
  */
 function registerSocketHandlers(io, players, config, serverInfo) {
   let lastRosterAt = 0;
+  // La primera pantalla conectada es la anfitriona: la única cuyos informes llegan a los mandos.
+  const screenIds = [];
 
   function emitRoster() {
     io.to(SCREENS_ROOM).emit(EVENTS.ROSTER, players.roster());
@@ -17,10 +19,23 @@ function registerSocketHandlers(io, players, config, serverInfo) {
 
   function handleScreen(socket) {
     socket.join(SCREENS_ROOM);
+    screenIds.push(socket.id);
     socket.emit(EVENTS.SCREEN_INIT, {
       server: serverInfo,
       roster: players.roster(),
       state: { t: Date.now(), p: players.snapshot() },
+    });
+
+    socket.on(EVENTS.FEEDBACK_REPORT, (packet) => {
+      if (screenIds[0] !== socket.id) return;
+      const report = decodeFeedbackReport(packet);
+      const player = report && players.get(report.id);
+      if (!player || !players.setFeedback(player, report.flags)) return;
+      if (player.connected) io.to(player.socketId).emit(EVENTS.FEEDBACK, report.flags);
+    });
+
+    socket.on('disconnect', () => {
+      screenIds.splice(screenIds.indexOf(socket.id), 1);
     });
   }
 
@@ -43,6 +58,7 @@ function registerSocketHandlers(io, players, config, serverInfo) {
     }
 
     socket.emit(EVENTS.WELCOME, { ...players.publicInfo(player), token: player.token });
+    if (player.feedback !== null) socket.emit(EVENTS.FEEDBACK, player.feedback);
     emitRoster();
 
     const isCurrent = () => player.socketId === socket.id;

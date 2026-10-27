@@ -14,13 +14,15 @@
     CONTROLLER: 'controller',
   });
 
-  // Prefijo c: = lo envía un mando; s: = lo envía el servidor.
+  // Prefijo c: = lo envía un mando; g: = lo envía la pantalla de juego; s: = lo envía el servidor.
   const EVENTS = Object.freeze({
     INPUT: 'c:input', // mando -> servidor: [seq, x, y, botones]
     PING: 'c:ping', // mando -> servidor: (ultimoRttMs, ack)
+    FEEDBACK_REPORT: 'g:feedback', // pantalla anfitriona -> servidor: [idJugador, estado]
     WELCOME: 's:welcome', // servidor -> mando: { id, number, name, color, token }
     REJECTED: 's:rejected', // servidor -> mando: { reason }
     KICKED: 's:kicked', // servidor -> mando: { reason }
+    FEEDBACK: 's:feedback', // servidor -> mando: estado (máscara FEEDBACK)
     SCREEN_INIT: 's:screenInit', // servidor -> pantalla: { server, roster, state }
     ROSTER: 's:roster', // servidor -> pantalla: [PlayerInfo]
     STATE: 's:state', // servidor -> pantalla: { t, p: [[id, x, y, botones, pulsaciones, obsoleto]] }
@@ -36,6 +38,13 @@
     ACTION: 1,
   });
   const BUTTON_MASK = BUTTONS.ACTION;
+
+  // Estado del personaje que se muestra en el mando (máscara de bits).
+  const FEEDBACK = Object.freeze({
+    ALIVE: 1,
+    ARMED: 2,
+  });
+  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED;
 
   // Los ejes viajan como enteros en [-AXIS_MAX, AXIS_MAX] para que los mensajes sean compactos.
   const AXIS_MAX = 100;
@@ -77,14 +86,24 @@
     return { seq, x, y, buttons: rawButtons & BUTTON_MASK };
   }
 
+  /** Valida un informe de estado de la pantalla. Devuelve { id, flags } o null. */
+  function decodeFeedbackReport(packet) {
+    if (!Array.isArray(packet) || packet.length !== 2) return null;
+    const [id, flags] = packet;
+    if (!Number.isInteger(id) || id < 1 || !Number.isInteger(flags)) return null;
+    return { id, flags: flags & FEEDBACK_MASK };
+  }
+
   return Object.freeze({
     ROLES,
     EVENTS,
     REASONS,
     BUTTONS,
+    FEEDBACK,
     AXIS_MAX,
     STATE_FIELDS,
     encodeInput,
     decodeInput,
+    decodeFeedbackReport,
   });
 });
