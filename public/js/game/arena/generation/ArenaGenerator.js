@@ -1,5 +1,8 @@
 import { createRandom, hashSeed } from './random.js';
 import { CELL, isSolid, STAMPS, PROP_TYPES } from './cells.js';
+import { ROOM_SETS, MODEL_SIZE, FURNITURE_SCALE } from './rooms.js';
+
+const ROOM_IDS = ['salon', 'cocina', 'patio', 'dormitorio', 'bano']; // mismo orden que arena/themes.js
 
 const NEIGHBOURS_4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 const NEIGHBOURS_8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
@@ -41,22 +44,30 @@ function tryGenerate(config, attempt) {
     grid[at(cols - 1, r)] = CELL.BORDER;
   }
 
+  // Zona de la casa: la pedida o una según la semilla (con habitaciones, los muebles dependen de ella).
+  const theme = config.theme ?? (config.rooms ? ROOM_IDS[Math.abs(config.seed) % ROOM_IDS.length] : null);
+
   // Zonas del interior. Con simetría solo se generan las de la mitad izquierda.
   const mirror = config.symmetry === 'mirror-x';
   const lastCol = mirror ? Math.floor((cols - 1) / 2) : cols - 2;
   const chunks = listChunks(cols, rows, chunkSize);
+  const furniture = []; // muebles colocados (con habitaciones)
   for (const chunk of chunks) {
     const c0 = Math.max(1, chunk.col0);
     const c1 = Math.min(lastCol, chunk.col1);
     const r0 = Math.max(1, chunk.row0);
     const r1 = Math.min(rows - 2, chunk.row1);
     if (c0 > c1 || r0 > r1) continue;
-    fillChunk(grid, cols, { c0, c1, r0, r1 }, config.density, createRandom(hashSeed(seed, chunk.cx, chunk.cy)));
+    const random = createRandom(hashSeed(seed, chunk.cx, chunk.cy));
+    if (config.rooms) fillRoom(grid, cols, { c0, c1, r0, r1 }, ROOM_SETS[theme], config.density, random, furniture);
+    else fillChunk(grid, cols, { c0, c1, r0, r1 }, config.density, random);
   }
   if (mirror) {
     for (let r = 1; r < rows - 1; r++) {
       for (let c = 1; c < cols - 1 - c; c++) grid[at(cols - 1 - c, r)] = grid[at(c, r)];
     }
+    // Muebles reflejados: izquierda <-> derecha (los que miran a un lado pasan a mirar al otro)
+    for (const item of [...furniture]) furniture.push({ ...item, x: cols - item.x, q: item.q % 2 ? -item.q : item.q });
   }
 
   // Huecos a los que no se puede llegar: se rellenan con bloques.
@@ -88,13 +99,21 @@ function tryGenerate(config, attempt) {
     props.push({ type: random.pick(PROP_TYPES), col: cell % cols, row: Math.floor(cell / cols), color: random.int(0, 6) });
   }
 
+  // Muebles sueltos (sillas, cajas...): se empujan como los juguetes, siempre que su casilla quede libre.
+  const loose = furniture.filter((f) => f.use === 'suelto');
+  for (const f of loose) {
+    const i = at(Math.floor(f.x), Math.floor(f.z));
+    if (!isSolid(grid[i])) props.push({ type: 'mueble', model: f.model, q: f.q, x: f.x, z: f.z });
+  }
+
   return {
     cols,
     rows,
     seed: config.seed,
-    theme: config.theme ?? null, // zona de la casa (null = según la semilla)
+    theme, // zona de la casa (null = según la semilla)
+    furniture: furniture.filter((f) => f.use !== 'suelto'), // muebles fijos y adornos (en casillas, con decimales)
     // Borde: con paredes de bloques solo en algunos mapas; en el resto, línea roja (ver ArenaBuilder).
-    walled: createRandom(hashSeed(config.seed, 0xb0de)).next() < config.wallChance,
+    walled: !config.rooms && createRandom(hashSeed(config.seed, 0xb0de)).next() < config.wallChance,
     chunkSize,
     grid,
     chunks,
@@ -144,6 +163,58 @@ function fillChunk(grid, cols, bounds, density, random) {
     for (const i of own) grid[i] = stamp.type ?? CELL.BLOCK;
     placed++;
   }
+}
+
+/**
+ * Coloca conjuntos de muebles de la habitación en una zona (sofá con mesita, isla de cocina, cama con mesillas...).
+ * Las casillas que pisan los muebles «pared» pasan a ser sólidas; se deja 1 casilla de paso entre conjuntos.
+ */
+function fillRoom(grid, cols, bounds, sets, density, random, out) {
+  const { c0, c1, r0, r1 } = bounds;
+  const area = (c1 - c0 + 1) * (r1 - r0 + 1);
+  const budget = area * density * random.range(0.8, 1.25); // casillas sólidas que se quieren en la zona
+  let used = 0;
+  // El conjunto principal de la habitación (sofá con mesita, isla, cama...) va primero en algunas zonas
+  const heroTries = random.next() < 0.45 ? 6 : 0;
+  for (let tries = 0; tries < 40 && used < budget; tries++) {
+    const set = tries < heroTries ? sets[0] : random.weighted(sets.slice(1));
+    const flip = random.next() < 0.5; // media vuelta al conjunto entero
+    if (set.w > c1 - c0 + 1 || set.h > r1 - r0 + 1) continue;
+    const col = random.int(c0, c1 - set.w + 2);
+    const row = random.int(r0, r1 - set.h + 2);
+    if (col + set.w - 1 > c1 || row + set.h - 1 > r1) continue;
+    const items = set.items.map(([model, x, z, q, use, y = 0]) => ({
+      model, use, y,
+      x: col + (flip ? set.w - x : x),
+      z: row + (flip ? set.h - z : z),
+      q: flip ? q + 2 : q,
+    }));
+    // Todo el conjunto (también adornos y sueltos) sobre suelo libre y sin tocar otros muebles
+    const solid = new Set(items.filter((i) => i.use === 'pared').flatMap((i) => footprint(i, cols)));
+    let free = true;
+    for (let r = row - 1; r <= row + set.h && free; r++) {
+      for (let c = col - 1; c <= col + set.w && free; c++) if (isSolid(grid[r * cols + c])) free = false;
+    }
+    if (!free || !solid.size) continue;
+    for (const i of solid) grid[i] = CELL.BLOCK;
+    out.push(...items);
+    used += solid.size;
+  }
+}
+
+/** Casillas que pisa un mueble (con un pequeño margen para no bloquear por un borde). */
+function footprint(item, cols) {
+  const size = MODEL_SIZE[item.model] ?? [0.4, 0.4, 0.4];
+  const quarter = Math.abs(item.q) % 2 === 1;
+  const w = (quarter ? size[2] : size[0]) * FURNITURE_SCALE;
+  const d = (quarter ? size[0] : size[2]) * FURNITURE_SCALE;
+  const cells = [];
+  const margin = 0.2;
+  for (let r = Math.floor(item.z - d / 2 + margin); r <= Math.floor(item.z + d / 2 - margin); r++) {
+    for (let c = Math.floor(item.x - w / 2 + margin); c <= Math.floor(item.x + w / 2 - margin); c++) cells.push(r * cols + c);
+  }
+  if (!cells.length) cells.push(Math.floor(item.z) * cols + Math.floor(item.x));
+  return cells;
 }
 
 /** Gira una pieza 90° `turns` veces y la vuelve a apoyar en (0, 0). */

@@ -12,9 +12,12 @@ import { TOY_BASES, TOYS } from './content/toys.js';
 import { loadIaModels } from './entities/IaFigure.js';
 import { loadFurniture } from './render/furniture.js';
 import { FURNITURE_NAMES } from './arena/themes.js';
+import { ROOM_MODELS } from './arena/generation/rooms.js';
+
+const WALL_MODELS = ['wall', 'wallWindow', 'wallWindowSlide', 'fence_planks', 'tree_oak', 'tree_default'];
 
 // Muñecos 3D animados, muebles de cada zona y suelos ilustrados; lo que falte se dibuja por código.
-await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture(FURNITURE_NAMES), loadIaModels(Object.keys(TOYS))]);
+await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture([...FURNITURE_NAMES, ...ROOM_MODELS, ...WALL_MODELS]), loadIaModels(Object.keys(TOYS))]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);

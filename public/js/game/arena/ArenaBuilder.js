@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CELL } from './generation/cells.js';
 import { THEMES, THEME_IDS, FURNITURE, floorTexture, buildProp, buildDecor } from './themes.js';
 import { hasFurniture, placeFurniture } from '../render/furniture.js';
+import { FURNITURE_SCALE, MODEL_SIZE } from './generation/rooms.js';
 import { toonMaterial, instancedOutline } from '../render/toon.js';
 import { ART } from '../render/art.js';
 
@@ -20,6 +21,47 @@ const STUDS = [[-0.24, -0.24], [0.24, -0.24], [-0.24, 0.24], [0.24, 0.24]];
  *
  * @returns arena con spawnPoints (mundo), bounds, layout, stats, sync() y dispose()
  */
+/**
+ * Paredes de la habitación al borde del suelo (fondo y lados, con ventanas) y algunos muebles de la zona
+ * apoyados en la pared del fondo. En el patio, una valla con árboles detrás.
+ */
+function buildRoomWalls(themeId, width, depth, decorList) {
+  const group = new THREE.Group();
+  const patio = themeId === 'patio';
+  const segment = FURNITURE_SCALE; // las piezas de pared miden 1 de ancho
+  const back = -depth / 2;
+  const side = width / 2;
+  const add = (name, x, z, rotation, scale = FURNITURE_SCALE) => {
+    const piece = placeFurniture(name, { x, z, scale, rotation });
+    if (piece) group.add(piece);
+  };
+  const along = (length) => {
+    const n = Math.ceil(length / segment);
+    return Array.from({ length: n }, (_, i) => -((n - 1) * segment) / 2 + i * segment);
+  };
+  along(width).forEach((x, i) => add(patio ? 'fence_planks' : (i % 3 === 1 ? 'wallWindow' : 'wall'), x, back, 0));
+  for (const s of [-1, 1]) {
+    along(depth).forEach((z, i) => add(patio ? 'fence_planks' : (i % 3 === 1 ? 'wallWindowSlide' : 'wall'), s * side, z, s * Math.PI / 2));
+  }
+  if (patio) {
+    along(width).forEach((x, i) => add(i % 2 ? 'tree_oak' : 'tree_default', x, back - 1.6, 0));
+  } else {
+    // Muebles contra la pared del fondo: [modelo, x en fracción del ancho]
+    for (const [name, fx] of decorList) add(name, fx * width * 0.9, back + 0.9, 0);
+  }
+  return group;
+}
+
+/** Mueble suelto que se empuja: el modelo centrado en su caja física (que es la que se mueve y gira). */
+function buildLooseFurniture(prop) {
+  const [w, h, d] = (MODEL_SIZE[prop.model] ?? [0.3, 0.3, 0.3]).map((v) => v * FURNITURE_SCALE);
+  const model = placeFurniture(prop.model, { x: 0, z: 0, y: -h / 2, scale: FURNITURE_SCALE, rotation: (prop.q * Math.PI) / 2 });
+  const object = new THREE.Group();
+  if (model) object.add(model);
+  const quarter = Math.abs(prop.q) % 2 === 1;
+  return { object, shape: { box: [(quarter ? d : w) / 2, h / 2, (quarter ? w : d) / 2] } };
+}
+
 export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}) {
   const { cols, rows, grid } = layout;
   const originX = -cols / 2;
@@ -41,8 +83,12 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   const drawnFloor = ART.floors[themeId];
   const floorMap = own(drawnFloor ? drawnFloor.clone() : floorTexture(theme));
   const tile = drawnFloor ? 6 : 4; // casillas que ocupa cada repetición de la textura
-  floorMap.repeat.set(cols / tile, rows / tile);
-  const floor = new THREE.Mesh(own(new THREE.PlaneGeometry(cols, rows)), own(toonMaterial(0xffffff, floorMap)));
+  // Con habitación, el suelo llega hasta las paredes (la línea roja marca la zona de juego)
+  const rooms = Boolean(layout.furniture);
+  const floorW = rooms ? cols + OUTER_MARGIN * 2 + 1 : cols;
+  const floorD = rooms ? rows + OUTER_MARGIN * 2 + 1 : rows;
+  floorMap.repeat.set(floorW / tile, floorD / tile);
+  const floor = new THREE.Mesh(own(new THREE.PlaneGeometry(floorW, floorD)), own(toonMaterial(0xffffff, floorMap)));
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   const table = new THREE.Mesh(own(new THREE.PlaneGeometry(cols * 4, rows * 4)), own(toonMaterial(theme.outside)));
@@ -119,6 +165,17 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   // Muebles de la zona (si están cargados): uno por casilla, elegido según la casilla (siempre el mismo).
   const furniture = FURNITURE[themeId];
   const useFurniture = furniture && [...furniture.blocks, ...furniture.pillars].every(hasFurniture);
+  if (rooms) {
+    // Habitación: los muebles colocados por el generador; las casillas sólidas solo tienen física
+    for (const f of layout.furniture) {
+      const item = placeFurniture(f.model, {
+        x: originX + f.x, z: originZ + f.z, y: f.y, scale: FURNITURE_SCALE, rotation: (f.q * Math.PI) / 2,
+      });
+      if (item) root.add(item);
+    }
+    stats.blocks = batches.reduce((n, b) => n + b.blocks.length, 0);
+    for (const batch of batches) { batch.blocks.length = 0; batch.studs.length = 0; }
+  }
   const pick = (list, x, z) => list[Math.abs(Math.floor(x * 7.3 + z * 13.7 + layout.seed)) % list.length];
   for (const { blocks, studs, pillars, caps } of batches) {
     const group = new THREE.Group();
@@ -137,9 +194,10 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   }
 
   // Juguetes y objetos sueltos de la zona (dados, naranjas, patitos...): se pueden empujar y ruedan.
+  // Con habitación, también los muebles sueltos (sillas, cajas, papelera...).
   const props = layout.props.map((prop, index) => {
-    const { object: mesh, shape } = buildProp(theme, prop.color + index);
-    const { x, z } = toWorld(prop);
+    const { object: mesh, shape } = prop.type === 'mueble' ? buildLooseFurniture(prop) : buildProp(theme, prop.color + index);
+    const { x, z } = prop.type === 'mueble' ? { x: originX + prop.x, z: originZ + prop.z } : toWorld(prop);
     root.add(mesh);
     const radius = shape.sphere ?? shape.box[1];
     const body = physics.createPropBody(shape, x, radius, z);
@@ -171,7 +229,9 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   }
   // Decorado al fondo, fuera de la zona de juego (sofá, muebles de cocina, valla, cama, bañera...).
   let decor;
-  if (useFurniture && furniture.decor.every(([name]) => hasFurniture(name))) {
+  if (rooms) {
+    decor = buildRoomWalls(themeId, floorW, floorD, furniture?.decor ?? []);
+  } else if (useFurniture && furniture.decor.every(([name]) => hasFurniture(name))) {
     decor = new THREE.Group();
     // [modelo, x en fracción del ancho, tamaño, giro]: muebles de casa de verdad, gigantes para los juguetes
     for (const [name, fx, size, rotation] of furniture.decor) {
@@ -180,7 +240,7 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   } else {
     decor = buildDecor(theme, cols);
   }
-  decor.position.z = originZ - (layout.walled ? 1.6 : OUTER_MARGIN + 1.5);
+  if (!rooms) decor.position.z = originZ - (layout.walled ? 1.6 : OUTER_MARGIN + 1.5);
   root.add(decor);
   stage.setMood(theme);
 

@@ -49,7 +49,7 @@ export const hasFurniture = (name) => Boolean(MODELS[name]);
  * Copia de un modelo encajada en una huella (ancho × fondo) y con un alto máximo, apoyada en el suelo
  * y centrada en (x, z). `grow` permite agrandarlo hasta llenar la huella.
  */
-export function placeFurniture(name, { x, z, footprint = 0.96, maxHeight = 1.5, minHeight = 0, fill = false, rotation = 0 }) {
+export function placeFurniture(name, { x, z, y = 0, footprint = 0.96, maxHeight = 1.5, minHeight = 0, fill = false, rotation = 0, scale = null }) {
   const model = MODELS[name];
   if (!model) return null;
   const { size, box } = model;
@@ -64,7 +64,9 @@ export function placeFurniture(name, { x, z, footprint = 0.96, maxHeight = 1.5, 
   const d = quarter ? size.x : size.z;
   const pivot = new THREE.Group();
   pivot.add(turned);
-  if (fill) {
+  if (scale) {
+    pivot.scale.setScalar(scale); // escala fija (casa de muñecas): conserva las proporciones
+  } else if (fill) {
     // Ocupa la casilla entera (es una pared): estira a lo ancho y fondo, y el alto entre min y max.
     const sx = footprint / w;
     const sz = footprint / d;
@@ -73,6 +75,6 @@ export function placeFurniture(name, { x, z, footprint = 0.96, maxHeight = 1.5, 
   } else {
     pivot.scale.setScalar(Math.min(footprint / w, footprint / d, maxHeight / size.y));
   }
-  pivot.position.set(x, 0, z);
+  pivot.position.set(x, y, z);
   return pivot;
 }

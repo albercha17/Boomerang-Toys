@@ -5,9 +5,9 @@
  *   /?ancho=30&alto=16&densidad=0.2&simetria=no
  */
 export const ARENA_PRESETS = Object.freeze({
-  pequena: { cols: 24, rows: 14, density: 0.13 },
-  mediana: { cols: 32, rows: 18, density: 0.14 },
-  grande: { cols: 40, rows: 24, density: 0.15 },
+  pequena: { cols: 22, rows: 13, density: 0.2 },
+  mediana: { cols: 28, rows: 16, density: 0.2 },
+  grande: { cols: 38, rows: 22, density: 0.2 },
 });
 
 export const ARENA_LIMITS = Object.freeze({
@@ -18,7 +18,8 @@ export const ARENA_LIMITS = Object.freeze({
 
 const DEFAULTS = Object.freeze({
   preset: 'mediana',
-  chunkSize: 8, // tamaño de cada zona de generación
+  chunkSize: 7, // tamaño de cada zona de generación
+  rooms: true, // muebles de la habitación en conjuntos (sofá con mesita, isla de cocina...); /?habitacion=no = bloques
   symmetry: 'mirror-x', // 'mirror-x' (izquierda = derecha) o 'none'
   spawnCount: 8,
   propDensity: 0.02, // juguetes sueltos por casilla libre
@@ -47,6 +48,7 @@ export function readArenaConfig(search = '') {
     rows: Math.round(clamp(number('alto', preset.rows), ARENA_LIMITS.rows)),
     density: clamp(number('densidad', preset.density), ARENA_LIMITS.density),
     symmetry: params.get('simetria') === 'no' ? 'none' : DEFAULTS.symmetry,
+    rooms: params.get('habitacion') !== 'no',
     // Zona de la casa: /?zona=cocina (salon, cocina, patio, dormitorio, bano); si no, una al azar por mapa.
     theme: ['salon', 'cocina', 'patio', 'dormitorio', 'bano'].includes(params.get('zona')) ? params.get('zona') : null,
     wallChance: params.has('paredes') ? (params.get('paredes') === 'si' ? 1 : 0) : DEFAULTS.wallChance,
