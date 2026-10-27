@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
 /**
- * Arte dibujado (generado con ChatGPT, ver herramientas/chatgpt_arte.py): ilustraciones de personajes
- * y texturas de suelo. Se cargan antes de empezar; lo que no exista se sustituye por el dibujo por código.
+ * Arte dibujado (generado con ChatGPT, ver herramientas/chatgpt_arte.py): suelos de cada zona y texturas.
+ * Se cargan antes de empezar; lo que no exista se sustituye por el dibujo por código.
  */
-export const ART = { characters: {}, floors: {}, textures: {} };
+export const ART = { floors: {}, textures: {} };
 
 const loader = new THREE.TextureLoader();
 
@@ -25,10 +25,9 @@ export async function loadArt() {
     const res = await fetch('/art/manifest.json', { cache: 'no-cache' });
     if (res.ok) manifest = await res.json();
   } catch { /* sin arte: todo dibujado por código */ }
-  manifest = { characters: [], floors: [], textures: [], ...manifest };
+  manifest = { floors: [], textures: [], ...manifest };
   await Promise.all([
     ...manifest.textures.map(async (id) => { ART.textures[id] = await load(`/art/texturas/${id}.jpg`); }),
-    ...manifest.characters.map(async (id) => { ART.characters[id] = await load(`/art/personajes/${id}.png`); }),
     ...manifest.floors.map(async (id) => {
       const t = await load(`/art/suelos/${id}.jpg`);
       if (t) t.wrapS = t.wrapT = THREE.RepeatWrapping;

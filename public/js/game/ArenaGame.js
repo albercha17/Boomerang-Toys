@@ -288,6 +288,7 @@ export class ArenaGame {
   throwWeapon(character, charge, now) {
     const weapon = character.weapon;
     weapon.throw(charge);
+    character.figure.throw?.();
     character.thrownWeapon = weapon;
     if (!character.hasAbility('multi')) return;
     const { extra, spread } = POWERUPS.multi;
@@ -434,6 +435,7 @@ export class ArenaGame {
     const fx = Math.cos(attacker.facing);
     const fz = Math.sin(attacker.facing);
     this.effects.slash(attacker.x, attacker.z, attacker.facing, def.meleeRange, attacker.color);
+    attacker.figure.strike?.();
 
     for (const other of this.targets()) {
       if (other === attacker || other.owner === attacker || !other.alive) continue;

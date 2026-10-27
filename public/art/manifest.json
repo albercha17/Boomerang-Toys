@@ -1,15 +1,4 @@
 {
-  "characters": [
-    "bichito",
-    "caballero",
-    "heroe",
-    "muneca",
-    "osito",
-    "peon",
-    "ranger",
-    "robot",
-    "soldado"
-  ],
   "floors": [
     "cocina"
   ],

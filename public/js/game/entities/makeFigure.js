@@ -1,9 +1,10 @@
-import { ART } from '../render/art.js';
-import { SpriteFigure } from './SpriteFigure.js';
+import { MODELS } from '../render/models.js';
+import { TOYS } from '../content/toys.js';
+import { BlockyFigure } from './BlockyFigure.js';
 import { ToyFigure } from './ToyFigure.js';
 
-/** Figura de un personaje: la ilustración de ChatGPT si está generada; si no, el muñeco hecho por código. */
+/** Figura de un personaje: el muñeco 3D animado si su modelo está cargado; si no, el hecho por código. */
 export function makeFigure(figureId, ringColor, scale = 1) {
-  const texture = ART.characters[figureId];
-  return texture ? new SpriteFigure(texture, ringColor, scale) : new ToyFigure(figureId, ringColor, scale);
+  const look = TOYS[figureId];
+  return look && MODELS[look.base] ? new BlockyFigure(look, ringColor, scale) : new ToyFigure(figureId, ringColor, scale);
 }
