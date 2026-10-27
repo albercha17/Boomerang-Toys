@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CELL } from './generation/cells.js';
-import { THEMES, THEME_IDS, floorTexture, buildProp, buildDecor } from './themes.js';
+import { THEMES, THEME_IDS, FURNITURE, floorTexture, buildProp, buildDecor } from './themes.js';
+import { hasFurniture, placeFurniture } from '../render/furniture.js';
 import { toonMaterial, instancedOutline } from '../render/toon.js';
 import { ART } from '../render/art.js';
 
@@ -115,12 +116,21 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
     }
     if (blocks.length + pillars.length > before) stats.chunks++;
   }
+  // Muebles de la zona (si están cargados): uno por casilla, elegido según la casilla (siempre el mismo).
+  const furniture = FURNITURE[themeId];
+  const useFurniture = furniture && [...furniture.blocks, ...furniture.pillars].every(hasFurniture);
+  const pick = (list, x, z) => list[Math.abs(Math.floor(x * 7.3 + z * 13.7 + layout.seed)) % list.length];
   for (const { blocks, studs, pillars, caps } of batches) {
     const group = new THREE.Group();
-    addInstanced(group, blockGeometry, blockMaterial, blocks);
-    addInstanced(group, studGeometry, instanced, studs, false);
-    addInstanced(group, pillarGeometry, wood, pillars);
-    addInstanced(group, capGeometry, instanced, caps);
+    if (useFurniture) {
+      for (const { x, z } of blocks) group.add(placeFurniture(pick(furniture.blocks, x, z), { x, z, footprint: 0.98, minHeight: 0.95, maxHeight: 1.4, fill: true }));
+      for (const { x, z } of pillars) group.add(placeFurniture(pick(furniture.pillars, x, z), { x, z, footprint: 0.85, maxHeight: 2.1 }));
+    } else {
+      addInstanced(group, blockGeometry, blockMaterial, blocks);
+      addInstanced(group, studGeometry, instanced, studs, false);
+      addInstanced(group, pillarGeometry, wood, pillars);
+      addInstanced(group, capGeometry, instanced, caps);
+    }
     root.add(group);
     stats.blocks += blocks.length;
     stats.pillars += pillars.length;
@@ -160,7 +170,16 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
     for (const [x, z, hx, hz] of outer) bodies.push(physics.addWall(x, 1, z, hx, 1, hz));
   }
   // Decorado al fondo, fuera de la zona de juego (sofá, muebles de cocina, valla, cama, bañera...).
-  const decor = buildDecor(theme, cols);
+  let decor;
+  if (useFurniture && furniture.decor.every(([name]) => hasFurniture(name))) {
+    decor = new THREE.Group();
+    // [modelo, x en fracción del ancho, tamaño, giro]: muebles de casa de verdad, gigantes para los juguetes
+    for (const [name, fx, size, rotation] of furniture.decor) {
+      decor.add(placeFurniture(name, { x: fx * cols, z: 0, footprint: Infinity, maxHeight: size * 0.6, rotation }));
+    }
+  } else {
+    decor = buildDecor(theme, cols);
+  }
   decor.position.z = originZ - (layout.walled ? 1.6 : OUTER_MARGIN + 1.5);
   root.add(decor);
   stage.setMood(theme);
@@ -200,7 +219,7 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
       stage.scene.remove(root);
       root.traverse((object) => {
         if (object.isInstancedMesh) object.dispose();
-        else if (object.isMesh) {
+        else if (object.isMesh && !object.userData.shared) {
           // Juguetes y decorado: geometría y material propios (el material de contorno es compartido).
           object.geometry.dispose();
           if (!object.userData.isOutline) object.material.dispose();

@@ -2,13 +2,14 @@ import * as THREE from 'three';
 import { loadModels } from '../render/models.js';
 import { TOY_BASES } from '../content/toys.js';
 import { makeFigure } from '../entities/makeFigure.js';
+import { loadIaModels } from '../entities/IaFigure.js';
 
 /**
  * Retratos de los personajes (para la pantalla de elección del móvil), con los mismos muñecos 3D que en la
  * partida. Devuelve { id: imagen PNG en dataURL }.
  */
 export async function renderPortraits(ids, size = 192) {
-  await loadModels(TOY_BASES);
+  await Promise.all([loadModels(TOY_BASES), loadIaModels(ids)]);
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1);
   renderer.setSize(size, size);

@@ -8,10 +8,13 @@ import { MatchOverlay } from './ui/MatchOverlay.js';
 import { readArenaConfig } from './arena/presets.js';
 import { loadArt } from './render/art.js';
 import { loadModels } from './render/models.js';
-import { TOY_BASES } from './content/toys.js';
+import { TOY_BASES, TOYS } from './content/toys.js';
+import { loadIaModels } from './entities/IaFigure.js';
+import { loadFurniture } from './render/furniture.js';
+import { FURNITURE_NAMES } from './arena/themes.js';
 
-// Muñecos 3D animados y suelos ilustrados; lo que falte se dibuja por código.
-await Promise.all([loadArt(), loadModels(TOY_BASES)]);
+// Muñecos 3D animados, muebles de cada zona y suelos ilustrados; lo que falte se dibuja por código.
+await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture(FURNITURE_NAMES), loadIaModels(Object.keys(TOYS))]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);

@@ -286,6 +286,41 @@ export const THEMES = Object.freeze({
 
 export const THEME_IDS = Object.keys(THEMES);
 
+/**
+ * Muebles 3D de cada zona (render/furniture.js). blocks: uno por casilla de obstáculo; pillars: en las columnas;
+ * decor: [modelo, posición x (fracción del ancho), escala, giro] al fondo, a tamaño de casa real (gigante para
+ * un juguete). Si no cargan, se usan los bloques de construcción.
+ */
+export const FURNITURE = {
+  salon: {
+    blocks: ['bookcaseClosed', 'sideTableDrawers', 'cabinetTelevision', 'loungeChair', 'speaker', 'cardboardBoxClosed', 'bookcaseClosedWide'],
+    pillars: ['lampRoundFloor', 'pottedPlant', 'lampSquareFloor'],
+    decor: [['loungeSofa', -0.18, 5.5, 0], ['tableCoffee', 0.12, 4, 0], ['televisionModern', 0.36, 5, 0], ['pottedPlant', 0.47, 5, 0], ['lampSquareFloor', -0.46, 5, 0]],
+  },
+  cocina: {
+    blocks: ['kitchenCabinet', 'kitchenCabinetDrawer', 'kitchenStove', 'kitchenSink', 'kitchenFridge', 'kitchenCabinet', 'kitchenCabinetDrawer'],
+    pillars: ['stoolBar', 'trashcan', 'pottedPlant'],
+    decor: [['kitchenFridgeLarge', -0.45, 4.5, 0], ['kitchenCabinet', -0.3, 4.5, 0], ['kitchenStove', -0.16, 4.5, 0], ['kitchenSink', -0.02, 4.5, 0], ['kitchenCabinetDrawer', 0.12, 4.5, 0], ['tableRound', 0.34, 4, 0], ['chair', 0.47, 4, 0]],
+  },
+  patio: {
+    blocks: ['plant_bushLarge', 'plant_bushDetailed', 'plant_bush', 'log_stack', 'plant_bushLarge', 'stump_squareDetailed'],
+    pillars: ['tree_default', 'tree_oak', 'tree_cone', 'stump_round'],
+    decor: [['tree_oak', -0.42, 4, 0], ['plant_bushLarge', -0.25, 3.5, 0], ['tree_default', -0.05, 4.5, 0], ['plant_bushDetailed', 0.15, 3.5, 0], ['tree_cone', 0.32, 4, 0], ['tree_oak', 0.48, 4, 0]],
+  },
+  dormitorio: {
+    blocks: ['cabinetBedDrawer', 'cabinetBedDrawerTable', 'cardboardBoxClosed', 'cardboardBoxOpen', 'sideTableDrawers', 'bookcaseClosed'],
+    pillars: ['lampRoundFloor', 'pottedPlant', 'coatRackStanding'],
+    decor: [['bedSingle', -0.25, 4.5, 0], ['cabinetBedDrawerTable', -0.03, 4.5, 0], ['desk', 0.18, 4.5, 0], ['chairDesk', 0.18, 4.5, Math.PI], ['bookcaseOpen', 0.42, 4.5, 0], ['bear', -0.45, 6, 0]],
+  },
+  bano: {
+    blocks: ['bathroomCabinetDrawer', 'bathroomCabinet', 'washer', 'dryer', 'toilet', 'bathroomSink', 'washerDryerStacked'],
+    pillars: ['pottedPlant', 'trashcan', 'coatRackStanding'],
+    decor: [['bathtub', -0.22, 4.5, 0], ['showerRound', 0.05, 4, 0], ['bathroomSink', 0.24, 4.5, 0], ['toilet', 0.38, 4.5, 0], ['washerDryerStacked', 0.48, 4, 0]],
+  },
+};
+
+export const FURNITURE_NAMES = Object.values(FURNITURE).flatMap((f) => [...f.blocks, ...f.pillars, ...f.decor.map((d) => d[0])]);
+
 export function floorTexture(theme) {
   return canvasTexture(512, theme.floor);
 }
