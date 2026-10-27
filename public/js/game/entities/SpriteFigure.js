@@ -25,7 +25,7 @@ export class SpriteFigure {
     this.scale = scale;
     this.group = new THREE.Group();
     const aspect = texture.image.width / texture.image.height;
-    const height = 1.32 * scale;
+    const height = 1.6 * scale; // algo más grande que el muñeco 3D: desde la cámara alta se lee mejor
     const width = height * aspect;
     this.size = { width, height };
 

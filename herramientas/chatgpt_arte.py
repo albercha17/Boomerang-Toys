@@ -99,6 +99,52 @@ def escribir_manifiesto():
     (ARTE / "manifest.json").write_text(json.dumps(datos, indent=2) + "\n", encoding="utf-8")
 
 
+CAJA = "div[contenteditable='true'][role='textbox'], #prompt-textarea"
+JS_PULSAR_ENVIAR = """
+const caja = document.querySelector("#prompt-textarea, div[contenteditable='true'][role='textbox']");
+const form = caja && caja.closest('form');
+const botones = [...(form || document).querySelectorAll('button')].filter((b) => b.offsetParent && !b.disabled);
+const enviar = botones.find((b) => /send|enviar/i.test((b.getAttribute('aria-label') || '') + (b.dataset.testid || '') + b.id))
+  || botones[botones.length - 1];
+if (enviar) { enviar.click(); return true; }
+return false;
+"""
+
+
+def enviado(chat, espera=12):
+    """El mensaje salió si ChatGPT abrió conversación (/c/...) y la caja de texto quedó vacía."""
+    fin = time.time() + espera
+    while time.time() < fin:
+        time.sleep(1)
+        caja = chat.d.execute_script(f"const c = document.querySelector(\"{CAJA}\"); return c ? c.innerText.trim() : '';")
+        if "/c/" in chat.d.current_url and not caja:
+            return True
+    return False
+
+
+def pedir(chat, texto):
+    """Chat nuevo, escribe y envía; comprueba que se ha enviado y reintenta si la web no respondió al clic."""
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.common.keys import Keys
+    for _ in range(3):
+        chat.nuevo_chat()  # cada imagen en su chat: que no se contagien estilos ni personajes
+        time.sleep(3)  # la caja de texto tarda en estar lista tras abrir chat
+        chat.enviar(texto)
+        if enviado(chat):
+            return True
+        # Texto escrito pero sin enviar: pulsa el botón de enviar y, si no, Intro.
+        chat.d.execute_script(JS_PULSAR_ENVIAR)
+        if enviado(chat):
+            return True
+        try:
+            chat.d.find_element(By.CSS_SELECTOR, CAJA).send_keys(Keys.ENTER)
+        except Exception:  # noqa: BLE001
+            pass
+        if enviado(chat):
+            return True
+    return False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--solo", nargs="*")
@@ -126,10 +172,16 @@ def main():
     BRUTO.mkdir(exist_ok=True)
     chat = Chat(9222)
     for n, (clave, _, prompt) in enumerate(pend, 1):
-        chat.nuevo_chat()  # cada imagen en su chat: que no se contagien estilos ni personajes
         print(f"[{n}/{len(pend)}] {clave}", flush=True)
-        chat.enviar(" ".join(prompt.split()))
-        src = chat.esperar_imagen()
+        src = None
+        for intento in range(2):  # si no sale, otra vez en un chat nuevo
+            if not pedir(chat, " ".join(prompt.split())):
+                print("  x ChatGPT no aceptó el mensaje", flush=True)
+                continue
+            src = chat.esperar_imagen()
+            if src or chat.hay_limite():
+                break
+            print(f"  ... no salió imagen (intento {intento + 1})", flush=True)
         if not src:
             if chat.hay_limite():
                 print("LIMITE: ChatGPT indica límite de imágenes. Relanza más tarde.", flush=True)
