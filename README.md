@@ -28,12 +28,30 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 
 ### La partida
 
-1. **Sala de pruebas.** Al abrir la pantalla, los jugadores que se conectan aparecen en un mapa aleatorio con **vidas infinitas** para practicar. Aquí se puede cambiar de mapa y añadir o quitar el bot.
-2. **«▶ Empezar partida»** (o la tecla **Intro**), cuando haya al menos 2 jugadores (vale el bot).
+1. **Sala de pruebas.** Al abrir la pantalla, los jugadores que se conectan aparecen en un mapa aleatorio con **vidas infinitas** para practicar (sin ventanas encima: solo una etiqueta arriba). Aquí se puede cambiar de mapa y añadir o quitar el bot.
+2. **«▶ Empezar»** en la barra superior (o la tecla **Intro**), cuando haya al menos 2 jugadores (vale el bot).
 3. Cada ronda empieza con una **cuenta atrás** (3, 2, 1) en un **mapa nuevo**, con todos quietos. En la ronda **no se reaparece**: quien cae queda eliminado (su móvil muestra **ELIMINADO · espera a la siguiente ronda**).
 4. **El último que queda vivo gana un punto.** Si caen todos a la vez, es empate y nadie suma. Se muestra el marcador y empieza la siguiente ronda en otro mapa.
 5. **Quien llega a 10 puntos gana la partida.** Pantalla de victoria y **«Volver a la sala»** para jugar otra, sin reiniciar nada.
 6. **Pausa** con el botón de la barra o la tecla **P** (o Esc): todo se congela; desde ahí se puede continuar o terminar la partida.
+
+### Power-ups
+
+Cada pocos segundos aparece una **caja sorpresa** en el mapa (hasta 3 a la vez). Quien pasa por encima gana su habilidad. Se pueden llevar **3 habilidades** a la vez: al coger una cuarta se pierde la más antigua. Se pierden al morir y al cambiar de mapa. Los iconos de las habilidades se ven bajo el nombre de cada muñeco.
+
+| Caja | Habilidad |
+|---|---|
+| 👟 Zapatillas | Corres un 35 % más rápido |
+| 🛡️ Escudo | Aguanta un golpe (se ve una burbuja verde) |
+| 🔶 Búmerang gigante | Tu búmerang es casi el doble de grande y acierta más fácil |
+| 🎯 Teledirigido | En la ida, tu búmerang tuerce hacia el rival que tenga delante |
+| 🔁 Súper rebote | Tu búmerang va más rápido, frena menos y rebota 3 veces más |
+| 💨 Turbo | Dash más rápido y con mucha menos recarga |
+
+### Búmerangs, rebotes y cuchillada
+
+- El búmerang **rebota** en paredes, torres y juguetes (y los empuja): en la ida aguanta 3 rebotes antes de volver, perdiendo un poco de fuerza en cada uno. Se pueden hacer tiros de rebote para pillar a alguien detrás de un bloque.
+- **Cuchillada con embestida** (como el cuchillo del COD): si hay un rival a menos de ~2,6 casillas y sin pared en medio, la cuchillada te lanza hacia él y le da, aunque estés mirando a otro lado. Si no hay nadie cerca, golpea delante.
 
 Quien conecta su móvil con una ronda empezada espera a la siguiente. Los puntos se ven en la barra superior (`J1 · 3`). Para partidas cortas: `/?puntos=3` (de 1 a 50).
 
@@ -68,9 +86,9 @@ El mando funciona como en Brawl Stars (mejor con el móvil en horizontal):
 | Joystick izquierdo | Moverse |
 | Joystick derecho (**LANZAR**): arrastrar | Apuntar y cargar el lanzamiento. Mientras apuntas avanzas muy despacio y una flecha en el suelo marca la dirección |
 | Joystick derecho: soltar | Lanzar hacia donde apuntabas. Cuanto más tiempo cargues, más lejos llega |
-| Joystick derecho: **toque** sin arrastrar | Cuchillada cuerpo a cuerpo |
+| Joystick derecho: **toque** sin arrastrar | Cuchillada; si hay un rival cerca, te lanza hacia él |
 | Joystick derecho: mantener sin arrastrar | Lanzar hacia donde mira el muñeco |
-| Botón **DASH** | Saltito rápido hacia donde te mueves (o hacia delante). Se recarga en 0,7 s |
+| Botón **DASH** (entre los dos joysticks) | Saltito rápido hacia donde te mueves (o hacia delante). Se recarga en 0,7 s |
 
 - El búmerang sale, frena, vuelve hacia ti y rebota en los bloques. Recógelo pasando por encima cuando vuelve.
 - Cualquier búmerang en vuelo (o un golpe) elimina al instante: el muñeco se desmonta en cabeza, torso, brazos y piernas, que saltan, ruedan, pueden quedar encima de los bloques y se pueden empujar.
@@ -107,13 +125,14 @@ public/js/game/GameNetwork.js  Conexión de la pantalla
 public/js/game/PlayerStore.js  Copia local de jugadores y entradas
 public/js/game/render/         Stage (cámara, luces, sombras) y materiales de plástico y madera
 public/js/game/physics/        PhysicsWorld: mundo cannon-es, grupos de colisión y cuerpos
-public/js/game/content/        Catálogos de personajes y armas (aquí se añaden nuevos)
+public/js/game/content/        Catálogos de personajes, armas y power-ups (aquí se añaden nuevos)
 public/js/game/entities/       Character, ToyFigure (muñeco por piezas), Boomerang, AimIndicator
 public/js/game/effects/        DebrisSystem (piezas con física) y Effects (confeti, ondas, tajos)
 public/js/game/input/          ButtonGesture: toque / mantener / soltar
 public/js/game/arena/          presets (tamaños y límites), ArenaBuilder (3D y física de la arena)
 public/js/game/arena/generation/  Generador procedural puro: semillas, zonas, piezas, accesibilidad, apariciones
 public/js/game/bots/           BotBrain: inteligencia del bot (genera la misma entrada que un mando)
+public/js/game/powerups/       PowerUpSpawner: cajas sorpresa en el mapa y entrega de habilidades
 public/js/game/match/          Match: sala, rondas, puntos, victoria y pausa
 public/js/game/ui/             Hud (barra superior: jugadores y puntos, botones, dirección) y MatchOverlay (pantallas de la partida)
 public/controller.html         Mando móvil (también en /mando)

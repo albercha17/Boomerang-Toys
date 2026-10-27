@@ -135,10 +135,21 @@ export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}
   stats.colliders = bodies.length;
   stage.frame(cols, rows);
 
+  // Casillas libres con todo su alrededor libre (para colocar power-ups).
+  const freePoints = [];
+  for (let r = 1; r < rows - 1; r++) {
+    for (let c = 1; c < cols - 1; c++) {
+      let clear = true;
+      for (let dr = -1; dr <= 1 && clear; dr++) for (let dc = -1; dc <= 1; dc++) if (cellAt(c + dc, r + dr) !== CELL.EMPTY) { clear = false; break; }
+      if (clear) freePoints.push(toWorld({ col: c, row: r }));
+    }
+  }
+
   return {
     layout,
     stats,
     spawnPoints: layout.spawnPoints.map(toWorld),
+    freePoints,
     bounds: { minX: originX, maxX: -originX, minZ: originZ, maxZ: -originZ },
 
     /** Después del paso de física: coloca los juguetes sueltos. */

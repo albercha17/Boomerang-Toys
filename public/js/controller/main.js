@@ -89,7 +89,7 @@ const aimStick = new Joystick({
   base: document.getElementById('aim-base'),
   knob: document.getElementById('aim-knob'),
   floating: false,
-  radius: 55,
+  radius: 70, // recorrido acorde al joystick de ataque, más grande
   deadZone: 0.2,
   onChange: (x, y) => sender.setAim(x, y),
   onPress: (pressed) => {

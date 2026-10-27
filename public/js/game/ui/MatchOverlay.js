@@ -43,13 +43,9 @@ export class MatchOverlay {
     }
     switch (match.phase) {
       case PHASE.LOBBY: {
-        const ready = match.canStart();
-        return `<div class="mo-lobby">${card(`
-          <h2>Sala de pruebas</h2>
-          <p>Vidas infinitas para practicar. Gana la partida quien llegue a <b>${match.targetScore}</b> puntos;
-          cada ronda la gana el último que quede vivo.</p>
-          <button data-action="start" class="mo-primary" ${ready ? '' : 'disabled'}>▶ Empezar partida</button>
-          <p class="mo-hint">${ready ? `${players} jugadores · pulsa Intro o el botón` : 'Hacen falta al menos 2 jugadores (conecta otro móvil o añade un bot)'}</p>`, 'mo-small')}</div>`;
+        // Solo una etiqueta pequeña: la sala es para practicar y no se tapa el mapa (el botón está en la barra).
+        const hint = match.canStart() ? 'pulsa «Empezar» (o Intro) cuando estéis' : 'hacen falta 2 jugadores para empezar (vale el bot)';
+        return `<div class="mo-tag">Sala de pruebas · vidas infinitas · gana quien llegue a ${match.targetScore} · ${hint}</div>`;
       }
       case PHASE.COUNTDOWN:
         return `<div class="mo-center"><div class="mo-round">Ronda ${match.round}</div><div class="mo-count">${match.countdownValue(now)}</div></div>`;

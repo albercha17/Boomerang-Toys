@@ -7,13 +7,16 @@ export const GROUP = Object.freeze({
   CHARACTER: 4,
   WEAPON: 8,
   DEBRIS: 16,
+  PROP: 32, // juguetes sueltos (dados, pelotas)
 });
 const MASK = Object.freeze({
-  WALL: GROUP.CHARACTER | GROUP.WEAPON | GROUP.DEBRIS,
-  FLOOR: GROUP.DEBRIS,
-  CHARACTER: GROUP.WALL | GROUP.CHARACTER | GROUP.DEBRIS,
-  WEAPON: GROUP.WALL, // los búmerangs atraviesan a los personajes: el impacto se calcula aparte
-  DEBRIS: GROUP.WALL | GROUP.FLOOR | GROUP.CHARACTER | GROUP.DEBRIS,
+  WALL: GROUP.CHARACTER | GROUP.WEAPON | GROUP.DEBRIS | GROUP.PROP,
+  FLOOR: GROUP.DEBRIS | GROUP.PROP,
+  CHARACTER: GROUP.WALL | GROUP.CHARACTER | GROUP.DEBRIS | GROUP.PROP,
+  // Los búmerangs atraviesan a los personajes (el impacto se calcula aparte) y rebotan en paredes y juguetes.
+  WEAPON: GROUP.WALL | GROUP.PROP,
+  DEBRIS: GROUP.WALL | GROUP.FLOOR | GROUP.CHARACTER | GROUP.DEBRIS | GROUP.PROP,
+  PROP: GROUP.WALL | GROUP.FLOOR | GROUP.CHARACTER | GROUP.WEAPON | GROUP.DEBRIS | GROUP.PROP,
 });
 
 const FIXED_STEP = 1 / 60;
@@ -35,6 +38,7 @@ export class PhysicsWorld {
       this.world.addContactMaterial(new CANNON.ContactMaterial(a, b, { friction, restitution }));
     };
     contact(weapon, wall, 0, 1); // rebote perfecto en las paredes
+    contact(weapon, debris, 0, 0.9); // con los juguetes (usan el material de las piezas): rebota y los empuja
     contact(character, wall, 0, 0);
     contact(character, character, 0, 0);
     contact(debris, floor, 0.5, 0.35);
@@ -92,6 +96,8 @@ export class PhysicsWorld {
     const body = this.createDebrisBody(shape, { x, y, z }, { x: 0, y: 0, z: 0, w: 1 });
     body.mass = 0.9;
     body.updateMassProperties();
+    body.collisionFilterGroup = GROUP.PROP;
+    body.collisionFilterMask = MASK.PROP;
     body.kind = 'prop';
     return body;
   }
@@ -149,6 +155,13 @@ export class PhysicsWorld {
     body.linearFactor.set(1, 0, 1); // sin movimiento vertical
     body.allowSleep = false;
     return body;
+  }
+
+  /** true si no hay paredes ni torres entre dos puntos del suelo (a media altura). */
+  lineOfSight(x1, z1, x2, z2) {
+    const result = new CANNON.RaycastResult();
+    this.world.raycastClosest(new CANNON.Vec3(x1, 0.5, z1), new CANNON.Vec3(x2, 0.5, z2), { collisionFilterMask: GROUP.WALL, skipBackfaces: true }, result);
+    return !result.hasHit;
   }
 
   add(body) {

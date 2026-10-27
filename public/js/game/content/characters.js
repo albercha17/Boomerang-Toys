@@ -20,6 +20,12 @@ export const CHARACTERS = Object.freeze({
       cooldownMs: 700,
       hopHeight: 0.5, // altura del saltito (solo visual)
     }),
+    // Cuchillada con embestida: si hay un rival a este alcance (y sin pared en medio), se lanza hacia él.
+    lunge: Object.freeze({
+      range: 2.6,
+      speed: 17,
+      maxMs: 220,
+    }),
     weapon: 'boomerang',
   }),
 });

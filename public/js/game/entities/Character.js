@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ToyFigure } from './ToyFigure.js';
 import { AimIndicator } from './AimIndicator.js';
 import { ButtonGesture } from '../input/ButtonGesture.js';
+import { POWERUPS, MAX_ABILITIES } from '../content/powerups.js';
 
 const { BUTTONS } = window.Protocol;
 
@@ -11,27 +12,33 @@ function rotateTowards(current, target, maxStep) {
   return Math.abs(diff) <= maxStep ? target : current + Math.sign(diff) * maxStep;
 }
 
-/** Etiqueta "J1" flotando sobre la cabeza. */
+const SHIELD_GEOMETRY = new THREE.SphereGeometry(1, 24, 16);
+
+/** Etiqueta "J1" flotando sobre la cabeza, con los iconos de sus habilidades debajo. */
 function createTag(color) {
   const canvas = document.createElement('canvas');
-  canvas.width = 160;
-  canvas.height = 64;
+  canvas.width = 256;
+  canvas.height = 112;
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true }));
-  sprite.scale.set(1.25, 0.5, 1);
+  sprite.scale.set(2, 0.875, 1);
   sprite.renderOrder = 10;
-  sprite.draw = (text) => {
+  sprite.draw = (text, icons) => {
     const g = canvas.getContext('2d');
     g.clearRect(0, 0, canvas.width, canvas.height);
-    g.font = 'bold 40px Trebuchet MS, Arial, sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
+    g.font = 'bold 40px Trebuchet MS, Arial, sans-serif';
     g.lineWidth = 9;
     g.strokeStyle = '#2a1d14';
-    g.strokeText(text, 80, 34);
+    g.strokeText(text, 128, 34);
     g.fillStyle = color;
-    g.fillText(text, 80, 34);
+    g.fillText(text, 128, 34);
+    if (icons) {
+      g.font = '34px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+      g.fillText(icons, 128, 84);
+    }
     texture.needsUpdate = true;
   };
   return sprite;
@@ -54,7 +61,13 @@ export class Character {
     this.figure = new ToyFigure(this.color, def.scale);
     this.aim = new AimIndicator(this.color);
     this.tag = createTag(player.color);
-    game.stage.scene.add(this.figure.group, this.aim.group, this.tag);
+    // Burbuja del escudo (solo visible con esa habilidad).
+    this.shield = new THREE.Mesh(SHIELD_GEOMETRY, new THREE.MeshStandardMaterial({ color: POWERUPS.escudo.color, transparent: true, opacity: 0.25, depthWrite: false }));
+    this.shield.scale.setScalar(def.radius * 2.1);
+    this.shield.visible = false;
+    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield);
+    this.abilities = []; // ids de power-up, de la más antigua a la más nueva
+    this.lunge = null; // embestida de la cuchillada: { target, until }
 
     this.gesture = new ButtonGesture(def.tapMs);
     this.connected = true;
@@ -84,11 +97,52 @@ export class Character {
     this.connected = player.connected;
     this.label = player.label ?? `J${player.number}`;
     this.cssColor = player.color;
-    const text = `${this.label}${player.connected ? '' : ' ✕'}`;
-    if (text !== this.tagText) {
-      this.tagText = text;
-      this.tag.draw(text);
-    }
+    this.tagLabel = `${this.label}${player.connected ? '' : ' ✕'}`;
+    this.refreshTag();
+  }
+
+  refreshTag() {
+    const icons = this.abilities.map((id) => POWERUPS[id].icon).join(' ');
+    const key = `${this.tagLabel}|${icons}`;
+    if (key === this.tagText) return;
+    this.tagText = key;
+    this.tag.draw(this.tagLabel, icons);
+  }
+
+  // --- Habilidades (power-ups) ---------------------------------------------
+
+  hasAbility(id) {
+    return this.abilities.includes(id);
+  }
+
+  /** Añade una habilidad; con el máximo ya lleno se pierde la más antigua. Repetir una la renueva. */
+  addAbility(id) {
+    this.abilities = this.abilities.filter((a) => a !== id);
+    this.abilities.push(id);
+    while (this.abilities.length > MAX_ABILITIES) this.abilities.shift();
+    this.refreshTag();
+  }
+
+  removeAbility(id) {
+    this.abilities = this.abilities.filter((a) => a !== id);
+    this.refreshTag();
+  }
+
+  clearAbilities() {
+    this.abilities = [];
+    this.refreshTag();
+  }
+
+  // --- Cuchillada con embestida (como el cuchillo del COD) -----------------
+
+  /** Se lanza hacia el objetivo; ArenaGame resuelve el golpe al llegar o al acabar el tiempo. */
+  startLunge(target, now) {
+    this.lunge = { target, until: now + this.def.lunge.maxMs };
+    this.facing = Math.atan2(target.z - this.z, target.x - this.x);
+  }
+
+  isLunging() {
+    return this.lunge !== null;
   }
 
   isVulnerable(now) {
@@ -106,6 +160,14 @@ export class Character {
     const actions = { melee: false, throwCharge: null, dash: false };
     if (!this.alive) {
       this.aimedThisPress = false;
+      return actions;
+    }
+    if (this.lunge) {
+      const { target } = this.lunge;
+      this.facing = Math.atan2(target.z - this.z, target.x - this.x);
+      const speed = this.def.lunge.speed;
+      this.body.velocity.set(Math.cos(this.facing) * speed, 0, Math.sin(this.facing) * speed);
+      this.moving = 1;
       return actions;
     }
 
@@ -140,20 +202,23 @@ export class Character {
 
     // Dash: impulso corto hacia donde se mueve (o hacia donde mira), con tiempo de recarga.
     const dash = this.def.dash;
+    const turbo = this.hasAbility('turbo') ? POWERUPS.turbo : null;
     if (dashPressed && now >= this.dashReadyAt) {
       this.dashAngle = magnitude > 0.2 ? Math.atan2(my, mx) : this.facing;
       this.dashStart = now;
-      this.dashReadyAt = now + dash.cooldownMs;
+      this.dashReadyAt = now + dash.cooldownMs * (turbo ? turbo.cooldownFactor : 1);
       if (!this.charging) this.facing = this.dashAngle;
       actions.dash = true;
     }
     if (this.isDashing(now)) {
-      this.body.velocity.set(Math.cos(this.dashAngle) * dash.speed, 0, Math.sin(this.dashAngle) * dash.speed);
+      const dashSpeed = dash.speed * (turbo ? turbo.speedFactor : 1);
+      this.body.velocity.set(Math.cos(this.dashAngle) * dashSpeed, 0, Math.sin(this.dashAngle) * dashSpeed);
       this.moving = 1;
       return actions;
     }
 
-    const speed = this.def.speed * (this.charging ? this.def.aimSpeedFactor : 1);
+    const boost = this.hasAbility('zapatillas') ? POWERUPS.zapatillas.speedFactor : 1;
+    const speed = this.def.speed * boost * (this.charging ? this.def.aimSpeedFactor : 1);
     this.body.velocity.set(mx * speed, 0, my * speed);
     this.moving = this.charging ? magnitude * this.def.aimSpeedFactor : magnitude;
     return actions;
@@ -185,7 +250,9 @@ export class Character {
       const t = (now - this.dashStart) / this.def.dash.durationMs;
       group.position.y += Math.sin(Math.PI * t) * this.def.dash.hopHeight; // saltito durante el dash
     }
-    this.tag.position.set(x, 1.3 * this.def.scale + 0.3, z);
+    this.tag.position.set(x, 1.3 * this.def.scale + 0.55, z);
+    this.shield.visible = this.alive && this.hasAbility('escudo');
+    this.shield.position.set(x, this.def.radius * 1.6, z);
 
     const blinking = now < this.invulnerableUntil && Math.floor(now / 90) % 2 === 1;
     group.visible = this.alive && !blinking;
@@ -198,6 +265,8 @@ export class Character {
 
   kill(respawnAt) {
     this.alive = false;
+    this.lunge = null;
+    this.clearAbilities(); // al morir se pierden los power-ups
     this.respawnAt = respawnAt;
     this.charging = false;
     this.charge = 0;
@@ -224,7 +293,8 @@ export class Character {
   destroy() {
     this.alive = false;
     this.game.physics.remove(this.body);
-    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag);
+    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield);
+    this.shield.material.dispose();
     this.tag.material.map.dispose();
     this.tag.material.dispose();
   }

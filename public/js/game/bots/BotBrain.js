@@ -59,7 +59,7 @@ export class BotBrain {
       const dz = target.z - me.z;
       const distance = Math.hypot(dx, dz);
       const toTarget = Math.atan2(dz, dx);
-      const melee = me.weapon.def.meleeRange + target.def.radius * 0.6;
+      const melee = me.def.lunge.range * 0.85; // la cuchillada le lanza hacia el rival
 
       if (this.mode === 'idle' && now >= this.nextAttackAt) {
         if (distance < melee) {

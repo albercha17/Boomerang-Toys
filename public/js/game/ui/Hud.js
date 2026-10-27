@@ -16,6 +16,7 @@ export class Hud {
     this.botButton = document.getElementById('bot-btn');
     this.mapButton = document.getElementById('map-btn');
     this.pauseButton = document.getElementById('pause-btn');
+    this.startButton = document.getElementById('start-btn');
 
     const inLobby = () => match.phase === PHASE.LOBBY;
     const actions = {
@@ -35,6 +36,7 @@ export class Hud {
     bind(this.botButton, actions.bot);
     bind(this.mapButton, actions.map);
     bind(this.pauseButton, actions.pause);
+    bind(this.startButton, actions.start);
     window.addEventListener('keydown', (event) => {
       if (event.repeat) return;
       const key = event.key.toLowerCase();
@@ -72,6 +74,7 @@ export class Hud {
       match.phase,
       match.paused,
       game.bots.size,
+      match.canStart(),
       slots.map((s) => s && [s.player.color, s.player.connected, Boolean(s.input?.stale), match.scoreOf(s.player.id)]),
     ]);
     if (key === this.renderedKey) return;
@@ -81,6 +84,9 @@ export class Hud {
     this.mapButton.hidden = !lobby;
     this.botButton.hidden = !lobby;
     this.pauseButton.hidden = !match.inMatch;
+    this.startButton.hidden = !lobby;
+    this.startButton.disabled = !match.canStart();
+    this.startButton.title = match.canStart() ? 'Empezar la partida (tecla Intro)' : 'Hacen falta al menos 2 jugadores (conecta otro móvil o añade un bot)';
     this.pauseButton.textContent = match.paused ? '▶ Continuar' : 'Ⅱ Pausa';
     this.botButton.textContent = game.bots.size ? '− Quitar bot' : '+ Añadir bot';
     this.botButton.classList.toggle('on', game.bots.size > 0);
@@ -96,6 +102,7 @@ export class Hud {
 
     slots.forEach((slot, i) => {
       const { chip, dot, label } = this.chips[i];
+      chip.style.display = slot ? '' : 'none'; // solo los jugadores presentes: así caben los 8 junto a los botones
       chip.classList.toggle('on', Boolean(slot?.player.connected));
       chip.classList.toggle('off', Boolean(slot && !slot.player.connected));
       dot.style.background = slot ? slot.player.color : 'transparent';

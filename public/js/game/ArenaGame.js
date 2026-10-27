@@ -9,6 +9,8 @@ import { DebrisSystem } from './effects/DebrisSystem.js';
 import { CHARACTERS, DEFAULT_CHARACTER } from './content/characters.js';
 import { WEAPONS } from './content/weapons.js';
 import { BotBrain } from './bots/BotBrain.js';
+import { PowerUpSpawner } from './powerups/PowerUpSpawner.js';
+import { POWERUPS } from './content/powerups.js';
 
 const { FEEDBACK } = window.Protocol;
 
@@ -42,6 +44,7 @@ export class ArenaGame {
     // Los controla Match: en la sala se reaparece siempre; en una ronda, no. Congelado = cuenta atrás.
     this.respawnEnabled = true;
     this.frozen = false;
+    this.powerups = new PowerUpSpawner(this);
   }
 
   aliveCharacters() {
@@ -69,6 +72,8 @@ export class ArenaGame {
     for (const character of this.characters.values()) character.render(dt, now);
     for (const weapon of this.weapons) weapon.sync(dt);
     this.checkWeaponHits(now);
+    this.resolveLunges(now);
+    this.powerups.update(now);
     this.debris.sync(now);
     this.effects.update(dt);
     this.sendFeedback();
@@ -82,6 +87,7 @@ export class ArenaGame {
     this.arena.dispose();
     this.debris.clear();
     this.arena = buildArena(this.stage, this.physics, generateArena(config));
+    this.powerups.reset(now);
 
     for (const weapon of this.weapons) {
       weapon.release();
@@ -94,6 +100,8 @@ export class ArenaGame {
       placed.push(spawn);
       character.respawn(spawn.x, spawn.z, now);
       character.facing = Math.atan2(-spawn.z, -spawn.x);
+      character.lunge = null;
+      character.clearAbilities(); // cada mapa empieza sin power-ups
       character.homeWeapon.attachTo(character);
     }
   }
@@ -194,7 +202,7 @@ export class ArenaGame {
       if (weapon.state === WEAPON_STATE.HELD) continue;
       for (const character of this.characters.values()) {
         if (!character.alive) continue;
-        const reach = character.def.radius + weapon.def.radius;
+        const reach = character.def.radius + weapon.hitRadius;
         if (Math.hypot(weapon.x - character.x, weapon.z - character.z) < reach) this.onWeaponTouch(weapon, character, now);
       }
     }
@@ -212,7 +220,62 @@ export class ArenaGame {
     }
   }
 
+  /**
+   * Cuchillada. Como el cuchillo del COD: si hay un rival a alcance de embestida y sin pared en medio,
+   * el personaje se lanza hacia él y el golpe se aplica al llegar (resolveLunges); si no, golpea delante.
+   */
   melee(attacker, now) {
+    const target = this.lungeTarget(attacker);
+    if (!target) {
+      this.strike(attacker, now);
+      return;
+    }
+    const reach = attacker.weapon.def.meleeRange + target.def.radius;
+    if (Math.hypot(target.x - attacker.x, target.z - attacker.z) <= reach * 0.85) {
+      attacker.facing = Math.atan2(target.z - attacker.z, target.x - attacker.x);
+      this.strike(attacker, now);
+    } else {
+      attacker.startLunge(target, now);
+    }
+  }
+
+  /** Rival vivo más cercano dentro del alcance de la embestida y a la vista. */
+  lungeTarget(attacker) {
+    let best = null;
+    let bestDistance = attacker.def.lunge.range + 0.001;
+    for (const other of this.characters.values()) {
+      if (other === attacker || !other.alive) continue;
+      const distance = Math.hypot(other.x - attacker.x, other.z - attacker.z);
+      if (distance >= bestDistance) continue;
+      if (!this.physics.lineOfSight(attacker.x, attacker.z, other.x, other.z)) continue;
+      best = other;
+      bestDistance = distance;
+    }
+    return best;
+  }
+
+  /** Termina las embestidas: al llegar junto al objetivo, si muere o si se acaba el tiempo, golpea. */
+  resolveLunges(now) {
+    for (const attacker of this.characters.values()) {
+      const lunge = attacker.lunge;
+      if (!lunge) continue;
+      if (!attacker.alive || !attacker.weapon) {
+        attacker.lunge = null;
+        continue;
+      }
+      const { target } = lunge;
+      const reach = attacker.weapon.def.meleeRange + target.def.radius;
+      const close = Math.hypot(target.x - attacker.x, target.z - attacker.z) <= reach * 0.8;
+      if (close || !target.alive || now >= lunge.until) {
+        attacker.lunge = null;
+        attacker.body.velocity.set(0, 0, 0);
+        this.strike(attacker, now);
+      }
+    }
+  }
+
+  /** El golpe en sí: arco delante del personaje. */
+  strike(attacker, now) {
     const def = attacker.weapon.def;
     const fx = Math.cos(attacker.facing);
     const fz = Math.sin(attacker.facing);
@@ -231,6 +294,14 @@ export class ArenaGame {
 
   kill(victim, angle, now) {
     if (!victim.isVulnerable(now)) return;
+    if (victim.hasAbility('escudo')) {
+      // El escudo aguanta un golpe y se rompe; un instante de invulnerabilidad para no caer justo después.
+      victim.removeAbility('escudo');
+      victim.invulnerableUntil = now + POWERUPS.escudo.graceMs;
+      this.effects.ring(victim.x, victim.z);
+      this.effects.burst(victim.x, 0.8, victim.z, [POWERUPS.escudo.color, 0xffffff], 16, 0.7);
+      return;
+    }
     this.debris.burst(victim, angle, now); // antes de ocultar la figura: usa la posición de sus piezas
     if (victim.weapon) victim.weapon.dropAt(victim.x, victim.z, angle);
     victim.kill(now + RESPAWN_MS);
