@@ -1,6 +1,7 @@
 import { Joystick } from './Joystick.js';
 import { ActionButton } from './ActionButton.js';
 import { InputSender } from './InputSender.js';
+import { setupScreenMode } from './screenMode.js';
 
 const { ROLES, EVENTS, REASONS, FEEDBACK, BUTTONS } = window.Protocol;
 
@@ -163,16 +164,8 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-const root = document.documentElement;
-if (root.requestFullscreen) {
-  ui.fullscreen.hidden = false;
-  ui.fullscreen.addEventListener('click', async () => {
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else {
-        await root.requestFullscreen();
-        await screen.orientation?.lock?.('landscape');
-      }
-    } catch { /* el navegador puede no permitir bloquear la orientación */ }
-  });
-}
+setupScreenMode({
+  fullscreenButton: ui.fullscreen,
+  iosHint: document.getElementById('ios-hint'),
+  iosHintClose: document.getElementById('ios-hint-close'),
+});

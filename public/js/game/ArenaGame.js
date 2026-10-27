@@ -1,5 +1,7 @@
 import { PhysicsWorld } from './physics/PhysicsWorld.js';
-import { createTestArena } from './arena/TestArena.js';
+import { generateArena } from './arena/generation/ArenaGenerator.js';
+import { buildArena } from './arena/ArenaBuilder.js';
+import { withNewSeed } from './arena/presets.js';
 import { Character } from './entities/Character.js';
 import { Boomerang, WEAPON_STATE } from './entities/Boomerang.js';
 import { Effects } from './effects/Effects.js';
@@ -21,12 +23,14 @@ const BOT_COLOR = '#8d99ae';
  * La simulación corre aquí (pantalla anfitriona); el servidor aporta jugadores y entradas validadas.
  */
 export class ArenaGame {
-  constructor(store, network, stage) {
+  /** @param arenaConfig configuración de la arena (ver arena/presets.js) */
+  constructor(store, network, stage, arenaConfig) {
     this.store = store;
     this.network = network;
     this.stage = stage;
     this.physics = new PhysicsWorld();
-    this.arena = createTestArena(stage, this.physics);
+    this.arenaConfig = arenaConfig;
+    this.arena = buildArena(stage, this.physics, generateArena(arenaConfig));
     this.effects = new Effects(stage);
     this.debris = new DebrisSystem(stage, this.physics, this.effects);
     this.characters = new Map(); // idJugador (o 'bot-N') -> Character
@@ -53,12 +57,37 @@ export class ArenaGame {
 
     this.physics.step(dt);
 
+    this.arena.sync();
     for (const character of this.characters.values()) character.render(dt, now);
     for (const weapon of this.weapons) weapon.sync(dt);
     this.checkWeaponHits(now);
     this.debris.sync(now);
     this.effects.update(dt);
     this.sendFeedback();
+  }
+
+  // --- Arena -------------------------------------------------------------
+
+  /** Genera y construye otra arena; todos reaparecen en ella con su búmerang. */
+  newArena(now, config = withNewSeed(this.arenaConfig)) {
+    this.arenaConfig = config;
+    this.arena.dispose();
+    this.debris.clear();
+    this.arena = buildArena(this.stage, this.physics, generateArena(config));
+
+    for (const weapon of this.weapons) {
+      weapon.release();
+      weapon.toGround();
+      this.physics.remove(weapon.body);
+    }
+    const placed = [];
+    for (const character of this.characters.values()) {
+      const spawn = this.pickSpawn(placed);
+      placed.push(spawn);
+      character.respawn(spawn.x, spawn.z, now);
+      character.facing = Math.atan2(-spawn.z, -spawn.x);
+      character.homeWeapon.attachTo(character);
+    }
   }
 
   // --- Jugadores ---------------------------------------------------------
@@ -125,8 +154,9 @@ export class ArenaGame {
   }
 
   /** Punto de aparición más alejado de los personajes vivos. */
-  pickSpawn() {
-    const alive = [...this.characters.values()].filter((c) => c.alive);
+  /** @param occupied posiciones a evitar; por defecto, los personajes vivos */
+  pickSpawn(occupied = [...this.characters.values()].filter((c) => c.alive)) {
+    const alive = occupied;
     let best = null;
     let bestDistance = -1;
     const points = [...this.arena.spawnPoints].sort(() => Math.random() - 0.5);

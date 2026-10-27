@@ -61,4 +61,10 @@ export class DebrisSystem {
     this.physics.remove(piece.body);
     this.stage.scene.remove(piece.mesh);
   }
+
+  /** Retira todos los restos (al cambiar de arena). */
+  clear() {
+    for (const piece of this.pieces) this.removePiece(piece);
+    this.pieces = [];
+  }
 }

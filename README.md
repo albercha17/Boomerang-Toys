@@ -2,7 +2,7 @@
 
 Juego multijugador local para navegador inspirado en Boomerang Fu. El ordenador muestra la partida y cada móvil hace de mando (sin instalar nada).
 
-**Estado: Fase 2 en 3D**: movimiento, búmerangs, golpes y muñecos que se desmontan en piezas con física 3D, vistos con cámara cenital inclinada (como Boomerang Fu). Aún no hay rondas ni puntuación (Fase 4) y la arena es fija (Fase 3).
+**Estado: Fase 3**: arenas generadas por procedimiento (bloques, torres y juguetes sueltos), en 3D con cámara cenital inclinada (como Boomerang Fu), búmerangs, cuchilladas, dash, muñecos que se desmontan y un bot. Aún no hay lobby, rondas ni puntuación (Fase 4).
 
 ## Requisitos
 
@@ -30,6 +30,25 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 2. En cada móvil, abre la dirección que aparece arriba a la derecha (`http://<IP-del-ordenador>:3000/mando`).
 3. Cada jugador aparece en la arena con su color y su búmerang en la mano.
 4. Para jugar contra la máquina, pulsa **«+ Añadir bot»** en la barra superior de la pantalla (o la tecla **B**). El mismo botón lo quita. Por ahora hay un bot como máximo.
+5. **«Nuevo mapa»** (o la tecla **M**) genera otra arena al momento; todos reaparecen en ella con su búmerang. Pasando el ratón por el botón se ve la semilla del mapa actual.
+
+### Mando a pantalla completa y sin zoom
+
+- **Android (Chrome):** al primer toque el mando se pone a pantalla completa y en horizontal. Si se sale, el siguiente toque lo recupera (el botón ⛶ también la quita y la pone).
+- **iPhone (Safari):** Apple no deja que una web se ponga sola a pantalla completa. Pulsa **Compartir → Añadir a pantalla de inicio** y abre el mando desde ese icono: así ocupa toda la pantalla, sin barras. El mando muestra un aviso con estos pasos (se puede cerrar).
+- En los dos, el doble toque, el pellizco y la pulsación larga no hacen zoom ni abren menús.
+
+### Elegir la arena
+
+Desde la dirección de la pantalla del juego (todo opcional):
+
+| Parámetro | Ejemplo | Qué hace |
+|---|---|---|
+| `mapa` | `/?mapa=grande` | Tamaño predefinido: `pequena` (20×12), `mediana` (26×14, por defecto), `grande` (34×20) |
+| `ancho`, `alto` | `/?ancho=30&alto=16` | Tamaño a medida en casillas, borde incluido (ancho 12–64, alto 10–40) |
+| `densidad` | `/?densidad=0.25` | Cantidad de obstáculos (0–0,3) |
+| `semilla` | `/?semilla=42` | Repite exactamente un mapa (misma semilla = mismo mapa) |
+| `simetria` | `/?simetria=no` | Por defecto el mapa es simétrico izquierda-derecha, para que sea justo |
 
 El mando funciona como en Brawl Stars (mejor con el móvil en horizontal):
 
@@ -81,12 +100,26 @@ public/js/game/content/        Catálogos de personajes y armas (aquí se añade
 public/js/game/entities/       Character, ToyFigure (muñeco por piezas), Boomerang, AimIndicator
 public/js/game/effects/        DebrisSystem (piezas con física) y Effects (confeti, ondas, tajos)
 public/js/game/input/          ButtonGesture: toque / mantener / soltar
-public/js/game/arena/          TestArena: arena fija con bloques de construcción (la sustituirá la Fase 3)
+public/js/game/arena/          presets (tamaños y límites), ArenaBuilder (3D y física de la arena)
+public/js/game/arena/generation/  Generador procedural puro: semillas, zonas, piezas, accesibilidad, apariciones
 public/js/game/bots/           BotBrain: inteligencia del bot (genera la misma entrada que un mando)
 public/js/game/ui/             Hud: barra superior en HTML (jugadores, botón del bot, dirección)
 public/controller.html         Mando móvil (también en /mando)
-public/js/controller/          Joysticks (movimiento y ataque), botón de dash y envío de entradas
+public/manifest.webmanifest    Mando como app de pantalla completa al abrirlo desde la pantalla de inicio
+public/icons/                  Iconos del mando
+public/js/controller/          Joysticks (movimiento y ataque), botón de dash, envío de entradas, pantalla completa y bloqueo del zoom
 ```
+
+### Generación de arenas
+
+1. Se crea la rejilla con su borde y se divide en **zonas de 8×8 casillas** (chunks). Cada zona tiene su propia semilla derivada de la semilla del mapa, así que se puede generar por separado: es la base para escenarios más grandes o que se amplían.
+2. En cada zona se estampan piezas al azar (bloque, pareja, muro, ele, cuadrado, te, torre redonda), siempre con al menos una casilla libre alrededor: nunca se cierran pasillos ni se pegan al borde.
+3. Con simetría, solo se genera la mitad izquierda y se refleja.
+4. Se buscan las regiones de suelo conectadas: los huecos aislados se rellenan con bloques, así **todo el suelo libre es accesible**. Si queda poco suelo libre, se repite con otra variante.
+5. Las **apariciones** se eligen en casillas con todo su alrededor libre, lo más separadas posible entre sí; nadie aparece dentro de un obstáculo ni pegado a él.
+6. Los **juguetes sueltos** (dados y pelotas, con física: se empujan y ruedan) se colocan en el suelo libre, lejos de las apariciones.
+
+Para el rendimiento, los bloques y torres se dibujan con mallas instanciadas (una llamada de dibujo por tipo de pieza, se vea el tamaño que se vea) y las filas de bloques de cada zona comparten una sola caja física. `buildArena(..., { meshPerChunk: true })` crea mallas por zona para que la cámara descarte las que no ve en escenarios más grandes que la pantalla. Generar un mapa tarda menos de 1 ms.
 
 ### Añadir personajes y armas
 
@@ -123,12 +156,13 @@ Reglas:
 
 - La simulación del combate corre en la pantalla anfitriona, no en el servidor. Si se abren dos pantallas, cada una simula su propia partida (solo la primera avisa a los mandos). La puntuación de la Fase 4 deberá guardarse en el servidor.
 - El bot es sencillo: no planifica rutas (si se atasca contra un bloque cambia de rumbo) y no usa los rebotes a propósito.
-- Arena fija de pruebas; los puntos de aparición son fijos (la Fase 3 traerá generación procedural).
+- La cámara encuadra siempre la arena entera: en mapas muy grandes (más de unas 40×24 casillas) los muñecos se ven pequeños. Para escenarios expansivos hará falta una cámara que siga a los jugadores (la generación por zonas ya lo permite).
+- En iPhone la pantalla completa solo es posible abriendo el mando desde el icono de la pantalla de inicio (limitación de Safari). Al no haber HTTPS en la red local, en Android el mando no se puede «instalar» como app: la pantalla completa se consigue con el primer toque.
 - Reaparición automática e infinita, sin rondas ni marcador (Fase 4).
 - Un jugador desconectado sigue en la arena (quieto, con «✕» en su etiqueta) hasta que caduca su plaza a los 60 s, y se le puede eliminar.
 - El 3D necesita la tarjeta gráfica del ordenador: con aceleración por hardware va a 60 fotogramas por segundo; sin ella (por ejemplo, Chrome sin pantalla) baja a unos 25 y la partida va más lenta.
 - Los muñecos y el búmerang son provisionales, hechos con formas básicas (sin modelos 3D ni animaciones elaboradas).
 - El golpe cuerpo a cuerpo no desvía búmerangs ni atraviesa paredes con precisión: comprueba distancia y ángulo.
 - Si el mando pierde la señal mientras carga, el lanzamiento se cancela.
-- Sin HTTPS en la red local: no hay bloqueo de pantalla encendida (Wake Lock) y en iPhone no existe pantalla completa para páginas web. La vibración no funciona en iPhone.
+- Sin HTTPS en la red local no hay bloqueo de pantalla encendida (Wake Lock): si el móvil se apaga solo, súbele el tiempo de bloqueo. La vibración no funciona en iPhone.
 - Todo el estado está en memoria: reiniciar el servidor desconecta a todos (los mandos se reconectan solos como jugadores nuevos).

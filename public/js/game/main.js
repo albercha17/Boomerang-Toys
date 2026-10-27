@@ -3,11 +3,13 @@ import { GameNetwork } from './GameNetwork.js';
 import { Stage } from './render/Stage.js';
 import { ArenaGame } from './ArenaGame.js';
 import { Hud } from './ui/Hud.js';
+import { readArenaConfig } from './arena/presets.js';
 
 const store = new PlayerStore();
 const network = new GameNetwork(store);
 const stage = new Stage(document.getElementById('game'));
-const game = new ArenaGame(store, network, stage);
+// Tamaño, densidad y semilla de la arena desde la dirección: /?mapa=grande&semilla=42 (ver arena/presets.js)
+const game = new ArenaGame(store, network, stage, readArenaConfig(location.search));
 const hud = new Hud(store, game);
 
 let last = performance.now();

@@ -180,6 +180,37 @@ body {
 .dash-btn > * { pointer-events: none; }
 .dash-btn.pressed { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4); background: var(--player-color); }
 
+/* Aviso de iPhone para abrirlo a pantalla completa desde la pantalla de inicio */
+.ios-hint {
+  position: fixed;
+  left: 50%;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 24px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--cream);
+  color: var(--wood-dark);
+  border-radius: 14px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  font-size: 14px;
+  line-height: 1.35;
+  z-index: 5;
+}
+.ios-hint[hidden] { display: none; }
+.ios-hint p { margin: 0; flex: 1; }
+.ios-hint button {
+  flex: none;
+  font-weight: 800;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--wood);
+  color: var(--cream);
+}
+
 /* Avisos a pantalla completa */
 .overlay {
   position: fixed;

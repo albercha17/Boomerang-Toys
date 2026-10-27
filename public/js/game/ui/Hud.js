@@ -10,16 +10,29 @@ export class Hud {
     this.game = game;
     this.url = document.getElementById('hud-url');
 
-    // Bot para jugar contra la máquina: botón o tecla B.
+    // Bot para jugar contra la máquina (botón o tecla B) y arena nueva (botón o tecla M).
     this.botButton = document.getElementById('bot-btn');
+    this.mapButton = document.getElementById('map-btn');
+    const newMap = () => {
+      game.newArena(performance.now());
+      this.showArenaInfo();
+    };
     this.botButton.addEventListener('click', () => {
       game.toggleBot(performance.now());
       this.botButton.blur();
     });
+    this.mapButton.addEventListener('click', () => {
+      newMap();
+      this.mapButton.blur();
+    });
     window.addEventListener('keydown', (event) => {
-      if (event.key.toLowerCase() === 'b' && !event.repeat) game.toggleBot(performance.now());
+      if (event.repeat) return;
+      const key = event.key.toLowerCase();
+      if (key === 'b') game.toggleBot(performance.now());
+      if (key === 'm') newMap();
     });
     this.botsShown = -1;
+    this.showArenaInfo();
 
     const container = document.getElementById('hud-players');
     this.chips = Array.from({ length: MAX_SLOTS }, (_, i) => {
@@ -30,6 +43,12 @@ export class Hud {
       return { chip, dot: chip.firstChild, label: chip.lastChild };
     });
     this.renderedKey = '';
+  }
+
+  /** Semilla y tamaño de la arena actual en la ayuda del botón (para repetir un mapa con ?semilla=). */
+  showArenaInfo() {
+    const { seed, cols, rows } = this.game.arenaConfig;
+    this.mapButton.title = `Tecla M · semilla ${seed} · ${cols}×${rows}`;
   }
 
   update() {

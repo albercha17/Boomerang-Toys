@@ -5,9 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bumerán">
+  <meta name="format-detection" content="telephone=no">
   <meta name="theme-color" content="#2a1d14">
   <title>Mando · Bumerán de Juguete</title>
-  <link rel="icon" href="data:,">
+  <!-- Abierto desde un icono de la pantalla de inicio, el mando ocupa toda la pantalla -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <link rel="stylesheet" href="/css/controller.css">
 </head>
 <body>
@@ -37,6 +43,11 @@
       </div>
     </section>
   </main>
+
+  <div class="ios-hint" id="ios-hint" hidden>
+    <p><strong>Pantalla completa en iPhone:</strong> pulsa <b>Compartir</b> (el cuadrado con la flecha) → <b>Añadir a pantalla de inicio</b>, y abre el mando desde ese icono.</p>
+    <button type="button" id="ios-hint-close">Entendido</button>
+  </div>
 
   <div class="overlay" id="overlay" hidden>
     <div class="overlay-box">

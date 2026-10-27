@@ -72,6 +72,30 @@ export class PhysicsWorld {
     return body;
   }
 
+  /** Torre redonda fija (cilindro vertical apoyado en el suelo). Choca como una pared. */
+  addPillar(x, z, radius, height) {
+    const body = new CANNON.Body({
+      type: CANNON.Body.STATIC,
+      shape: new CANNON.Cylinder(radius, radius, height, 16),
+      position: new CANNON.Vec3(x, height / 2, z),
+      material: this.materials.wall,
+      collisionFilterGroup: GROUP.WALL,
+      collisionFilterMask: MASK.WALL,
+    });
+    body.kind = 'wall';
+    this.world.addBody(body);
+    return body;
+  }
+
+  /** Juguete suelto (dado, pelota): física 3D completa; los personajes y las piezas lo empujan. */
+  createPropBody(shape, x, y, z) {
+    const body = this.createDebrisBody(shape, { x, y, z }, { x: 0, y: 0, z: 0, w: 1 });
+    body.mass = 0.9;
+    body.updateMassProperties();
+    body.kind = 'prop';
+    return body;
+  }
+
   /** Cuerpo de un personaje: esfera que se desliza por el suelo sin girar. */
   createCharacterBody(radius, x, z) {
     const body = this.planarBody(radius, 5, this.materials.character, GROUP.CHARACTER, MASK.CHARACTER);
