@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { G, FRONT_FACING_ROTATION } from './kit.js';
+import { addOutlines } from '../render/toon.js';
 
 /**
  * Esqueleto común de todos los juguetes: dos piernas y dos brazos con articulación (para andar y apuntar),
@@ -126,5 +127,6 @@ export function buildRig(spec) {
     spec.decorate(rig, { mesh });
     for (const part of parts) part.object.traverse((o) => { if (o.isMesh) o.castShadow = true; });
   }
+  addOutlines(group); // contorno de dibujos animados (también lo llevan las piezas al desmontarse)
   return rig;
 }

@@ -48,7 +48,7 @@ export class MatchOverlay {
         return `<div class="mo-tag">Sala de pruebas · vidas infinitas · gana quien llegue a ${match.targetScore} · ${hint}</div>`;
       }
       case PHASE.COUNTDOWN:
-        return `<div class="mo-center"><div class="mo-round">Ronda ${match.round}</div><div class="mo-count">${match.countdownValue(now)}</div></div>`;
+        return `<div class="mo-center"><div class="mo-round">Ronda ${match.round} · ${escape(match.game.arena.theme.name)}</div><div class="mo-count">${match.countdownValue(now)}</div></div>`;
       case PHASE.PLAYING:
         return `<div class="mo-tag">Ronda ${match.round} · a ${match.targetScore} puntos</div>`;
       case PHASE.ROUND_END: {

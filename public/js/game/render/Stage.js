@@ -24,7 +24,8 @@ export class Stage {
     this.shakeUntil = 0;
     this.shakeStrength = 0;
 
-    this.scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6b4a2e, 1.1));
+    this.hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b4a2e, 1.1);
+    this.scene.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xffffff, 1.7);
     this.sun.position.set(-8, 18, 9);
     this.sun.castShadow = true;
@@ -35,6 +36,14 @@ export class Stage {
 
     window.addEventListener('resize', () => this.resize());
     this.resize();
+  }
+
+  /** Ambiente de la zona de la casa: color de fondo y luz. */
+  setMood({ background, sky, ground, sun }) {
+    this.scene.background = new THREE.Color(background);
+    this.hemi.color.setHex(sky);
+    this.hemi.groundColor.setHex(ground);
+    this.sun.intensity = sun;
   }
 
   /** Ajusta cámara y sombras para que se vea entero un rectángulo del suelo centrado en el origen. */
@@ -62,7 +71,7 @@ export class Stage {
     const fitDepth = ((this.frameSize.depth / 2) * Math.sin(CAMERA_TILT) * 1.12 + HUD_ROOM) / Math.tan(vHalf);
     const distance = Math.max(fitWidth, fitDepth);
 
-    this.target.set(0, 0, -HUD_ROOM * 0.6);
+    this.target.set(0, 0, -HUD_ROOM * 0.6 - 1.1); // algo más arriba: asoma el decorado del fondo
     this.basePosition.set(0, Math.sin(CAMERA_TILT) * distance, Math.cos(CAMERA_TILT) * distance).add(this.target);
   }
 

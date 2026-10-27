@@ -47,6 +47,8 @@ export function readArenaConfig(search = '') {
     rows: Math.round(clamp(number('alto', preset.rows), ARENA_LIMITS.rows)),
     density: clamp(number('densidad', preset.density), ARENA_LIMITS.density),
     symmetry: params.get('simetria') === 'no' ? 'none' : DEFAULTS.symmetry,
+    // Zona de la casa: /?zona=cocina (salon, cocina, patio, dormitorio, bano); si no, una al azar por mapa.
+    theme: ['salon', 'cocina', 'patio', 'dormitorio', 'bano'].includes(params.get('zona')) ? params.get('zona') : null,
     wallChance: params.has('paredes') ? (params.get('paredes') === 'si' ? 1 : 0) : DEFAULTS.wallChance,
     seed: Math.floor(number('semilla', randomSeed())),
   };

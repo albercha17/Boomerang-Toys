@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { toonMaterial } from '../render/toon.js';
 
 /**
  * Kit para construir juguetes: geometrías y materiales compartidos (en caché) y texturas pintadas por código.
@@ -36,7 +37,8 @@ export const G = {
 
 // --- Materiales -----------------------------------------------------------
 
-const material = (kind, color, map, extra) => cached(`${kind}:${color}:${map?.uuid ?? ''}`, () => new THREE.MeshStandardMaterial({ color, map: map ?? null, ...extra }));
+// Todos con sombreado de dibujos animados (bandas planas); el tipo solo cambia un poco el tono.
+const material = (kind, color, map) => cached(`${kind}:${color}:${map?.uuid ?? ''}`, () => toonMaterial(color, map ?? null));
 
 export const M = {
   plastic: (color, map) => material('plastic', color, map, { roughness: 0.4, metalness: 0.05 }),

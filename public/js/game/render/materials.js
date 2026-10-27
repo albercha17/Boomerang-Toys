@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { toonMaterial } from './toon.js';
 
 export const COLORS = Object.freeze({
   wood: 0xf0c991,
@@ -16,12 +17,12 @@ function cached(key, create) {
 
 /** Plástico brillante de juguete. */
 export function plastic(color) {
-  return cached(`plastic:${color}`, () => new THREE.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.05 }));
+  return cached(`plastic:${color}`, () => toonMaterial(color));
 }
 
 /** Acabado mate (madera, pintura). */
 export function matte(color) {
-  return cached(`matte:${color}`, () => new THREE.MeshStandardMaterial({ color, roughness: 0.8 }));
+  return cached(`matte:${color}`, () => toonMaterial(color));
 }
 
 /** Sin iluminación (partículas y marcas en el suelo). */

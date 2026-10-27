@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plastic } from '../render/materials.js';
+import { addOutlines } from '../render/toon.js';
 
 const BOX = new THREE.BoxGeometry(0.62, 0.62, 0.62);
 const RIBBON_A = new THREE.BoxGeometry(0.66, 0.66, 0.16);
@@ -41,6 +42,7 @@ export class PowerUp {
     this.box = new THREE.Group();
     this.box.add(box, new THREE.Mesh(RIBBON_A, ribbon), new THREE.Mesh(RIBBON_B, ribbon), bow);
     this.box.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    addOutlines(this.box);
     this.icon = createIcon(def.icon);
     this.icon.position.y = 1.25;
     this.group.add(this.box, this.icon);

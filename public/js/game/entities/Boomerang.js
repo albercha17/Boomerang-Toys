@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { plastic } from '../render/materials.js';
 import { POWERUPS } from '../content/powerups.js';
+import { addOutlines } from '../render/toon.js';
 
 export const WEAPON_STATE = Object.freeze({
   HELD: 'held', // en la mano de alguien
@@ -46,6 +47,7 @@ export class Boomerang {
     this.mesh = new THREE.Mesh(GEOMETRY, plastic(0xffffff));
     this.mesh.scale.setScalar(def.scale);
     this.mesh.castShadow = true;
+    addOutlines(this.mesh, 0.018);
     game.stage.scene.add(this.mesh);
 
     this.body = game.physics.createWeaponBody(def.radius);

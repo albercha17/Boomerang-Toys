@@ -60,6 +60,22 @@ Cada pocos segundos aparece una **caja sorpresa** en el mapa (hasta 3 a la vez).
 | 🧠 Telequinesis | En la ida, guías tu búmerang con el joystick de movimiento |
 | 🔥 Fuego | El búmerang deja un rastro de llamas que elimina a los rivales que lo pisan |
 
+### Zonas de la casa y estilo de dibujos animados
+
+Cada mapa se juega en una zona de la casa, con su suelo, sus colores, su luz, sus objetos sueltos (que se empujan y ruedan) y algo de decorado al fondo:
+
+| Zona | Suelo | Objetos sueltos | Al fondo |
+|---|---|---|---|
+| Salón | Listones de madera | Dados, libros, cojines, pelotas de playa | Sofá con cojines y lámpara |
+| Cocina | Baldosas a cuadros | Naranjas, tazas, cajas de cereales | Muebles, encimera y nevera |
+| Patio | Césped con florecitas | Balones, macetas, pelotas de playa | Valla y arbustos |
+| Dormitorio | Moqueta de estrellas | Dados, cojines, libros, pelotas | Cama y baúl de juguetes |
+| Baño | Azulejos | Patitos de goma y pastillas de jabón | Bañera, lavabo y toalla |
+
+La zona cambia con cada mapa (al azar según la semilla) y se anuncia en la cuenta atrás de cada ronda. Para fijarla: `/?zona=cocina` (`salon`, `cocina`, `patio`, `dormitorio`, `bano`). Se añaden zonas en `public/js/game/arena/themes.js`.
+
+Todo se dibuja como en los dibujos animados: sombreado por bandas de color planas y contorno negro en personajes, búmerangs, bloques, juguetes y decorado (`public/js/game/render/toon.js`).
+
 ### Mapas grandes y línea roja
 
 Los mapas son más grandes (pequeña 24×14, mediana 32×18 por defecto, grande 40×24). En la mayoría **no hay paredes en el borde**: hay una **línea roja**. Si la cruzas, tienes **5 segundos** para volver: parpadeas en rojo (cada vez más rápido), sobre tu cabeza se ve la cuenta atrás y el móvil vibra y muestra **«¡VUELVE A LA ZONA!»**. Si no vuelves, explotas. Más allá de la línea hay un poco de mesa y un tope invisible. Uno de cada cinco mapas tiene paredes de bloques; `/?paredes=si` o `/?paredes=no` lo fuerzan.
@@ -90,6 +106,7 @@ Desde la dirección de la pantalla del juego (todo opcional):
 | Parámetro | Ejemplo | Qué hace |
 |---|---|---|
 | `mapa` | `/?mapa=grande` | Tamaño predefinido: `pequena` (24×14), `mediana` (32×18, por defecto), `grande` (40×24) |
+| `zona` | `/?zona=patio` | Zona de la casa: `salon`, `cocina`, `patio`, `dormitorio`, `bano` (por defecto, una al azar por mapa) |
 | `paredes` | `/?paredes=si` | `si`: borde de bloques; `no`: línea roja (por defecto, al azar: 1 de cada 5 con paredes) |
 | `ancho`, `alto` | `/?ancho=30&alto=16` | Tamaño a medida en casillas, borde incluido (ancho 12–64, alto 10–40) |
 | `densidad` | `/?densidad=0.25` | Cantidad de obstáculos (0–0,3) |
