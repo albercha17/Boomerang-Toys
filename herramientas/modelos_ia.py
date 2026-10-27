@@ -1,7 +1,8 @@
-"""Convierte los dibujos de los personajes (ChatGPT, fondo blanco) en modelos 3D con TRELLIS (Hugging Face, gratis).
+"""Convierte los dibujos de los personajes (herramientas/dibujos, hechos con ChatGPT) en modelos 3D con TRELLIS
+(Hugging Face, gratis). El cupo gratuito de GPU da para ~1 personaje al día: se relanza cada día y salta los hechos.
 
-Uso:  python herramientas/modelos_ia.py <carpeta con personaje_<id>.png> [ids...]
-Resultado: public/models/ia/<id>.glb (malla simplificada + textura 1024). Salta los que ya existen.
+Uso:  python herramientas/modelos_ia.py [ids...]
+Resultado: public/models/ia/<id>.glb (malla simplificada + textura 1024) y manifest.json con los que hay.
 """
 import json
 import shutil
@@ -13,7 +14,8 @@ from gradio_client import Client, handle_file
 
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "public" / "models" / "ia"
-IDS = ["peon", "muneca", "heroe", "soldado", "ranger", "bichito", "robot", "osito", "caballero", "dino", "pirata", "vaquero"]
+# Orden de la cola diaria (el dibujo de «peon» es el peón de madera: al generarlo, cambiar su nombre en shared/characters.js)
+IDS = ["muneca", "caballero", "osito", "dino", "pirata", "vaquero", "robot", "ranger", "bichito", "heroe", "soldado", "peon"]
 
 
 def generar(client, imagen, destino):
@@ -28,25 +30,30 @@ def generar(client, imagen, destino):
 
 
 def main():
-    origen = Path(sys.argv[1])
-    ids = sys.argv[2:] or IDS
+    origen = RAIZ / "herramientas" / "dibujos"
+    ids = sys.argv[1:] or IDS
     SALIDA.mkdir(parents=True, exist_ok=True)
     client = Client("trellis-community/TRELLIS")
     for id_ in ids:
         imagen = origen / f"personaje_{id_}.png"
         destino = SALIDA / f"{id_}.glb"
         if destino.exists() or not imagen.exists():
-            print(f"salto {id_}", flush=True)
             continue
-        for intento in range(3):
+        for intento in range(2):
             try:
                 t0 = time.time()
                 generar(client, imagen, destino)
                 print(f"ok {id_} ({time.time() - t0:.0f}s, {destino.stat().st_size // 1024} KB)", flush=True)
                 break
             except Exception as e:  # noqa: BLE001  (cola llena, cupo de GPU...)
+                if "quota" in str(e).lower():
+                    print(f"Cupo de GPU gratis agotado por hoy ({id_} queda para mañana).", flush=True)
+                    ids = []
+                    break
                 print(f"  fallo {id_} (intento {intento + 1}): {str(e)[:200]}", flush=True)
-                time.sleep(30)
+                time.sleep(20)
+        if not ids:
+            break
     hechos = sorted(p.stem for p in SALIDA.glob("*.glb"))
     (SALIDA / "manifest.json").write_text(json.dumps(hechos) + "\n", encoding="utf-8")  # el juego carga estos
     print("FIN", hechos, flush=True)

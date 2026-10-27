@@ -303,8 +303,8 @@ export const FURNITURE = {
     decor: [['kitchenFridgeLarge', -0.45, 4.5, 0], ['kitchenCabinet', -0.3, 4.5, 0], ['kitchenStove', -0.16, 4.5, 0], ['kitchenSink', -0.02, 4.5, 0], ['kitchenCabinetDrawer', 0.12, 4.5, 0], ['tableRound', 0.34, 4, 0], ['chair', 0.47, 4, 0]],
   },
   patio: {
-    blocks: ['plant_bushLarge', 'plant_bushDetailed', 'plant_bush', 'log_stack', 'plant_bushLarge', 'stump_squareDetailed'],
-    pillars: ['tree_default', 'tree_oak', 'tree_cone', 'stump_round'],
+    blocks: ['plant_bushLarge', 'plant_bushDetailed', 'plant_bush', 'plant_bushLarge'],
+    pillars: ['tree_default', 'tree_oak', 'tree_cone'],
     decor: [['tree_oak', -0.42, 4, 0], ['plant_bushLarge', -0.25, 3.5, 0], ['tree_default', -0.05, 4.5, 0], ['plant_bushDetailed', 0.15, 3.5, 0], ['tree_cone', 0.32, 4, 0], ['tree_oak', 0.48, 4, 0]],
   },
   dormitorio: {

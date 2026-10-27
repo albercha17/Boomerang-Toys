@@ -1,6 +1,4 @@
-{
-  "floors": [
-    "cocina"
-  ],
+﻿{
+  "floors": ["bano", "cocina", "dormitorio", "patio", "salon"],
   "textures": []
 }
