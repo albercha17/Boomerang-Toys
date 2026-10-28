@@ -13,13 +13,15 @@ export class PowerUpSpawner {
   constructor(game) {
     this.game = game;
     this.items = [];
+    this.opening = []; // cogidas: se están abriendo antes de desaparecer
     this.nextSpawnAt = 0;
   }
 
   /** Quita todas las cajas (arena nueva) y programa la primera. */
   reset(now) {
-    for (const item of this.items) item.destroy();
+    for (const item of [...this.items, ...this.opening]) item.destroy();
     this.items = [];
+    this.opening = [];
     this.nextSpawnAt = now + random(...CFG.firstDelayMs);
     this.nextSuperAt = now + random(...SUPER_SPAWN.firstDelayMs);
   }
@@ -37,6 +39,11 @@ export class PowerUpSpawner {
     }
 
     for (const item of this.items) item.update(now);
+    this.opening = this.opening.filter((item) => {
+      if (item.update(now)) return true;
+      item.destroy();
+      return false;
+    });
     for (const character of game.characters.values()) {
       if (!character.alive) continue;
       const index = this.items.findIndex((item) => Math.hypot(item.x - character.x, item.z - character.z) < CFG.pickupRadius);
@@ -51,7 +58,8 @@ export class PowerUpSpawner {
         character.addAbility(item.def.id);
         game.effects.burst(item.x, 0.6, item.z, [item.def.color, 0xffffff], 18, 0.6);
       }
-      item.destroy();
+      item.open(now); // se abre (la tapa salta) y luego desaparece
+      this.opening.push(item);
     }
   }
 

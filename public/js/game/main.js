@@ -11,6 +11,7 @@ import { loadFurniture } from './render/furniture.js';
 import { HANDMADE_MAPS, readMapConfig, registerSceneMaps } from './arena/maps/handmade.js';
 import { loadSceneMaps } from './arena/SceneMapBuilder.js';
 import { loadBoomerangModels } from './render/boomerangModels.js';
+import { loadBoxModels } from './render/boxModels.js';
 
 // Modelos de los mapas dibujados en texto (bloques, matorrales, sueltos y lo que se mueve)
 const MAP_MODELS = HANDMADE_MAPS.filter((m) => !m.scene)
@@ -19,7 +20,7 @@ const MAP_MODELS = HANDMADE_MAPS.filter((m) => !m.scene)
 
 // Personajes (sus modelos 3D), mapas (modelos y escenas horneadas) y suelos ilustrados.
 const CHARACTER_IDS = window.CharacterCatalog.CHARACTERS.map((c) => c.id);
-await Promise.all([loadArt(), loadFurniture(MAP_MODELS), loadIaModels(['muneca', ...CHARACTER_IDS]), loadSceneMaps().then(registerSceneMaps), loadBoomerangModels()]);
+await Promise.all([loadArt(), loadFurniture(MAP_MODELS), loadIaModels(['muneca', ...CHARACTER_IDS]), loadSceneMaps().then(registerSceneMaps), loadBoomerangModels(), loadBoxModels()]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);
