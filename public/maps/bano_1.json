@@ -1,0 +1,152 @@
+{
+  "id": "bano_1",
+  "name": "Baño 1",
+  "theme": "bano",
+  "play": true,
+  "room": {
+    "w": 30,
+    "d": 18,
+    "wallHeight": 3.2,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 5,
+    "pits": []
+  },
+  "water": [
+    {
+      "x": 9.4,
+      "z": -6,
+      "w": 10.5,
+      "d": 4,
+      "y": 2.8,
+      "round": 1
+    }
+  ],
+  "objects": [
+    {
+      "id": "vater_1",
+      "model": "vater",
+      "x": -10,
+      "y": 0,
+      "z": -7,
+      "rot": 0,
+      "size": [
+        4.81,
+        7.87,
+        7.59
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "banera_1",
+      "model": "banera",
+      "x": 8.5,
+      "y": 0,
+      "z": -6,
+      "rot": 0,
+      "size": [
+        12.23,
+        5.97,
+        6.5
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "patito_1",
+      "model": "patito",
+      "x": 9.5,
+      "y": 2,
+      "z": -7,
+      "rot": 0,
+      "size": [
+        2,
+        1.8,
+        1.6
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cesto_1",
+      "model": "cesto",
+      "x": 1,
+      "y": 0,
+      "z": -6.5,
+      "rot": 0,
+      "size": [
+        3.54,
+        3.48,
+        2.54
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "cesto_2",
+      "model": "cesto",
+      "x": 13.5,
+      "y": 0,
+      "z": 7,
+      "rot": 90,
+      "size": [
+        3.54,
+        3.48,
+        2.54
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "patito_2",
+      "model": "patito",
+      "x": 7.5,
+      "y": 0,
+      "z": -0.5,
+      "rot": -5,
+      "size": [
+        2,
+        1.8,
+        1.6
+      ],
+      "collider": "box",
+      "tilt": [
+        -85,
+        0
+      ]
+    }
+  ],
+  "movers": [],
+  "spawns": [
+    [
+      -9,
+      -2.5
+    ],
+    [
+      9,
+      5.4
+    ],
+    [
+      -9,
+      5.4
+    ],
+    [
+      9,
+      -5.4
+    ],
+    [
+      -3,
+      -7.2
+    ],
+    [
+      3,
+      7.2
+    ],
+    [
+      -12.6,
+      0
+    ],
+    [
+      12.6,
+      0
+    ]
+  ]
+}

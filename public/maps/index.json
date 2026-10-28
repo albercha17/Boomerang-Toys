@@ -5,5 +5,19 @@
     "theme": "cocina",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "mesa_rodillos",
+    "name": "Mesa rodillos",
+    "theme": "cocina",
+    "play": true,
+    "baked": true
+  },
+  {
+    "id": "bano_1",
+    "name": "Baño 1",
+    "theme": "bano",
+    "play": true,
+    "baked": true
   }
 ]
