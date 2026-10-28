@@ -142,6 +142,13 @@ export const THEMES = Object.freeze({
     blocks: [0xff8fab, 0x80ed99, 0xffd166, 0x48cae4, 0xc77dff, 0xff9f1c],
     props: ['dado', 'cojin', 'libro', 'pelota'],
   },
+  oeste: {
+    id: 'oeste', name: 'Oeste',
+    background: 0xe9c48c,
+    sky: 0xfff0d2, ground: 0xb5834e, sun: 1.9,
+    blocks: [0xb5651d, 0x8c4b1f, 0xd9a066, 0x6b8e23, 0xc0392b, 0xe1b15b],
+    props: ['naranja'],
+  },
   bano: {
     id: 'bano', name: 'Baño',
     background: 0xbfe3e8,

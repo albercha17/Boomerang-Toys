@@ -19,5 +19,12 @@
     "theme": "bano",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "fuerte",
+    "name": "Fuerte del Oeste",
+    "theme": "oeste",
+    "play": true,
+    "baked": true
   }
 ]

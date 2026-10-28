@@ -62,6 +62,30 @@ function tileTexture() {
   });
 }
 
+/** Arena o hierba: dos tonos con manchas y piedrecitas. Una repetición = 6 unidades. */
+function terrainTexture(kind) {
+  const [light, dark, stone] = kind === 'hierba' ? ['#5c9e38', '#3e7a26', '#33571f'] : ['#dba866', '#b98045', '#86593a'];
+  return canvasTexture(kind, 512, (g, n) => {
+    g.fillStyle = light;
+    g.fillRect(0, 0, n, n);
+    for (let i = 0; i < 260; i++) { // manchas suaves
+      g.fillStyle = dark;
+      g.globalAlpha = 0.05 + Math.random() * 0.12;
+      g.beginPath();
+      g.arc(Math.random() * n, Math.random() * n, 10 + Math.random() * 50, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.globalAlpha = 0.8;
+    g.fillStyle = stone;
+    for (let i = 0; i < 160; i++) { // piedrecitas
+      g.beginPath();
+      g.arc(Math.random() * n, Math.random() * n, 1 + Math.random() * 3, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+  });
+}
+
 function material(texture, repeatX, repeatY, color = 0xffffff) {
   const map = texture.clone();
   map.repeat.set(repeatX, repeatY);
@@ -138,14 +162,22 @@ export function buildProceduralBase(root, data) {
     const floorGeometry = new THREE.ExtrudeGeometry(shape, { depth: 0.1, bevelEnabled: false, curveSegments: 10 });
     floorGeometry.rotateX(-Math.PI / 2);
     floorGeometry.translate(0, -0.1, 0);
-    const tiles = own(material(tileTexture(), 1 / (tile * 2), 1 / (tile * 2)));
-    add(new THREE.Mesh(own(floorGeometry), tiles));
+    const kind = r.floor ?? 'baldosas';
+    const floorMaterial = kind === 'baldosas' ? own(material(tileTexture(), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
+    add(new THREE.Mesh(own(floorGeometry), floorMaterial));
+    if (kind !== 'baldosas') { // al aire libre: el terreno sigue más allá de la zona de juego
+      const outW = r.w * 3;
+      const outD = r.d * 4;
+      const outside = add(new THREE.Mesh(own(new THREE.PlaneGeometry(outW, outD)), own(material(terrainTexture(kind), outW / 6, outD / 6, 0xd8d0c4))));
+      outside.rotation.x = -Math.PI / 2;
+      outside.position.y = -0.12;
+    }
     const depth = r.pitDepth ?? 3;
     owned.push(...buildPitLiners(root, data));
     const wallHeight = r.wallHeight ?? 3;
     const wallTile = r.wallTile ?? 0.8;
     const walls = { fondo: [0, -r.d / 2 - 0.25, r.w + 1, 0.5], izq: [-r.w / 2 - 0.25, 0, 0.5, r.d], der: [r.w / 2 + 0.25, 0, 0.5, r.d] };
-    for (const [x, z, w, d] of Object.values(walls)) {
+    for (const [x, z, w, d] of (r.walls ?? 'baldosas') === 'baldosas' ? Object.values(walls) : []) {
       const len = Math.max(w, d);
       const wall = add(new THREE.Mesh(own(new THREE.BoxGeometry(w, wallHeight, d)), own(material(tileTexture(), len / (wallTile * 2), wallHeight / (wallTile * 2)))));
       wall.position.set(x, wallHeight / 2, z);

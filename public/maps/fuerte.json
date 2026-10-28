@@ -1,0 +1,878 @@
+{
+  "id": "fuerte",
+  "name": "Fuerte del Oeste",
+  "theme": "oeste",
+  "play": true,
+  "note": "Fuerte de vaqueros: empalizada con puerta al fondo, torres, saloon y cabaña; el carro y los cañones en el centro. Los cactus con flor esconden.",
+  "room": {
+    "w": 34,
+    "d": 22,
+    "wallHeight": 3,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 4,
+    "pits": [],
+    "floor": "arena",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "muro_fondo_0_i",
+      "model": "empalizada",
+      "x": -5.2,
+      "y": 0,
+      "z": -10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_0_d",
+      "model": "empalizada",
+      "x": 5.2,
+      "y": 0,
+      "z": -10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_1_i",
+      "model": "empalizada",
+      "x": -8.6,
+      "y": 0,
+      "z": -10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_1_d",
+      "model": "empalizada",
+      "x": 8.6,
+      "y": 0,
+      "z": -10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_2_i",
+      "model": "empalizada",
+      "x": -12,
+      "y": 0,
+      "z": -10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_2_d",
+      "model": "empalizada",
+      "x": 12,
+      "y": 0,
+      "z": -10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_3_i",
+      "model": "empalizada",
+      "x": -15.4,
+      "y": 0,
+      "z": -10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_fondo_3_d",
+      "model": "empalizada",
+      "x": 15.4,
+      "y": 0,
+      "z": -10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_0_i",
+      "model": "empalizada",
+      "x": -16.8,
+      "y": 0,
+      "z": -7.6,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_0_d",
+      "model": "empalizada",
+      "x": 16.8,
+      "y": 0,
+      "z": -7.6,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_1_i",
+      "model": "empalizada",
+      "x": -16.8,
+      "y": 0,
+      "z": -4.2,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_1_d",
+      "model": "empalizada",
+      "x": 16.8,
+      "y": 0,
+      "z": -4.2,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_2_i",
+      "model": "empalizada",
+      "x": -16.8,
+      "y": 0,
+      "z": -0.8,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_2_d",
+      "model": "empalizada",
+      "x": 16.8,
+      "y": 0,
+      "z": -0.8,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_3_i",
+      "model": "empalizada",
+      "x": -16.8,
+      "y": 0,
+      "z": 2.6,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_3_d",
+      "model": "empalizada",
+      "x": 16.8,
+      "y": 0,
+      "z": 2.6,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_4_i",
+      "model": "empalizada",
+      "x": -16.8,
+      "y": 0,
+      "z": 6,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "muro_lado_4_d",
+      "model": "empalizada",
+      "x": 16.8,
+      "y": 0,
+      "z": 6,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "puerta",
+      "model": "puerta_fuerte",
+      "x": 0,
+      "y": 0,
+      "z": -10.9,
+      "rot": 0,
+      "size": [
+        7,
+        4.13,
+        0.91
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "torre_i",
+      "model": "torre_vigia",
+      "x": -15.2,
+      "y": 0,
+      "z": -9.2,
+      "rot": 0,
+      "size": [
+        3.29,
+        7,
+        3.43
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "torre_d",
+      "model": "torre_vigia",
+      "x": 15.2,
+      "y": 0,
+      "z": -9.2,
+      "rot": 0,
+      "size": [
+        3.29,
+        7,
+        3.43
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "valla_0_i",
+      "model": "valla",
+      "x": -9.2,
+      "y": 0,
+      "z": 10.6,
+      "rot": 0,
+      "size": [
+        3,
+        1.23,
+        0.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "valla_0_d",
+      "model": "valla",
+      "x": 9.2,
+      "y": 0,
+      "z": 10.6,
+      "rot": 0,
+      "size": [
+        3,
+        1.23,
+        0.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "valla_1_i",
+      "model": "valla",
+      "x": -12.2,
+      "y": 0,
+      "z": 10.6,
+      "rot": 0,
+      "size": [
+        3,
+        1.23,
+        0.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "valla_1_d",
+      "model": "valla",
+      "x": 12.2,
+      "y": 0,
+      "z": 10.6,
+      "rot": 0,
+      "size": [
+        3,
+        1.23,
+        0.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "valla_2_i",
+      "model": "valla",
+      "x": -15.2,
+      "y": 0,
+      "z": 10.6,
+      "rot": 0,
+      "size": [
+        3,
+        1.23,
+        0.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "valla_2_d",
+      "model": "valla",
+      "x": 15.2,
+      "y": 0,
+      "z": 10.6,
+      "rot": 0,
+      "size": [
+        3,
+        1.23,
+        0.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "saloon",
+      "model": "saloon",
+      "x": -9.2,
+      "y": 0,
+      "z": -7.3,
+      "rot": 0,
+      "size": [
+        7,
+        5.11,
+        4.62
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cabana",
+      "model": "cabana",
+      "x": 9.4,
+      "y": 0,
+      "z": -7.6,
+      "rot": 0,
+      "size": [
+        5,
+        3.65,
+        4.8
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "carro",
+      "model": "carro",
+      "x": 0,
+      "y": 0,
+      "z": 0.5,
+      "rot": 90,
+      "size": [
+        2.4,
+        2.11,
+        4.8
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canon_i",
+      "model": "canon",
+      "x": -4.6,
+      "y": 0,
+      "z": -3.6,
+      "rot": 25,
+      "size": [
+        2.2,
+        1.58,
+        1.58
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canon_d",
+      "model": "canon",
+      "x": 4.6,
+      "y": 0,
+      "z": -3.6,
+      "rot": -25,
+      "size": [
+        2.2,
+        1.58,
+        1.58
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_a_i",
+      "model": "barril",
+      "x": -11.2,
+      "y": 0,
+      "z": 1.5,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.14
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_a_d",
+      "model": "barril",
+      "x": 11.2,
+      "y": 0,
+      "z": 1.5,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.14
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_b_i",
+      "model": "barril",
+      "x": -6.2,
+      "y": 0,
+      "z": 6,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.14
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_b_d",
+      "model": "barril",
+      "x": 6.2,
+      "y": 0,
+      "z": 6,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.14
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_c_i",
+      "model": "barril",
+      "x": -7.1,
+      "y": 0,
+      "z": 6.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.14
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_c_d",
+      "model": "barril",
+      "x": 7.1,
+      "y": 0,
+      "z": 6.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.14
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja_a_i",
+      "model": "caja_madera",
+      "x": -13.4,
+      "y": 0,
+      "z": 6.2,
+      "rot": -10,
+      "size": [
+        1.7,
+        1.06,
+        1.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja_a_d",
+      "model": "caja_madera",
+      "x": 13.4,
+      "y": 0,
+      "z": 6.2,
+      "rot": 10,
+      "size": [
+        1.7,
+        1.06,
+        1.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja_b_i",
+      "model": "caja_madera",
+      "x": -2.6,
+      "y": 0,
+      "z": 7.4,
+      "rot": 8,
+      "size": [
+        1.5,
+        0.94,
+        1.12
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja_b_d",
+      "model": "caja_madera",
+      "x": 2.6,
+      "y": 0,
+      "z": 7.4,
+      "rot": -8,
+      "size": [
+        1.5,
+        0.94,
+        1.12
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cactus_flor_a_i",
+      "model": "cactus_flor",
+      "x": -7,
+      "y": 0,
+      "z": -1.2,
+      "rot": -15,
+      "size": [
+        2.05,
+        2.2,
+        0.99
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "cactus_flor_a_d",
+      "model": "cactus_flor",
+      "x": 7,
+      "y": 0,
+      "z": -1.2,
+      "rot": 15,
+      "size": [
+        2.05,
+        2.2,
+        0.99
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "cactus_flor_b_i",
+      "model": "cactus_flor",
+      "x": -13.8,
+      "y": 0,
+      "z": -3.4,
+      "rot": 20,
+      "size": [
+        2.05,
+        2.2,
+        0.99
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "cactus_flor_b_d",
+      "model": "cactus_flor",
+      "x": 13.8,
+      "y": 0,
+      "z": -3.4,
+      "rot": -20,
+      "size": [
+        2.05,
+        2.2,
+        0.99
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "cactus_alto_i",
+      "model": "cactus_alto",
+      "x": -14.3,
+      "y": 0,
+      "z": 3.6,
+      "rot": 0,
+      "size": [
+        1.56,
+        3,
+        0.63
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cactus_alto_d",
+      "model": "cactus_alto",
+      "x": 14.3,
+      "y": 0,
+      "z": 3.6,
+      "rot": 0,
+      "size": [
+        1.56,
+        3,
+        0.63
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cactus_fuera_a_i",
+      "model": "cactus_alto",
+      "x": -19.5,
+      "y": 0,
+      "z": -4,
+      "rot": -30,
+      "size": [
+        2.08,
+        4,
+        0.84
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cactus_fuera_a_d",
+      "model": "cactus_alto",
+      "x": 19.5,
+      "y": 0,
+      "z": -4,
+      "rot": 30,
+      "size": [
+        2.08,
+        4,
+        0.84
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cactus_fuera_b_i",
+      "model": "cactus_flor",
+      "x": -20,
+      "y": 0,
+      "z": 6,
+      "rot": 0,
+      "size": [
+        2.42,
+        2.6,
+        1.17
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cactus_fuera_b_d",
+      "model": "cactus_flor",
+      "x": 20,
+      "y": 0,
+      "z": 6,
+      "rot": 0,
+      "size": [
+        2.42,
+        2.6,
+        1.17
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "spawns": [
+    [
+      -11.5,
+      -3
+    ],
+    [
+      11.5,
+      -3
+    ],
+    [
+      -11.5,
+      8.2
+    ],
+    [
+      11.5,
+      8.2
+    ],
+    [
+      -3.6,
+      -6.6
+    ],
+    [
+      3.6,
+      -6.6
+    ],
+    [
+      -4.4,
+      8.6
+    ],
+    [
+      4.4,
+      8.6
+    ]
+  ]
+}

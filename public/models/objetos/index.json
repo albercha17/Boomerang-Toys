@@ -82,5 +82,65 @@
     "id": "vaso_de_cerveza_o",
     "name": "vaso de cerveza o",
     "source": "vaso de cerveza 3d modelo.glb"
+  },
+  {
+    "id": "empalizada",
+    "name": "Empalizada",
+    "source": "fuerte\\empalizada.glb"
+  },
+  {
+    "id": "valla",
+    "name": "Valla de madera",
+    "source": "fuerte\\valla.glb"
+  },
+  {
+    "id": "puerta_fuerte",
+    "name": "Puerta del fuerte",
+    "source": "fuerte\\puerta_fuerte.glb"
+  },
+  {
+    "id": "torre_vigia",
+    "name": "Torre de vigía",
+    "source": "fuerte\\torre_vigia.glb"
+  },
+  {
+    "id": "saloon",
+    "name": "Saloon",
+    "source": "fuerte\\saloon.glb"
+  },
+  {
+    "id": "cabana",
+    "name": "Cabaña",
+    "source": "fuerte\\cabana.glb"
+  },
+  {
+    "id": "cactus_flor",
+    "name": "Cactus con flor",
+    "source": "fuerte\\cactus_flor.glb"
+  },
+  {
+    "id": "cactus_alto",
+    "name": "Cactus alto",
+    "source": "fuerte\\cactus_alto.glb"
+  },
+  {
+    "id": "barril",
+    "name": "Barril",
+    "source": "fuerte\\barril.glb"
+  },
+  {
+    "id": "caja_madera",
+    "name": "Caja de madera",
+    "source": "fuerte\\caja_madera.glb"
+  },
+  {
+    "id": "carro",
+    "name": "Carro",
+    "source": "fuerte\\carro.glb"
+  },
+  {
+    "id": "canon",
+    "name": "Cañón",
+    "source": "fuerte\\canon.glb"
   }
 ]

@@ -123,6 +123,47 @@ def material_baldosas(nombre, lado=1.6):
     return m
 
 
+def material_terreno(nombre, tipo):
+    """Arena del desierto o hierba por código: dos tonos mezclados con ruido y piedrecitas más oscuras."""
+    claro, oscuro, piedra = {
+        "arena": ((0.60, 0.40, 0.20), (0.43, 0.27, 0.13), (0.28, 0.17, 0.09)),
+        "hierba": ((0.22, 0.42, 0.12), (0.14, 0.30, 0.08), (0.11, 0.21, 0.06)),
+    }[tipo]
+    m = bpy.data.materials.new(nombre)
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = 0.95
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    ruido = nt.nodes.new("ShaderNodeTexNoise")
+    ruido.inputs["Scale"].default_value = 1.1
+    ruido.inputs["Detail"].default_value = 6
+    nt.links.new(coord.outputs["Object"], ruido.inputs["Vector"])
+    mezcla = nt.nodes.new("ShaderNodeMix")
+    mezcla.data_type = "RGBA"
+    mezcla.inputs[6].default_value = (*claro, 1)
+    mezcla.inputs[7].default_value = (*oscuro, 1)
+    nt.links.new(ruido.outputs["Fac"], mezcla.inputs[0])
+    piedras = nt.nodes.new("ShaderNodeTexVoronoi")
+    piedras.inputs["Scale"].default_value = 5
+    nt.links.new(coord.outputs["Object"], piedras.inputs["Vector"])
+    umbral = nt.nodes.new("ShaderNodeMath")
+    umbral.operation = "LESS_THAN"
+    umbral.inputs[1].default_value = 0.07
+    nt.links.new(piedras.outputs["Distance"], umbral.inputs[0])
+    final = nt.nodes.new("ShaderNodeMix")
+    final.data_type = "RGBA"
+    final.inputs[7].default_value = (*piedra, 1)
+    nt.links.new(umbral.outputs[0], final.inputs[0])
+    nt.links.new(mezcla.outputs[2], final.inputs[6])
+    nt.links.new(final.outputs[2], bsdf.inputs["Base Color"])
+    return m
+
+
+def material_suelo(nombre, tipo, lado):
+    return material_baldosas(nombre, lado) if tipo == "baldosas" else material_terreno(nombre, tipo)
+
+
 def material_color(nombre, rgb, rugosidad=0.5):
     m = bpy.data.materials.new(nombre)
     m.use_nodes = True
@@ -219,12 +260,23 @@ else:
         bpy.ops.object.modifier_apply(modifier=hueco.name)
         bpy.data.objects.remove(corte, do_unlink=True)
     suelo.data.materials.clear()  # el recorte deja huecos de material vacíos
-    suelo.data.materials.append(material_baldosas("baldosas", r.get("tile", 1.4)))
+    TIPO = r.get("floor", "baldosas")
+    suelo.data.materials.append(material_suelo("suelo", TIPO, r.get("tile", 1.4)))
     for poligono in suelo.data.polygons:
         poligono.material_index = 0
-    # Paredes: fondo y lados (la de delante no se pone: taparía la vista)
+    fuera = []
+    if TIPO != "baldosas":  # al aire libre: el terreno sigue más allá de la zona de juego
+        bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -0.12, 0))
+        f = bpy.context.active_object
+        f.name = "HORNEADO_fuera"
+        f.scale = (W * 3, D * 4, 1)
+        bpy.ops.object.transform_apply(scale=True)
+        f.data.materials.append(material_terreno("fuera", TIPO))
+        fuera.append(f)
+    # Paredes: fondo y lados (la de delante no se pone: taparía la vista); ninguna si el mapa no las quiere
     paredes = []
-    for nombre, (x, z, w, d) in {"fondo": (0, -D / 2 - 0.25, W + 1, 0.5), "izq": (-W / 2 - 0.25, 0, 0.5, D), "der": (W / 2 + 0.25, 0, 0.5, D)}.items():
+    muros = {"fondo": (0, -D / 2 - 0.25, W + 1, 0.5), "izq": (-W / 2 - 0.25, 0, 0.5, D), "der": (W / 2 + 0.25, 0, 0.5, D)}
+    for nombre, (x, z, w, d) in (muros.items() if r.get("walls", "baldosas") == "baldosas" else []):
         bpy.ops.mesh.primitive_cube_add(size=1, location=g2b(x, ALTO_PARED / 2, z))
         p = bpy.context.active_object
         p.scale = (w, d, ALTO_PARED)
@@ -233,6 +285,7 @@ else:
         p.data.materials.append(material_baldosas(f"azulejos_{nombre}", r.get("wallTile", 0.7)))
         paredes.append(p)
     HORNEAR += [(suelo, 1024 if RAPIDO else 2048, "suelo_luz")] + [(p, 512 if RAPIDO else 1024, f"{p.name[9:]}_luz") for p in paredes]
+    HORNEAR += [(f, 512 if RAPIDO else 1024, "fuera_luz") for f in fuera]
 
 
 # --- luz: sol de ventana y cielo cálido (misma dirección que el sol del juego) ------------

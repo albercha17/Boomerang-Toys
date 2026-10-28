@@ -14,7 +14,9 @@ const { normalizeMap, emptyMap, ID_PATTERN, THEMES } = window.MapFormat;
 const DEG = Math.PI / 180;
 const r2 = (v) => Math.round(v * 100) / 100;
 const normDeg = (d) => r2(((((d + 180) % 360) + 360) % 360) - 180);
-const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio' };
+const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste' };
+const FLOOR_NAMES = { baldosas: 'Baldosas', arena: 'Arena (desierto)', hierba: 'Hierba' };
+const WALL_NAMES = { baldosas: 'Alicatadas', ninguna: 'Ninguna (al aire libre)' };
 const COLLIDERS = { box: 'Caja', cylinder: 'Cilindro', none: 'Ninguno (se atraviesa)' };
 const MAX_UNDO = 100;
 
@@ -763,6 +765,8 @@ export class Editor {
       form.double('Ancho y fondo', [d.room.w, d.room.d], 1, (v) => (data) => { data.room.w = Math.max(8, v[0]); data.room.d = Math.max(6, v[1]); });
       form.number('Alto de las paredes', d.room.wallHeight, 0.2, (v) => (data) => { data.room.wallHeight = Math.max(0.5, v); });
       form.number('Profundidad huecos', d.room.pitDepth, 0.5, (v) => (data) => { data.room.pitDepth = Math.max(1, v); });
+      form.select('Suelo', d.room.floor ?? 'baldosas', FLOOR_NAMES, (v) => (data) => { data.room.floor = v; });
+      form.select('Paredes', d.room.walls ?? 'baldosas', WALL_NAMES, (v) => (data) => { data.room.walls = v; });
       form.number('Baldosa del suelo', d.room.tile, 0.1, (v) => (data) => { data.room.tile = Math.max(0.3, v); });
     }
     const list = form.list(`Objetos (${d.objects.length})`);

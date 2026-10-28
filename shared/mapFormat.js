@@ -4,7 +4,8 @@
  *
  *   { id, name, theme, play,                         play: false = no sale en la rotación del juego
  *     table: { w, d, chamfer, thickness, height }    mesa: salirse = caer (height = altura hasta el suelo)
- *     room:  { w, d, wallHeight, tile, wallTile, pitDepth, pits: [{ x, z, w, d, round }] }   o habitación
+ *     room:  { w, d, wallHeight, tile, wallTile, pitDepth, pits: [{ x, z, w, d, round }],   o habitación
+ *              floor: 'baldosas' | 'arena' | 'hierba', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base)
  *     water: [{ x, z, w, d, y, round }]              agua: caer dentro = ahogarse
  *     objects: [{ id, model, x, y, z, rot, tilt: [x, z], size: [w, h, d], stretch: [x, y, z],
  *                 collider: 'box' | 'cylinder' | 'none', bush, loose }]
@@ -21,7 +22,9 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste'];
+  const FLOORS = ['baldosas', 'arena', 'hierba'];
+  const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
   const round = (v) => Math.round(num(v) * 1000) / 1000;
 
@@ -38,7 +41,8 @@
     if (data.room) {
       const r = data.room;
       out.room = { w: num(r.w, 30), d: num(r.d, 18), wallHeight: num(r.wallHeight, 3.2), tile: num(r.tile, 1.4), wallTile: num(r.wallTile, 0.8),
-        pitDepth: num(r.pitDepth, 5), pits: (r.pits ?? []).map((p) => ({ x: num(p.x), z: num(p.z), w: num(p.w, 4), d: num(p.d, 4), round: num(p.round) })) };
+        pitDepth: num(r.pitDepth, 5), pits: (r.pits ?? []).map((p) => ({ x: num(p.x), z: num(p.z), w: num(p.w, 4), d: num(p.d, 4), round: num(p.round) })),
+        floor: FLOORS.includes(r.floor) ? r.floor : 'baldosas', walls: WALLS.includes(r.walls) ? r.walls : 'baldosas' };
     } else {
       const t = data.table ?? {};
       out.table = { w: num(t.w, 34), d: num(t.d, 20), chamfer: num(t.chamfer, 2.6), thickness: num(t.thickness, 0.7), height: num(t.height, 9) };
@@ -90,7 +94,8 @@
     if (map.room) {
       const r = map.room;
       return ['room', r.w, r.d, r.wallHeight, r.tile, r.wallTile, r.pitDepth].map((v) => (typeof v === 'string' ? v : n(v))).join('|')
-        + (r.pits ?? []).map((p) => `|pit:${[p.x, p.z, p.w, p.d, p.round].map(n).join(',')}`).join('');
+        + (r.pits ?? []).map((p) => `|pit:${[p.x, p.z, p.w, p.d, p.round].map(n).join(',')}`).join('')
+        + ((r.floor ?? 'baldosas') !== 'baldosas' ? `|suelo:${r.floor}` : '') + ((r.walls ?? 'baldosas') !== 'baldosas' ? `|paredes:${r.walls}` : '');
     }
     const t = map.table;
     return ['table', t.w, t.d, t.chamfer, t.thickness, t.height].map((v) => (typeof v === 'string' ? v : n(v))).join('|');
@@ -118,5 +123,5 @@
     return normalizeMap(base);
   }
 
-  return Object.freeze({ ID_PATTERN, THEMES, normalizeMap, baseKey, validateMap, emptyMap });
+  return Object.freeze({ ID_PATTERN, THEMES, FLOORS, WALLS, normalizeMap, baseKey, validateMap, emptyMap });
 });
