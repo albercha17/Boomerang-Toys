@@ -101,6 +101,32 @@ export class EditorHelpers {
       }
     }
 
+    // Artefactos: punto de aterrizaje de cada trampolín (y la línea hasta él) y la unión de cada pareja de portales
+    for (const d of data.devices ?? []) {
+      if (d.type === 'jump') {
+        const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(d.x, 0.06, d.z), new THREE.Vector3(d.target[0], 0.06, d.target[1])]),
+          new THREE.LineDashedMaterial({ color: 0xff5fa2, dashSize: 0.4, gapSize: 0.3, depthTest: false }));
+        line.computeLineDistances();
+        line.renderOrder = 9;
+        this.group.add(line);
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.38, 18, 12), new THREE.MeshBasicMaterial({ color: 0xff5fa2, depthTest: false }));
+        ball.renderOrder = 10;
+        ball.position.set(d.target[0], 0.5, d.target[1]);
+        ball.userData.pick = { kind: 'deviceTarget', id: d.id };
+        this.group.add(ball);
+      }
+      if (d.type === 'portal') {
+        const other = (data.devices ?? []).find((o) => o !== d && o.type === 'portal' && o.link === d.link);
+        if (other && d.id < other.id) {
+          const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(d.x, 0.1, d.z), new THREE.Vector3(other.x, 0.1, other.z)]),
+            new THREE.LineDashedMaterial({ color: 0x9b5de5, dashSize: 0.3, gapSize: 0.5, depthTest: false }));
+          line.computeLineDistances();
+          line.renderOrder = 9;
+          this.group.add(line);
+        }
+      }
+    }
+
     // Agua y huecos
     data.water.forEach((w, index) => {
       const shape = outline(w, (w.y ?? 0) + 0.04, 0x4fc3f7);

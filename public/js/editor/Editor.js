@@ -327,6 +327,7 @@ export class Editor {
     if (sel.kind === 'spawn') return this.data.spawns[sel.index] ?? null;
     if (sel.kind === 'water') return this.data.water[sel.index] ?? null;
     if (sel.kind === 'pit') return this.data.room?.pits?.[sel.index] ?? null;
+    if (sel.kind === 'device' || sel.kind === 'deviceTarget') return (this.data.devices ?? []).find((d) => d.id === sel.id) ?? null;
     return null;
   }
 
@@ -336,6 +337,7 @@ export class Editor {
     if (!sel || !this.arena) return null;
     if (sel.kind === 'object') return this.arena.handles.objects.get(sel.id) ?? null;
     if (sel.kind === 'mover') return this.arena.handles.movers.get(sel.id) ?? null;
+    if (sel.kind === 'device') return this.arena.handles.devices?.get(sel.id) ?? null;
     return this.helpers.find(sel);
   }
 
@@ -354,7 +356,7 @@ export class Editor {
     }
     const kind = this.selection.kind;
     // Qué flechas tiene cada cosa: los objetos, todo; el resto se mueve por el suelo y algunos giran o cambian de tamaño
-    const allowed = { object: ['translate', 'rotate', 'scale'], mover: ['translate', 'rotate'], moverEnd: ['translate'], spawn: ['translate'], water: ['translate', 'scale'], pit: ['translate', 'scale'] }[kind];
+    const allowed = { object: ['translate', 'rotate', 'scale'], mover: ['translate', 'rotate'], moverEnd: ['translate'], spawn: ['translate'], water: ['translate', 'scale'], pit: ['translate', 'scale'], device: ['translate', 'rotate', 'scale'], deviceTarget: ['translate'] }[kind];
     let mode = this.mode ?? 'translate';
     if (!allowed.includes(mode)) mode = 'translate';
     this.transform.setMode(mode);
@@ -427,6 +429,13 @@ export class Editor {
         data.spawns[sel.index] = [r2(p.x), r2(p.z)];
       } else if (sel.kind === 'water' || sel.kind === 'pit') {
         Object.assign(it, { x: r2(p.x), z: r2(p.z), w: r2(Math.max(0.5, it.w * scale.x)), d: r2(Math.max(0.5, it.d * scale.z)) });
+      } else if (sel.kind === 'device') {
+        const dx = p.x - it.x;
+        const dz = p.z - it.z;
+        Object.assign(it, { x: r2(p.x), z: r2(p.z), rot: normDeg(euler.y / DEG), w: r2(Math.max(0.3, it.w * scale.x)), d: r2(Math.max(0.3, it.d * scale.z)) });
+        if (it.target) it.target = [r2(it.target[0] + dx), r2(it.target[1] + dz)]; // el trampolín se lleva su punto
+      } else if (sel.kind === 'deviceTarget') {
+        it.target = [r2(p.x), r2(p.z)];
       }
     });
   }
@@ -452,6 +461,7 @@ export class Editor {
   pick(ray) {
     const ids = new Set(this.data.objects.map((o) => o.id));
     const moverIds = new Set(this.data.movers.map((m) => m.id));
+    const deviceIds = new Set((this.data.devices ?? []).map((d) => d.id));
     const candidates = this.stage.scene.children.filter((c) => c !== this.transform && c !== this.helpers.selectionBox && !this.helpers.colliderBoxes.includes(c));
     const hits = ray.intersectObjects(candidates, true);
     let best = null;
@@ -462,10 +472,11 @@ export class Editor {
         if (o.userData.pick) found = { ...o.userData.pick };
         else if (ids.has(o.name)) found = { kind: 'object', id: o.name };
         else if (moverIds.has(o.name)) found = { kind: 'mover', id: o.name };
+        else if (deviceIds.has(o.name)) found = { kind: 'device', id: o.name };
         o = o.parent;
       }
       if (!found || !hit.object.visible) continue;
-      const rank = { spawn: 0, moverEnd: 0, object: 1, mover: 1, water: 2, pit: 3 }[found.kind];
+      const rank = { spawn: 0, moverEnd: 0, deviceTarget: 0, object: 1, mover: 1, device: 1, water: 2, pit: 3 }[found.kind];
       if (!best || rank < best.rank) best = { ...found, rank };
       if (rank === 0) break;
     }
@@ -508,13 +519,14 @@ export class Editor {
       if (sel.kind === 'spawn') data.spawns[sel.index] = [r2(it[0] + dx), r2(it[1] + dz)];
       else if (sel.kind === 'mover') { it.from = [r2(it.from[0] + dx), r2(it.from[1] + dz)]; it.to = [r2(it.to[0] + dx), r2(it.to[1] + dz)]; }
       else if (sel.kind === 'moverEnd') it[sel.end] = [r2(it[sel.end][0] + dx), r2(it[sel.end][1] + dz)];
+      else if (sel.kind === 'deviceTarget') it.target = [r2(it.target[0] + dx), r2(it.target[1] + dz)];
       else { it.x = r2(it.x + dx); it.z = r2(it.z + dz); }
     });
   }
 
   rotateSelected(deg) {
     const sel = this.selection;
-    if (sel?.kind === 'object') this.change(() => { const it = this.item(sel); it.rot = normDeg((it.rot ?? 0) + deg); });
+    if (sel?.kind === 'object' || sel?.kind === 'device') this.change(() => { const it = this.item(sel); it.rot = normDeg((it.rot ?? 0) + deg); });
     else if (sel?.kind === 'mover') {
       this.change(() => {
         const it = this.item(sel);
@@ -532,7 +544,7 @@ export class Editor {
     const sel = this.selection;
     if (sel?.kind === 'object') this.change(() => { const it = this.item(sel); it.size = it.size.map((v) => r2(Math.max(0.05, v * k))); });
     else if (sel?.kind === 'mover') this.change(() => { const it = this.item(sel); it.length = r2(it.length * k); it.radius = r2(it.radius * k); });
-    else if (sel?.kind === 'water' || sel?.kind === 'pit') this.change(() => { const it = this.item(sel); it.w = r2(it.w * k); it.d = r2(it.d * k); });
+    else if (sel?.kind === 'water' || sel?.kind === 'pit' || sel?.kind === 'device') this.change(() => { const it = this.item(sel); it.w = r2(it.w * k); it.d = r2(it.d * k); });
   }
 
   newObjectId(model) {
@@ -540,6 +552,39 @@ export class Editor {
     let i = 1;
     while (used.has(`${model}_${i}`)) i++;
     return `${model}_${i}`;
+  }
+
+  newDeviceId(type) {
+    const used = new Set((this.data.devices ?? []).map((d) => d.id));
+    let i = 1;
+    while (used.has(`${type}_${i}`)) i++;
+    return `${type}_${i}`;
+  }
+
+  /** Artefacto nuevo en el centro de la vista (los portales, en pareja). */
+  async addDevice(type) {
+    const [x, z] = this.viewCenter();
+    const base = { conveyor: { w: 6, d: 2.2, speed: 3.5 }, door: { w: 4, d: 0.5, openMs: 2500, closedMs: 2500, offsetMs: 0, height: 2.6 },
+      fragile: { w: 5, d: 2.2, shakeMs: 600, respawnMs: 5000 }, jump: { w: 2, d: 2, target: [r2(x + 6), z], height: 3.5, durationMs: 800 }, portal: { w: 2, d: 2 } }[type];
+    const added = [];
+    await this.change((d) => {
+      d.devices = d.devices ?? [];
+      if (type === 'portal') {
+        const links = new Set(d.devices.filter((o) => o.type === 'portal').map((o) => o.link));
+        let n = 1;
+        while (links.has(`p${n}`)) n++;
+        for (const dx of [-3, 3]) {
+          const dev = { id: this.newDeviceId(type), type, x: r2(x + dx), z, rot: 0, ...base, link: `p${n}` };
+          d.devices.push(dev);
+          added.push(dev);
+        }
+      } else {
+        const dev = { id: this.newDeviceId(type), type, x, z, rot: 0, ...base };
+        d.devices.push(dev);
+        added.push(dev);
+      }
+    });
+    this.select({ kind: 'device', id: added[0].id });
   }
 
   newMoverId() {
@@ -565,6 +610,10 @@ export class Editor {
       this.change((d) => d.water.push({ ...it, x: r2(it.x + 2) })).then(() => this.select({ kind: 'water', index: this.data.water.length - 1 }));
     } else if (sel.kind === 'pit') {
       this.change((d) => d.room.pits.push({ ...it, x: r2(it.x + 2) })).then(() => this.select({ kind: 'pit', index: this.data.room.pits.length - 1 }));
+    } else if (sel.kind === 'device' || sel.kind === 'deviceTarget') {
+      const copy = { ...JSON.parse(JSON.stringify(it)), id: this.newDeviceId(it.type), x: r2(it.x + 2) };
+      if (copy.target) copy.target = [r2(copy.target[0] + 2), copy.target[1]];
+      this.change((d) => d.devices.push(copy)).then(() => this.select({ kind: 'device', id: copy.id }));
     }
   }
 
@@ -587,6 +636,10 @@ export class Editor {
     } else if (sel.kind === 'water' || sel.kind === 'pit') {
       const copy = { ...it, [axis]: r2(-it[axis]) };
       this.change((d) => (sel.kind === 'water' ? d.water : d.room.pits).push(copy));
+    } else if (sel.kind === 'device' || sel.kind === 'deviceTarget') {
+      const copy = { ...JSON.parse(JSON.stringify(it)), id: this.newDeviceId(it.type), [axis]: r2(-it[axis]), rot: normDeg(axis === 'x' ? 180 - (it.rot ?? 0) : -(it.rot ?? 0)) };
+      if (copy.target) copy.target = axis === 'x' ? [r2(-it.target[0]), it.target[1]] : [it.target[0], r2(-it.target[1])];
+      this.change((d) => d.devices.push(copy)).then(() => this.select({ kind: 'device', id: copy.id }));
     }
   }
 
@@ -600,6 +653,7 @@ export class Editor {
       else if (sel.kind === 'spawn') d.spawns.splice(sel.index, 1);
       else if (sel.kind === 'water') d.water.splice(sel.index, 1);
       else if (sel.kind === 'pit') d.room.pits.splice(sel.index, 1);
+      else if (sel.kind === 'device' || sel.kind === 'deviceTarget') d.devices = d.devices.filter((x) => x.id !== sel.id);
     }, { keepSelection: false });
   }
 
@@ -738,6 +792,37 @@ export class Editor {
       form.double('Centro x z', [it.x, it.z], 0.5, (v) => () => { Object.assign(this.item(sel), { x: v[0], z: v[1] }); });
       form.double('Ancho y fondo', [it.w, it.d], 0.5, (v) => () => { Object.assign(this.item(sel), { w: Math.max(0.5, v[0]), d: Math.max(0.5, v[1]) }); });
       form.number('Esquinas (radio)', it.round ?? 0, 0.2, (v) => () => { this.item(sel).round = Math.max(0, v); });
+    } else if (sel.kind === 'device' || sel.kind === 'deviceTarget') {
+      const set = (patch) => () => { Object.assign(this.item(sel), patch); };
+      const titles = {
+        conveyor: ['Cinta transportadora', 'Arrastra a quien la pisa (y búmerangs del suelo y sueltos) hacia donde apuntan las flechas. Gírala para cambiar la dirección.'],
+        door: ['Puerta', 'Sube y baja sola: cerrada es una pared, también para los búmerangs. Primero está cerrada y luego abierta.'],
+        fragile: ['Pasarela que se cae', 'Se puede pisar aunque debajo haya un hueco o el vacío. Al pisarla tiembla, se cae y vuelve a salir.'],
+        jump: ['Trampolín', 'Lanza por el aire hasta el punto rosa (arrástralo), por encima de todo.'],
+        portal: ['Portal', 'Lleva al otro portal con el mismo enlace (y a los búmerangs que vuelan). Cambia el enlace para emparejarlo con otro.'],
+      }[it.type];
+      form.title(`${titles[0]} · ${it.id}`);
+      form.hint(titles[1]);
+      form.double('Centro x z', [it.x, it.z], 0.5, (v) => set({ x: v[0], z: v[1] }));
+      form.double('Largo y ancho', [it.w, it.d], 0.2, (v) => set({ w: Math.max(0.3, v[0]), d: Math.max(0.3, v[1]) }));
+      form.number('Giro (°)', it.rot ?? 0, 15, (v) => set({ rot: normDeg(v) }));
+      if (it.type === 'conveyor') form.number('Velocidad', it.speed, 0.5, (v) => set({ speed: v }), 'Casillas por segundo (negativo: al revés)');
+      if (it.type === 'door') {
+        form.number('Cerrada (s)', it.closedMs / 1000, 0.5, (v) => set({ closedMs: Math.max(200, Math.round(v * 1000)) }));
+        form.number('Abierta (s)', it.openMs / 1000, 0.5, (v) => set({ openMs: Math.max(200, Math.round(v * 1000)) }));
+        form.number('Desfase (s)', it.offsetMs / 1000, 0.5, (v) => set({ offsetMs: Math.round(v * 1000) }), 'Para que varias puertas no se abran a la vez');
+        form.number('Altura', it.height, 0.2, (v) => set({ height: Math.max(0.5, v) }));
+      }
+      if (it.type === 'fragile') {
+        form.number('Tiembla (s)', it.shakeMs / 1000, 0.1, (v) => set({ shakeMs: Math.max(100, Math.round(v * 1000)) }), 'Lo que aguanta tras pisarla');
+        form.number('Vuelve a los (s)', it.respawnMs / 1000, 0.5, (v) => set({ respawnMs: Math.max(500, Math.round(v * 1000)) }));
+      }
+      if (it.type === 'jump') {
+        form.double('Aterriza en x z', it.target, 0.5, (v) => set({ target: v }));
+        form.number('Altura del salto', it.height, 0.5, (v) => set({ height: Math.max(0.5, v) }));
+        form.number('Duración (s)', it.durationMs / 1000, 0.1, (v) => set({ durationMs: Math.max(200, Math.round(v * 1000)) }));
+      }
+      if (it.type === 'portal') form.text('Enlace', it.link, (v) => set({ link: v.slice(0, 20) || it.link }));
     }
     const actions = form.actions();
     actions.button('Duplicar (Ctrl+D)', () => this.duplicate());
@@ -771,6 +856,11 @@ export class Editor {
     }
     const list = form.list(`Objetos (${d.objects.length})`);
     for (const o of d.objects) list.item(`${this.library.find((m) => m.id === o.model)?.name ?? o.model} · ${o.id}`, () => this.select({ kind: 'object', id: o.id }));
+    const DEVICE_NAMES = { conveyor: 'Cinta', door: 'Puerta', fragile: 'Pasarela', jump: 'Trampolín', portal: 'Portal' };
+    if ((d.devices ?? []).length) {
+      const devs = form.list(`Artefactos (${d.devices.length})`);
+      for (const dev of d.devices) devs.item(`${DEVICE_NAMES[dev.type]} · ${dev.id}`, () => this.select({ kind: 'device', id: dev.id }));
+    }
     const others = form.list('Rodillos, apariciones, agua y huecos');
     for (const m of d.movers) others.item(`Rodillo · ${m.id}`, () => this.select({ kind: 'mover', id: m.id }));
     d.spawns.forEach((s, i) => others.item(`Aparición ${i + 1}`, () => this.select({ kind: 'spawn', index: i })));

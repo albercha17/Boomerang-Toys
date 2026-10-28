@@ -1,0 +1,117 @@
+{
+  "id": "artefactos",
+  "name": "Prueba de artefactos",
+  "theme": "salon",
+  "play": false,
+  "room": {
+    "w": 30,
+    "d": 18,
+    "wallHeight": 2.5,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 4,
+    "pits": [
+      {
+        "x": 6,
+        "z": 0,
+        "w": 5,
+        "d": 8,
+        "round": 0.5
+      }
+    ],
+    "floor": "baldosas",
+    "walls": "baldosas"
+  },
+  "water": [],
+  "objects": [],
+  "movers": [],
+  "devices": [
+    {
+      "id": "cinta",
+      "type": "conveyor",
+      "x": -8,
+      "z": -4,
+      "w": 8,
+      "d": 2.4,
+      "rot": 0,
+      "speed": 4
+    },
+    {
+      "id": "puerta",
+      "type": "door",
+      "x": -2,
+      "z": 3,
+      "w": 4,
+      "d": 0.5,
+      "rot": 0,
+      "openMs": 2000,
+      "closedMs": 2000,
+      "offsetMs": 0,
+      "height": 2.6
+    },
+    {
+      "id": "pasarela",
+      "type": "fragile",
+      "x": 6,
+      "z": 0,
+      "w": 5.4,
+      "d": 2.2,
+      "rot": 0,
+      "shakeMs": 600,
+      "respawnMs": 4000
+    },
+    {
+      "id": "trampolin",
+      "type": "jump",
+      "x": -10,
+      "z": 4,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        -2,
+        -6
+      ],
+      "height": 3.5,
+      "durationMs": 800
+    },
+    {
+      "id": "portal_a",
+      "type": "portal",
+      "x": 12,
+      "z": -5,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "link": "a"
+    },
+    {
+      "id": "portal_b",
+      "type": "portal",
+      "x": -12,
+      "z": 0,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "link": "a"
+    }
+  ],
+  "spawns": [
+    [
+      -12,
+      -6
+    ],
+    [
+      12,
+      6
+    ],
+    [
+      -4,
+      6
+    ],
+    [
+      0,
+      -6
+    ]
+  ]
+}

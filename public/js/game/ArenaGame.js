@@ -105,6 +105,7 @@ export class ArenaGame {
     });
     for (const weapon of [...this.weapons]) weapon.steer(dt);
     if (!this.frozen) this.arena.update?.(now, dt); // lo que se mueve en el mapa (rodillo...)
+    if (!this.frozen) this.arena.devices?.affect(this, now, dt); // cintas, trampolines, portales, pasarelas
 
     this.physics.step(dt);
 
@@ -454,16 +455,21 @@ export class ArenaGame {
     this.effects.ring(character.x, character.z);
   }
 
-  /** Supersalto: sale volando hacia donde iba el dash, por encima de todo, y aterriza con una onda. */
-  startLeap(character, now) {
+  /**
+   * Salto por el aire, por encima de todo: el Supersalto (hacia donde iba el dash, con onda al caer) o un trampolín
+   * (opts: to, height, durationMs, wave).
+   */
+  startLeap(character, now, opts = {}) {
     const def = SUPERS.supersalto;
+    const durationMs = opts.durationMs ?? def.durationMs;
     character.dashStart = -Infinity; // el salto sustituye al dash
     character.charging = false;
-    const to = this.leapLanding(character, def.distance);
-    character.leap = { fromX: character.x, fromZ: character.z, toX: to.x, toZ: to.z, start: now, until: now + def.durationMs, y: 0, flip: 0 };
-    character.invulnerableUntil = Math.max(character.invulnerableUntil, now + def.durationMs + 150);
+    const to = opts.to ?? this.leapLanding(character, def.distance);
+    character.leap = { fromX: character.x, fromZ: character.z, toX: to.x, toZ: to.z, start: now, until: now + durationMs, y: 0, flip: 0,
+      height: opts.height ?? def.height, wave: opts.wave ?? true };
+    character.invulnerableUntil = Math.max(character.invulnerableUntil, now + durationMs + 150);
     this.physics.remove(character.body);
-    this.effects.burst(character.x, 0.2, character.z, [def.color, 0xffd000, 0xffffff], 26, 0.9);
+    this.effects.burst(character.x, 0.2, character.z, [opts.wave === false ? 0xff5fa2 : def.color, 0xffd000, 0xffffff], 26, 0.9);
   }
 
   /** Dónde aterriza: tan lejos como quepa sin salirse del mapa (si delante todo es vacío, se acorta). */
@@ -483,14 +489,14 @@ export class ArenaGame {
     const ease = t * t * (3 - 2 * t);
     character.body.position.x = leap.fromX + (leap.toX - leap.fromX) * ease;
     character.body.position.z = leap.fromZ + (leap.toZ - leap.fromZ) * ease;
-    leap.y = Math.sin(Math.PI * t) * SUPERS.supersalto.height;
+    leap.y = Math.sin(Math.PI * t) * leap.height;
     leap.flip = t * Math.PI * 2; // voltereta
     if (t < 1) return;
     character.leap = null;
     character.body.velocity.set(0, 0, 0);
     this.physics.add(character.body);
     character.figure.land?.(1.6);
-    this.landingWave(character, now);
+    if (leap.wave) this.landingWave(character, now);
   }
 
   /** Al aterrizar del Supersalto: onda que tumba a los que estén cerca (no a ti ni a tus clones). */

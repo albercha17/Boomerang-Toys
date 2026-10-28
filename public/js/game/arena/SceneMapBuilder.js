@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { THEMES } from './themes.js';
 import { buildPitLiners, buildProceduralBase, roundedPath, tableShape } from './proceduralBase.js';
 import { moverLocal, moverProgress } from './movers.js';
+import { buildDevices } from './devices.js';
 
 /**
  * Mapas descritos en public/maps/<id>.json (formato en shared/mapFormat.js; se editan en /editor).
@@ -260,7 +261,7 @@ export function buildSceneMap(stage, physics, layout) {
   }
 
   // Objetos: fijos (con su choque), matorrales (esconden) y sueltos (se empujan)
-  const handles = { objects: new Map(), movers: new Map() };
+  const handles = { objects: new Map(), movers: new Map(), devices: new Map() };
   const bushes = [];
   const props = [];
   const blockers = [];
@@ -309,6 +310,10 @@ export function buildSceneMap(stage, physics, layout) {
       pathLength: Math.hypot(def.to[0] - x0, def.to[1] - z0) };
   });
 
+  // Artefactos: cintas, puertas, pasarelas que se caen, trampolines y portales
+  const devices = buildDevices(root, physics, data.devices ?? [], own);
+  for (const d of devices.list) handles.devices.set(d.id, d.group);
+
   stage.tuneMaterials(root); // con la luz nueva, que los modelos no reflejen tanto el entorno
   stage.setMood(theme);
   // Se ve entero: con el canto delantero de la mesa o, en una habitación, con la pared del fondo
@@ -326,6 +331,7 @@ export function buildSceneMap(stage, physics, layout) {
       if (waters.some((w) => inRect(w, x, z, 1.4)) || (room?.pits ?? []).some((p) => inRect(p, x, z, 0.8))) continue;
       if (blockers.some((b) => Math.hypot(b.x - x, b.z - z) < b.r)) continue;
       if (movers.some((m) => onMoverPath(m, x, z))) continue;
+      if ((data.devices ?? []).some((d) => Math.hypot(d.x - x, d.z - z) < Math.max(d.w, d.d) / 2 + 0.8)) continue; // ni encima de artefactos
       freePoints.push({ x, z });
     }
   }
@@ -342,10 +348,13 @@ export function buildSceneMap(stage, physics, layout) {
     bounds: { minX: -t.w / 2, maxX: t.w / 2, minZ: -t.d / 2, maxZ: t.d / 2 },
     movers,
     bushes,
+    devices,
+    props,
     fallDepth: -t.height, // el suelo de la cocina, donde se estrella quien cae de la mesa
 
     /** 0 suelo, 1 vacío (te caes), 2 agua (te ahogas). */
     hazardAt(x, z) {
+      if (devices.solidAt(x, z)) return 0; // pasarela entera: se pisa aunque debajo no haya suelo
       if (waters.some((w) => inRounded(w, x, z))) return 2;
       // Hueco sin agua: te caes (con agua, como la bañera, el borde se pisa y lo que ahoga es el agua)
       if ((room?.pits ?? []).some((p) => inRounded(p, x, z) && !waters.some((w) => inRect(p, w.x, w.z)))) return 1;
@@ -361,6 +370,7 @@ export function buildSceneMap(stage, physics, layout) {
     },
 
     update(now, dt) {
+      devices.update(now, dt);
       for (const m of movers) {
         const k = moverProgress(m, now);
         m.forward = k >= m.progress;
@@ -388,6 +398,7 @@ export function buildSceneMap(stage, physics, layout) {
     },
 
     dispose() {
+      devices.dispose();
       stage.scene.remove(root);
       for (const r of owned) r.dispose?.();
       for (const body of bodies) physics.remove(body);

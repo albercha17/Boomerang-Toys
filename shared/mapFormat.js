@@ -12,6 +12,9 @@
  *       size = caja en la que se encaja el modelo (sin deformarlo); stretch lo estira por ejes;
  *       rot = giro en grados sobre el eje vertical; tilt = inclinación en x y z; bush = esconde; loose = se empuja
  *     movers: [{ id, model, from: [x, z], to: [x, z], length, radius, periodMs, pauseMs }]   rodillos que aplastan
+ *     devices: [{ id, type, x, z, w, d, rot, ... }]   artefactos (ver public/js/game/arena/devices.js):
+ *       conveyor { speed } · door { openMs, closedMs, offsetMs, height } · fragile { shakeMs, respawnMs }
+ *       jump { target: [x, z], height, durationMs } · portal { link } (dos portales con el mismo link)
  *     spawns: [[x, z], ...] }
  */
 (function (root, factory) {
@@ -84,6 +87,16 @@
         periodMs: Math.max(1000, Math.round(num(m.periodMs, 7000))), pauseMs: Math.max(0, Math.round(num(m.pauseMs, 900))) });
     }
     out.movers = movers;
+    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal'];
+    out.devices = (data.devices ?? []).filter((d) => DEVICE_TYPES.includes(d.type)).map((d) => {
+      const dev = { id: uniqueId(d.id ?? d.type), type: d.type, x: round(d.x), z: round(d.z), w: Math.max(0.3, round(num(d.w, 2))), d: Math.max(0.3, round(num(d.d, 2))), rot: round(d.rot) };
+      if (d.type === 'conveyor') dev.speed = round(num(d.speed, 3.5));
+      if (d.type === 'door') Object.assign(dev, { openMs: Math.round(num(d.openMs, 2500)), closedMs: Math.round(num(d.closedMs, 2500)), offsetMs: Math.round(num(d.offsetMs, 0)), height: round(num(d.height, 2.6)) });
+      if (d.type === 'fragile') Object.assign(dev, { shakeMs: Math.round(num(d.shakeMs, 600)), respawnMs: Math.round(num(d.respawnMs, 5000)) });
+      if (d.type === 'jump') Object.assign(dev, { target: (d.target ?? [d.x + 6, d.z]).slice(0, 2).map(round), height: round(num(d.height, 3.5)), durationMs: Math.round(num(d.durationMs, 800)) });
+      if (d.type === 'portal') dev.link = String(d.link ?? 'a').slice(0, 20);
+      return dev;
+    });
     out.spawns = (data.spawns ?? []).map(([x, z]) => [round(x), round(z)]);
     return out;
   }

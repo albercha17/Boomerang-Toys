@@ -33,5 +33,12 @@
     "theme": "barbie",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "artefactos",
+    "name": "Prueba de artefactos",
+    "theme": "salon",
+    "play": false,
+    "baked": false
   }
 ]
