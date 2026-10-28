@@ -206,13 +206,17 @@ export class ArenaGame {
   freeFigure(except = new Set()) {
     const taken = this.takenFigures();
     for (const c of this.characters.values()) if (c.isBot) taken.add(c.figureId);
-    const free = CharacterCatalog.CHARACTERS.map((c) => c.id).filter((id) => !taken.has(id) && !except.has(id));
-    return free[Math.floor(Math.random() * free.length)] ?? 'peon';
+    const all = CharacterCatalog.CHARACTERS.map((c) => c.id);
+    const free = all.filter((id) => !taken.has(id) && !except.has(id));
+    const pool = free.length ? free : all; // todos cogidos: se repite
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  /** Si un jugador elige el personaje que llevaba el bot, el bot se cambia a otro libre. */
+  /** Si un jugador elige el personaje que llevaba el bot, el bot se cambia a otro libre (si queda alguno). */
   keepBotsUnique(now) {
     const taken = this.takenFigures();
+    const anyFree = CharacterCatalog.CHARACTERS.some((c) => !taken.has(c.id));
+    if (!anyFree) return;
     for (const [id, bot] of [...this.characters]) {
       if (!bot.isBot || !taken.has(bot.figureId)) continue;
       this.removeCharacter(bot);

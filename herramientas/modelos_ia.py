@@ -1,7 +1,7 @@
 """Convierte los dibujos de los personajes (herramientas/dibujos, hechos con ChatGPT) en modelos 3D con TRELLIS
-(Hugging Face, gratis). El cupo gratuito de GPU da para ~1 personaje al día: se relanza cada día y salta los hechos.
+(Hugging Face, gratis). El cupo gratuito de GPU da para ~1 personaje al día. Solo hace los que se le piden.
 
-Uso:  python herramientas/modelos_ia.py [ids...]
+Uso:  python herramientas/modelos_ia.py <id> [ids...]
 Resultado: public/models/ia/<id>.glb (malla simplificada + textura 1024) y manifest.json con los que hay.
 """
 import json
@@ -14,8 +14,6 @@ from gradio_client import Client, handle_file
 
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "public" / "models" / "ia"
-# Orden de la cola diaria (el dibujo de «peon» es el peón de madera: al generarlo, cambiar su nombre en shared/characters.js)
-IDS = ["capsula", "muneca", "caballero", "osito", "dino", "pirata", "vaquero", "robot", "ranger", "bichito", "heroe", "soldado", "peon"]
 
 
 def generar(client, imagen, destino):
@@ -31,7 +29,10 @@ def generar(client, imagen, destino):
 
 def main():
     origen = RAIZ / "herramientas" / "dibujos"
-    ids = sys.argv[1:] or IDS
+    ids = sys.argv[1:]
+    if not ids:
+        print("Indica qué personaje pasar a 3D, p. ej.: python herramientas/modelos_ia.py capsula")
+        return
     SALIDA.mkdir(parents=True, exist_ok=True)
     client = Client("trellis-community/TRELLIS")
     for id_ in ids:

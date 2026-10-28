@@ -1,6 +1,8 @@
 const { ROLES, EVENTS, REASONS, decodeFeedbackReport, decodeAbilitiesReport } = require('../shared/protocol');
 const { isPowerupId, MAX_ABILITIES } = require('../shared/powerups');
-const { isCharacterId } = require('../shared/characters');
+const { isCharacterId, CHARACTERS } = require('../shared/characters');
+
+const CHARACTER_IDS = CHARACTERS.map((c) => c.id);
 
 const SCREENS_ROOM = 'screens';
 
@@ -97,7 +99,7 @@ function registerSocketHandlers(io, players, config, serverInfo) {
 
     socket.on(EVENTS.CHOOSE, (characterId) => {
       if (!isCurrent()) return;
-      const result = players.chooseCharacter(player, characterId, isCharacterId, phase);
+      const result = players.chooseCharacter(player, characterId, isCharacterId, phase, CHARACTER_IDS);
       if (result.error) {
         socket.emit(EVENTS.CHOOSE_REJECTED, { reason: result.error });
         socket.emit(EVENTS.CHARACTERS, players.takenCharacters());

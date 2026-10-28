@@ -91,13 +91,17 @@ class PlayerManager {
 
   /**
    * Elige personaje. En partida solo puede elegir quien aún no tiene (entra en la siguiente ronda).
+   * Los personajes no se repiten mientras quede alguno libre; si están todos cogidos, se puede repetir.
+   * @param {string[]} allIds todos los personajes elegibles
    * @returns {{ ok: true } | { error: 'invalid'|'taken'|'locked' }}
    */
-  chooseCharacter(player, characterId, isValid, phase) {
+  chooseCharacter(player, characterId, isValid, phase, allIds = []) {
     if (!isValid(characterId)) return { error: 'invalid' };
     if (phase !== 'lobby' && player.character) return { error: 'locked' };
-    const owner = [...this.players.values()].find((p) => p.character === characterId);
-    if (owner && owner !== player) return { error: 'taken' };
+    const others = [...this.players.values()].filter((p) => p !== player);
+    const owner = others.find((p) => p.character === characterId);
+    const anyFree = allIds.some((id) => !others.some((p) => p.character === id));
+    if (owner && anyFree) return { error: 'taken' };
     player.character = characterId;
     return { ok: true };
   }

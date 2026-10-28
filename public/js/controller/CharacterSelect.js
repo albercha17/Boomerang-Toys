@@ -44,8 +44,10 @@ export class CharacterSelect {
     }
   }
 
+  /** Cogido por otro jugador; si ya están todos cogidos, se puede repetir (nada sale tachado). */
   isTakenByOther(id) {
-    return this.taken[id] !== undefined && this.taken[id] !== this.myNumber;
+    const byOther = (cid) => this.taken[cid] !== undefined && this.taken[cid] !== this.myNumber;
+    return byOther(id) && !CHARACTERS.every((c) => byOther(c.id));
   }
 
   canPlay() {
