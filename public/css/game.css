@@ -119,3 +119,28 @@ html, body {
 .mo-bar span { display: block; height: 100%; border-radius: 6px; }
 
 a.hud-btn { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* Aviso de superhabilidad (ui/Announcer.js) */
+.announce {
+  position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 20; pointer-events: none;
+  display: flex; align-items: center; gap: 14px; padding: 12px 26px 12px 18px; border-radius: 999px;
+  background: rgba(26, 17, 12, 0.86); border: 3px solid var(--announce-color, #ffc93c);
+  box-shadow: 0 0 0 6px rgba(255, 201, 60, 0.25), 0 10px 30px rgba(0, 0, 0, 0.45);
+  color: #fff6e0; font: bold 30px "Trebuchet MS", Arial, sans-serif; white-space: nowrap;
+}
+.announce-icon { font-size: 46px; line-height: 1; font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
+.announce-text { display: flex; flex-direction: column; }
+.announce-text b { color: var(--announce-color, #ffc93c); text-shadow: 0 2px 0 #2a1d14; }
+.announce-text small { font-size: 16px; color: #e8d7bd; }
+.announce-text small:empty { display: none; }
+.announce.pop { animation: announce-pop 1.9s ease-out forwards; }
+@keyframes announce-pop {
+  0% { transform: translateX(-50%) scale(0.4); opacity: 0; }
+  12% { transform: translateX(-50%) scale(1.12); opacity: 1; }
+  20% { transform: translateX(-50%) scale(1); }
+  80% { opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-18px) scale(0.96); opacity: 0; }
+}
+
+/* Superhabilidad en la barra de jugadores */
+.hud-super { margin-left: 4px; font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; filter: drop-shadow(0 0 4px #ffc93c); }

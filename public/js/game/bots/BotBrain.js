@@ -113,7 +113,7 @@ export class BotBrain {
     let best = null;
     let bestDistance = Infinity;
     for (const other of game.targets()) {
-      if (other === this.character || other.owner === this.character || !other.alive) continue;
+      if (other === this.character || other.owner === this.character || !other.alive || other.isInvisible?.(performance.now())) continue; // al Fantasma no lo ve
       const d = Math.hypot(other.x - this.character.x, other.z - this.character.z);
       if (d < bestDistance) {
         best = other;

@@ -16,7 +16,8 @@ import { CHARACTERS, DEFAULT_CHARACTER } from './content/characters.js';
 import { WEAPONS } from './content/weapons.js';
 import { BotBrain } from './bots/BotBrain.js';
 import { PowerUpSpawner } from './powerups/PowerUpSpawner.js';
-import { POWERUPS } from './content/powerups.js';
+import { POWERUPS, SUPERS } from './content/powerups.js';
+import { Announcer } from './ui/Announcer.js';
 
 const { FEEDBACK } = window.Protocol;
 const { CharacterCatalog } = window;
@@ -26,6 +27,8 @@ const RESPAWN_MS = 2500;
 const WEAPON_CLASSES = { boomerang: Boomerang };
 const MAX_BOTS = 1;
 const BOT_COLOR = '#8d99ae';
+const CATCH_MARGIN = 0.4; // tu propio búmerang de vuelta se recoge desde un poco más lejos
+const PARRY_REACH = 0.6; // la cuchillada devuelve los búmerangs que pasan a este margen más de su alcance
 
 /**
  * Partida en la arena: personajes, armas, power-ups, impactos y reapariciones.
@@ -55,6 +58,12 @@ export class ArenaGame {
     this.respawnEnabled = true;
     this.frozen = false;
     this.powerups = new PowerUpSpawner(this);
+    this.announcer = new Announcer();
+  }
+
+  /** Aviso grande en la pantalla (superhabilidades). */
+  announce(def, title, subtitle) {
+    this.announcer.show(def, title, subtitle);
   }
 
   aliveCharacters() {
@@ -73,6 +82,10 @@ export class ArenaGame {
     for (const character of [...this.characters.values()]) {
       if (character.falling) { // cayendo de la mesa o al agua: sin control hasta que llega abajo
         this.updateFall(character, dt, now);
+        continue;
+      }
+      if (character.leap) { // Supersalto: por el aire, sin control, hasta que aterriza
+        this.updateLeap(character, now);
         continue;
       }
       let input = null; // congelados: nadie se mueve ni ataca
@@ -153,7 +166,7 @@ export class ArenaGame {
     const arena = this.arena;
     for (const character of this.characters.values()) {
       character.hidden = false;
-      if (!character.alive || this.frozen || character.falling) continue;
+      if (!character.alive || this.frozen || character.falling || character.leap) continue;
       const hazard = arena.hazardAt(character.x, character.z);
       if (hazard) {
         this.startFall(character, hazard);
@@ -352,12 +365,29 @@ export class ArenaGame {
 
   // --- Power-ups ---------------------------------------------------------
 
-  /** Lanzamiento; con Multibúmerang salen dos copias temporales en abanico. */
+  /**
+   * Lanzamiento; con Multibúmerang salen dos copias temporales en abanico. Si lleva una superhabilidad de
+   * lanzamiento, se gasta aquí: Tormenta (12 en todas las direcciones) o Megabúmerang.
+   */
   throwWeapon(character, charge, now) {
     const weapon = character.weapon;
     weapon.throw(charge);
     character.figure.throw?.();
     character.thrownWeapon = weapon;
+    const superPower = character.useSuper('throw');
+    if (superPower === 'tormenta') {
+      const { count } = SUPERS.tormenta;
+      for (let i = 1; i < count; i++) {
+        const copy = this.createWeapon(weapon.def.id, { temporary: true });
+        copy.throwFrom(character, character.facing + (i * Math.PI * 2) / count, Math.max(charge, 0.6));
+      }
+      this.effects.ring(character.x, character.z);
+      this.stage.shake(200, 0.3);
+    } else if (superPower === 'mega') {
+      weapon.makeMega();
+      this.stage.shake(160, 0.25);
+    }
+    if (superPower) this.announce(SUPERS[superPower], `${character.label}: ¡${SUPERS[superPower].name}!`);
     if (!character.hasAbility('multi')) return;
     const { extra, spread } = POWERUPS.multi;
     for (let i = 0; i < extra; i++) {
@@ -367,13 +397,104 @@ export class ArenaGame {
     }
   }
 
+  /** Dash: polvo, Señuelo (solo en el primer dash tras cogerlo) y las superhabilidades de dash. */
   onDash(character, now) {
     this.effects.burst(character.x, 0.1, character.z, [0xe8d3b0, 0xffffff], 10, 0.35); // polvo
     if (character.hasAbility('senuelo')) {
-      // Un señuelo por jugador: el nuevo sustituye al anterior.
+      // Una sola copia y la habilidad se gasta: no se duplica en cada dash.
       for (const old of this.decoys.filter((d) => d.owner === character)) old.destroy();
       this.decoys = this.decoys.filter((d) => d.alive);
       this.decoys.push(new Decoy(this, character, character.dashAngle, now));
+      character.removeAbility('senuelo');
+    }
+    const superPower = character.useSuper('dash');
+    if (!superPower) return;
+    const def = SUPERS[superPower];
+    this.announce(def, `${character.label}: ¡${def.name}!`);
+    if (superPower === 'hipermultiplicacion') this.hyperClone(character, now);
+    else if (superPower === 'supersalto') this.startLeap(character, now);
+    else if (superPower === 'helada') this.freezeWave(character, now);
+    else if (superPower === 'fantasma') {
+      character.invisibleUntil = now + def.invisibleMs;
+      this.effects.burst(character.x, 0.8, character.z, [def.color, 0xffffff], 22, 0.8);
+    }
+  }
+
+  /** Hipermultiplicación: 10 clones en abanico alrededor del dash (solo en este primer dash). */
+  hyperClone(character, now) {
+    const def = SUPERS.hipermultiplicacion;
+    for (let i = 0; i < def.clones; i++) {
+      const angle = character.dashAngle + (i / (def.clones - 1) - 0.5) * def.fan;
+      this.decoys.push(new Decoy(this, character, angle, now, def));
+    }
+    this.effects.burst(character.x, 0.8, character.z, [def.color, 0xffffff, 0xffc93c], 40, 1.1);
+    this.effects.ring(character.x, character.z);
+  }
+
+  /** Supersalto: sale volando hacia donde iba el dash, por encima de todo, y aterriza con una onda. */
+  startLeap(character, now) {
+    const def = SUPERS.supersalto;
+    character.dashStart = -Infinity; // el salto sustituye al dash
+    character.charging = false;
+    const to = this.leapLanding(character, def.distance);
+    character.leap = { fromX: character.x, fromZ: character.z, toX: to.x, toZ: to.z, start: now, until: now + def.durationMs, y: 0, flip: 0 };
+    character.invulnerableUntil = Math.max(character.invulnerableUntil, now + def.durationMs + 150);
+    this.physics.remove(character.body);
+    this.effects.burst(character.x, 0.2, character.z, [def.color, 0xffd000, 0xffffff], 26, 0.9);
+  }
+
+  /** Dónde aterriza: tan lejos como quepa sin salirse del mapa (si delante todo es vacío, se acorta). */
+  leapLanding(character, distance) {
+    const { dashAngle } = character;
+    for (let d = distance; d >= 1; d -= 0.5) {
+      const x = character.x + Math.cos(dashAngle) * d;
+      const z = character.z + Math.sin(dashAngle) * d;
+      if (this.arena.hazardAt(x, z) === 0) return { x, z };
+    }
+    return { x: character.x, z: character.z };
+  }
+
+  updateLeap(character, now) {
+    const leap = character.leap;
+    const t = Math.min(1, (now - leap.start) / (leap.until - leap.start));
+    const ease = t * t * (3 - 2 * t);
+    character.body.position.x = leap.fromX + (leap.toX - leap.fromX) * ease;
+    character.body.position.z = leap.fromZ + (leap.toZ - leap.fromZ) * ease;
+    leap.y = Math.sin(Math.PI * t) * SUPERS.supersalto.height;
+    leap.flip = t * Math.PI * 2; // voltereta
+    if (t < 1) return;
+    character.leap = null;
+    character.body.velocity.set(0, 0, 0);
+    this.physics.add(character.body);
+    this.landingWave(character, now);
+  }
+
+  /** Al aterrizar del Supersalto: onda que tumba a los que estén cerca (no a ti ni a tus clones). */
+  landingWave(character, now) {
+    const { radius, color } = SUPERS.supersalto;
+    const { x, z } = character;
+    this.effects.burst(x, 0.3, z, [color, 0xffd000, 0xffffff, 0x2a1d14], 46, 1.4);
+    this.effects.ring(x, z);
+    this.physics.blast(x, z, radius * 1.5, 8);
+    this.stage.shake(300, 0.55);
+    for (const target of this.targets()) {
+      if (!target.alive || target === character || target.owner === character) continue;
+      if (Math.hypot(target.x - x, target.z - z) <= radius + target.def.radius) this.hit(target, Math.atan2(target.z - z, target.x - x), now);
+    }
+  }
+
+  /** Onda helada: congela unos segundos a los rivales cercanos (no se mueven ni atacan; se les puede golpear). */
+  freezeWave(character, now) {
+    const { radius, freezeMs, color } = SUPERS.helada;
+    this.effects.burst(character.x, 0.5, character.z, [color, 0xffffff, 0xbfefff], 50, 1.6);
+    this.effects.ring(character.x, character.z);
+    for (const other of this.characters.values()) {
+      if (other === character || !other.alive) continue;
+      if (Math.hypot(other.x - character.x, other.z - character.z) > radius) continue;
+      other.frozenUntil = now + freezeMs;
+      other.charging = false;
+      other.lunge = null;
+      this.effects.burst(other.x, 0.8, other.z, [color, 0xffffff], 14, 0.5);
     }
   }
 
@@ -417,7 +538,8 @@ export class ArenaGame {
       if (weapon.state === WEAPON_STATE.HELD) continue;
       for (const target of this.targets()) {
         if (!target.alive) continue;
-        const reach = target.def.radius + weapon.hitRadius;
+        const catching = weapon.owner === target && weapon.catchable && !target.weapon;
+        const reach = target.def.radius + weapon.hitRadius + (catching ? CATCH_MARGIN : 0);
         if (Math.hypot(weapon.x - target.x, weapon.z - target.z) < reach) this.onWeaponTouch(weapon, target, now);
       }
     }
@@ -467,7 +589,7 @@ export class ArenaGame {
     let best = null;
     let bestDistance = attacker.def.lunge.range + 0.001;
     for (const other of this.targets()) {
-      if (other === attacker || other.owner === attacker || !other.alive) continue;
+      if (other === attacker || other.owner === attacker || !other.alive || other.isInvisible?.(performance.now())) continue;
       const distance = Math.hypot(other.x - attacker.x, other.z - attacker.z);
       if (distance >= bestDistance) continue;
       if (!this.physics.lineOfSight(attacker.x, attacker.z, other.x, other.z)) continue;
@@ -504,6 +626,7 @@ export class ArenaGame {
     const fz = Math.sin(attacker.facing);
     this.effects.slash(attacker.x, attacker.z, attacker.facing, def.meleeRange, attacker.color);
     attacker.figure.strike?.();
+    this.parry(attacker, fx, fz, def);
 
     for (const other of this.targets()) {
       if (other === attacker || other.owner === attacker || !other.alive) continue;
@@ -513,6 +636,21 @@ export class ArenaGame {
       if (distance > def.meleeRange + other.def.radius) continue;
       if (distance > 0.01 && (dx * fx + dz * fz) / distance < def.meleeArc) continue;
       this.hit(other, Math.atan2(dz, dx), now);
+    }
+  }
+
+  /** La cuchillada devuelve los búmerangs ajenos que vuelan delante (como en Boomerang Fu): ahora son tuyos. */
+  parry(attacker, fx, fz, def) {
+    for (const weapon of this.weapons) {
+      if (!weapon.dangerous || weapon.owner === attacker) continue;
+      const dx = weapon.x - attacker.x;
+      const dz = weapon.z - attacker.z;
+      const distance = Math.hypot(dx, dz);
+      if (distance > def.meleeRange + PARRY_REACH + weapon.hitRadius) continue;
+      if (distance > 0.01 && (dx * fx + dz * fz) / distance < -0.2) continue; // detrás no
+      weapon.deflect(attacker, attacker.facing);
+      this.effects.burst(weapon.x, 0.7, weapon.z, [0xffffff, 0xffd000], 14, 0.5);
+      this.stage.shake(90, 0.15);
     }
   }
 
@@ -562,10 +700,11 @@ export class ArenaGame {
         this.feedbackSent.set(character.id, flags);
         this.network.sendFeedback(character.id, flags);
       }
-      const abilities = character.abilities.join(',');
+      const list = [...character.abilities, ...(character.superPower ? [character.superPower] : [])]; // la súper, al final
+      const abilities = list.join(',');
       if (this.abilitiesSent.get(character.id) !== abilities) {
         this.abilitiesSent.set(character.id, abilities);
-        this.network.sendAbilities(character.id, [...character.abilities]);
+        this.network.sendAbilities(character.id, list);
       }
     }
   }

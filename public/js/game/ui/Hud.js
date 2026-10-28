@@ -1,5 +1,7 @@
 import { PHASE } from '../match/Match.js';
 
+const { ALL } = window.PowerupCatalog;
+
 const MAX_SLOTS = 8;
 
 /**
@@ -50,9 +52,9 @@ export class Hud {
     this.chips = Array.from({ length: MAX_SLOTS }, (_, i) => {
       const chip = document.createElement('span');
       chip.className = 'hud-chip';
-      chip.innerHTML = `<span class="hud-dot"></span><span>J${i + 1}</span>`;
+      chip.innerHTML = `<span class="hud-dot"></span><span>J${i + 1}</span><span class="hud-super"></span>`;
       container.appendChild(chip);
-      return { chip, dot: chip.firstChild, label: chip.lastChild };
+      return { chip, dot: chip.children[0], label: chip.children[1], power: chip.children[2] };
     });
     this.renderedKey = '';
     this.showArenaInfo();
@@ -75,7 +77,7 @@ export class Hud {
       match.paused,
       game.bots.size,
       match.canStart(),
-      slots.map((s) => s && [s.player.color, s.player.connected, s.player.character, Boolean(s.input?.stale), match.scoreOf(s.player.id)]),
+      slots.map((s) => s && [s.player.color, s.player.connected, s.player.character, Boolean(s.input?.stale), match.scoreOf(s.player.id), game.characters.get(s.player.id)?.superPower ?? null]),
     ]);
     if (key === this.renderedKey) return;
     this.renderedKey = key;
@@ -101,7 +103,10 @@ export class Hud {
     }
 
     slots.forEach((slot, i) => {
-      const { chip, dot, label } = this.chips[i];
+      const { chip, dot, label, power } = this.chips[i];
+      const superPower = slot ? game.characters.get(slot.player.id)?.superPower : null;
+      power.textContent = superPower ? ALL[superPower].icon : '';
+      power.title = superPower ? `Lleva ${ALL[superPower].name}` : '';
       chip.style.display = slot ? '' : 'none'; // solo los jugadores presentes: así caben los 8 junto a los botones
       chip.classList.toggle('on', Boolean(slot?.player.connected));
       chip.classList.toggle('off', Boolean(slot && !slot.player.connected));

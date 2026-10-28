@@ -361,3 +361,19 @@ body {
   background: var(--warn);
   color: #1b1b1b;
 }
+
+/* Recarga del dash: una capa oscura que baja mientras recarga */
+.dash-btn { overflow: hidden; } /* ya es position: absolute: la capa se coloca dentro */
+.dash-btn::before {
+  content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); transform-origin: top; transform: scaleY(0); pointer-events: none;
+}
+.dash-btn.cooling::before { animation: dash-cooldown 0.7s linear forwards; }
+@keyframes dash-cooldown { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+
+/* Superhabilidad (caja dorada): icono dorado que late y aviso dorado */
+.ability.super {
+  border-color: #ffc93c !important; background: radial-gradient(circle, #fff3b0 0%, #ffc93c 70%) !important;
+  box-shadow: 0 0 10px #ffc93c; animation: super-pulse 1.2s ease-in-out infinite;
+}
+@keyframes super-pulse { 50% { transform: scale(1.12); box-shadow: 0 0 18px #ffc93c; } }
+.toast.super { border-color: #ffc93c; background: #3a2a10; color: #fff3b0; }

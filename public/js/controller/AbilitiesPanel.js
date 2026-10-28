@@ -1,4 +1,4 @@
-const { POWERUPS, MAX_ABILITIES } = window.PowerupCatalog;
+const { POWERUPS, SUPERS, ALL, MAX_ABILITIES } = window.PowerupCatalog;
 
 const INFO_MS = 4500;
 const TOAST_MS = 2600;
@@ -7,8 +7,9 @@ const escape = (text) => String(text).replace(/[&<>"']/g, (c) => `&#${c.charCode
 
 /**
  * Power-ups del jugador en su mando: iconos en la barra superior (al tocarlos se explica qué hace cada uno)
- * y un aviso cuando se coge uno nuevo.
+ * y un aviso cuando se coge uno nuevo. La superhabilidad (caja dorada, un solo uso) va aparte, en dorado.
  */
+const WHEN = { dash: 'en tu próximo DASH', throw: 'en tu próximo LANZAMIENTO' };
 export class AbilitiesPanel {
   constructor({ list, info, toast }) {
     this.list = list;
@@ -28,30 +29,38 @@ export class AbilitiesPanel {
   /** Lista nueva desde la pantalla de juego (de la más antigua a la más nueva). */
   set(abilities) {
     const valid = abilities.filter((id) => POWERUPS[id]).slice(-MAX_ABILITIES);
-    const added = valid.filter((id) => !this.abilities.includes(id));
-    this.abilities = valid;
-    this.list.innerHTML = valid.map((id) => {
-      const p = POWERUPS[id];
-      return `<button type="button" class="ability" data-ability="${id}" style="--ability-color:#${p.color.toString(16).padStart(6, '0')}" aria-label="${escape(p.name)}">${p.icon}</button>`;
+    const superPower = abilities.find((id) => SUPERS[id]) ?? null;
+    const all = superPower ? [...valid, superPower] : valid;
+    const added = all.filter((id) => !this.abilities.includes(id));
+    this.abilities = all;
+    this.list.innerHTML = all.map((id) => {
+      const p = ALL[id];
+      return `<button type="button" class="ability${p.super ? ' super' : ''}" data-ability="${id}" style="--ability-color:#${p.color.toString(16).padStart(6, '0')}" aria-label="${escape(p.name)}">${p.icon}</button>`;
     }).join('');
-    this.list.hidden = valid.length === 0;
-    if (added.length) this.announce(added[added.length - 1]);
-    if (!this.info.hidden && !valid.includes(this.info.dataset.ability)) this.info.hidden = true;
+    this.list.hidden = all.length === 0;
+    if (added.length) this.announce(added.includes(superPower) ? superPower : added[added.length - 1]);
+    if (!this.info.hidden && !all.includes(this.info.dataset.ability)) this.info.hidden = true;
   }
 
   announce(id) {
-    const p = POWERUPS[id];
-    if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
-    this.toast.innerHTML = `<b>${p.icon} ${escape(p.name)}</b> · toca el icono de arriba para ver qué hace`;
+    const p = ALL[id];
+    if (navigator.vibrate) navigator.vibrate(p.super ? [60, 40, 60, 40, 120] : [30, 40, 30]);
+    this.toast.classList.toggle('super', Boolean(p.super));
+    this.toast.innerHTML = p.super
+      ? `<b>★ SÚPER: ${p.icon} ${escape(p.name)}</b> · se usa sola ${WHEN[p.trigger]} (una vez)`
+      : `<b>${p.icon} ${escape(p.name)}</b> · toca el icono de arriba para ver qué hace`;
     this.toast.hidden = false;
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => { this.toast.hidden = true; }, TOAST_MS);
   }
 
   explain(id) {
-    const p = POWERUPS[id];
+    const p = ALL[id];
     this.info.dataset.ability = id;
-    this.info.innerHTML = `<div class="ability-title">${p.icon} ${escape(p.name)}</div><p>${escape(p.description)}</p><small>Llevas ${this.abilities.length} de ${MAX_ABILITIES}: al coger otra se pierde la más antigua.</small>`;
+    const note = p.super
+      ? `Superhabilidad de un solo uso: se dispara sola ${WHEN[p.trigger]}. Solo llevas una; si coges otra caja dorada, la cambias.`
+      : `Llevas ${this.abilities.filter((a) => POWERUPS[a]).length} de ${MAX_ABILITIES}: al coger otra se pierde la más antigua.`;
+    this.info.innerHTML = `<div class="ability-title">${p.super ? '★ ' : ''}${p.icon} ${escape(p.name)}</div><p>${escape(p.description)}</p><small>${note}</small>`;
     this.info.hidden = false;
     this.toast.hidden = true;
     clearTimeout(this.infoTimer);

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { plastic } from '../render/materials.js';
-import { POWERUPS } from '../content/powerups.js';
+import { POWERUPS, SUPERS } from '../content/powerups.js';
 import { addOutlines } from '../render/toon.js';
 import { boomerangModel } from '../render/boomerangModels.js';
 
@@ -15,7 +15,7 @@ const SPIN = 24; // rad/s en vuelo
 const HELD_SCALE = 0.75;
 const GROUND_HEIGHT = 0.07;
 const BOUNCE_DEBOUNCE_MS = 60; // un mismo choque puede avisar en varios pasos seguidos
-const NORMAL_FLIGHT = Object.freeze({ explosive: false, fire: false, telekinesis: false });
+const NORMAL_FLIGHT = Object.freeze({ explosive: false, fire: false, telekinesis: false, mega: false });
 
 // Búmerang en V con volumen (extruido y biselado), tumbado en el plano del suelo.
 const GEOMETRY = (() => {
@@ -73,7 +73,7 @@ export class Boomerang {
     this.hand = new THREE.Vector3();
   }
 
-  get hitRadius() { return this.def.radius; }
+  get hitRadius() { return this.flight.mega ? SUPERS.mega.hitRadius : this.def.radius; }
   get x() { return this.body.position.x; }
   get z() { return this.body.position.z; }
   get velocityAngle() { return Math.atan2(this.body.velocity.z, this.body.velocity.x); }
@@ -93,6 +93,7 @@ export class Boomerang {
     character.weapon = this;
     this.game.physics.remove(this.body);
     this.setLook(character);
+    this.flight = NORMAL_FLIGHT;
     this.mesh.scale.setScalar(this.def.scale * HELD_SCALE);
   }
 
@@ -129,9 +130,35 @@ export class Boomerang {
       explosive: thrower.hasAbility('explosivo'),
       fire: thrower.hasAbility('fuego'),
       telekinesis: thrower.hasAbility('telequinesis'),
+      mega: false,
     };
     const speed = THREE.MathUtils.lerp(this.def.minSpeed, this.def.maxSpeed, charge);
     this.launch(thrower.x, thrower.z, Math.cos(angle) * speed, Math.sin(angle) * speed);
+    this.body.linearDamping = 0;
+  }
+
+  /** Megabúmerang: este vuelo es gigante y atraviesa a todos (vuelve a su tamaño al recogerlo o caer). */
+  makeMega() {
+    this.flight = { ...this.flight, mega: true };
+    this.mesh.scale.setScalar(this.def.scale * SUPERS.mega.scale);
+  }
+
+  /**
+   * Devuelto con una cuchillada (como en Boomerang Fu): pasa a ser de quien lo golpea y sale disparado hacia donde
+   * mira, con sus power-ups. Las copias temporales siguen siendo temporales.
+   */
+  deflect(newOwner, angle) {
+    const speed = Math.max(this.def.maxSpeed * 0.85, Math.hypot(this.body.velocity.x, this.body.velocity.z));
+    const mega = this.flight.mega;
+    this.owner = newOwner;
+    this.setLook(newOwner);
+    this.state = WEAPON_STATE.OUT;
+    this.flightMs = this.def.catchDelayMs; // se puede volver a coger enseguida
+    this.bounces = 0;
+    this.pendingBounce = false;
+    this.exploded = false;
+    this.flight = { explosive: newOwner.hasAbility('explosivo'), fire: newOwner.hasAbility('fuego'), telekinesis: newOwner.hasAbility('telequinesis'), mega };
+    this.body.velocity.set(Math.cos(angle) * speed, 0, Math.sin(angle) * speed);
     this.body.linearDamping = 0;
   }
 
@@ -161,6 +188,7 @@ export class Boomerang {
     }
     this.state = WEAPON_STATE.GROUND;
     this.flight = NORMAL_FLIGHT;
+    this.mesh.scale.setScalar(this.def.scale);
     this.body.linearDamping = this.def.groundDamping;
   }
 

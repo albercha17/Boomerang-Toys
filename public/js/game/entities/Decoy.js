@@ -7,7 +7,9 @@ import { POWERUPS } from '../content/powerups.js';
  * Tiene lo que DebrisSystem necesita para desmontarla: x, z, color y figure.
  */
 export class Decoy {
-  constructor(game, owner, angle, now) {
+  /** @param params { runMs, lifeMs, speed } (por defecto, los del Señuelo; la Hipermultiplicación pasa los suyos) */
+  constructor(game, owner, angle, now, params = POWERUPS.senuelo) {
+    this.params = params;
     this.game = game;
     this.owner = owner;
     this.color = owner.color;
@@ -28,7 +30,7 @@ export class Decoy {
 
   /** @returns {boolean} false cuando ya ha cumplido su tiempo */
   update(dt, now) {
-    const { runMs, lifeMs, speed } = POWERUPS.senuelo;
+    const { runMs, lifeMs, speed } = this.params;
     const age = now - this.bornAt;
     const running = age < runMs;
     const v = running ? speed : 0;

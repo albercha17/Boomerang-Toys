@@ -25,7 +25,7 @@
     },
     senuelo: {
       id: 'senuelo', name: 'Señuelo', icon: '🎭', color: 0xff5fa2,
-      description: 'Al hacer dash dejas una copia tuya que sigue corriendo y engaña a los rivales.',
+      description: 'En tu próximo dash dejas una copia tuya que sigue corriendo y engaña a los rivales (una vez).',
       runMs: 1300, lifeMs: 6000, speed: 5,
     },
     explosivo: {
@@ -50,7 +50,46 @@
     },
   });
 
-  const isPowerupId = (id) => typeof id === 'string' && Object.prototype.hasOwnProperty.call(POWERUPS, id);
+  /**
+   * Superhabilidades: salen de las cajas doradas (raras), se lleva una sola a la vez y se gastan al usarla.
+   * `trigger`: se dispara sola en el próximo 'dash' o en el próximo lanzamiento ('throw'), sin botones nuevos.
+   */
+  const SUPERS = Object.freeze({
+    hipermultiplicacion: {
+      id: 'hipermultiplicacion', name: 'Hipermultiplicación', icon: '👥', color: 0xff5fa2, super: true, trigger: 'dash',
+      description: 'En tu próximo dash te clonas 10 veces: los clones salen corriendo en abanico y engañan a todos.',
+      clones: 10, fan: 2.6, runMs: 1500, lifeMs: 7000, speed: 5.5,
+    },
+    tormenta: {
+      id: 'tormenta', name: 'Tormenta de búmerangs', icon: '🌪️', color: 0x00b4c6, super: true, trigger: 'throw',
+      description: 'Tu próximo lanzamiento suelta 12 búmerangs en todas las direcciones.',
+      count: 12,
+    },
+    mega: {
+      id: 'mega', name: 'Megabúmerang', icon: '🪃', color: 0xf4b400, super: true, trigger: 'throw',
+      description: 'Tu próximo búmerang es gigante: el triple de grande y atraviesa a todos los que toca.',
+      scale: 2.6, hitRadius: 0.95,
+    },
+    supersalto: {
+      id: 'supersalto', name: 'Supersalto', icon: '🚀', color: 0xe63946, super: true, trigger: 'dash',
+      description: 'Tu próximo dash es un salto enorme por encima de todo; al caer, una onda tumba a los que estén cerca.',
+      distance: 9, height: 4.5, durationMs: 850, radius: 2.6,
+    },
+    helada: {
+      id: 'helada', name: 'Onda helada', icon: '❄️', color: 0x4fc3f7, super: true, trigger: 'dash',
+      description: 'En tu próximo dash sueltas una onda de frío que congela a los rivales cercanos 3 segundos.',
+      radius: 7, freezeMs: 3000,
+    },
+    fantasma: {
+      id: 'fantasma', name: 'Fantasma', icon: '👻', color: 0x9b5de5, super: true, trigger: 'dash',
+      description: 'En tu próximo dash te vuelves invisible 6 segundos (también para los bots).',
+      invisibleMs: 6000,
+    },
+  });
 
-  return Object.freeze({ MAX_ABILITIES, POWERUPS, isPowerupId });
+  const ALL = Object.freeze({ ...POWERUPS, ...SUPERS });
+  const isPowerupId = (id) => typeof id === 'string' && Object.prototype.hasOwnProperty.call(ALL, id);
+  const isSuperId = (id) => typeof id === 'string' && Object.prototype.hasOwnProperty.call(SUPERS, id);
+
+  return Object.freeze({ MAX_ABILITIES, POWERUPS, SUPERS, ALL, isPowerupId, isSuperId });
 });

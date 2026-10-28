@@ -53,7 +53,7 @@ function registerSocketHandlers(io, players, config, serverInfo) {
 
     socket.on(EVENTS.ABILITIES_REPORT, (packet) => {
       if (screenIds[0] !== socket.id) return;
-      const report = decodeAbilitiesReport(packet, isPowerupId, MAX_ABILITIES);
+      const report = decodeAbilitiesReport(packet, isPowerupId, MAX_ABILITIES + 1); // + la superhabilidad
       const player = report && players.get(report.id);
       if (!player) return;
       player.abilities = report.abilities;

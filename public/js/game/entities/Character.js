@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { makeFigure } from './makeFigure.js';
 import { AimIndicator } from './AimIndicator.js';
 import { ButtonGesture } from '../input/ButtonGesture.js';
-import { POWERUPS, MAX_ABILITIES, ICONS_ON_PICKUP_MS } from '../content/powerups.js';
+import { POWERUPS, ALL, MAX_ABILITIES, ICONS_ON_PICKUP_MS } from '../content/powerups.js';
 
 const { BUTTONS } = window.Protocol;
 
@@ -13,6 +13,8 @@ function rotateTowards(current, target, maxStep) {
 }
 
 const SHIELD_GEOMETRY = new THREE.SphereGeometry(1, 24, 16);
+const ICE_GEOMETRY = new THREE.BoxGeometry(1, 1, 1);
+const ACCELERATION = 16; // 1/s: lo rápido que alcanza la velocidad del joystick (arranque y frenada suaves, no de golpe)
 
 /** Etiqueta "J1" flotando sobre la cabeza, con los iconos de sus habilidades debajo. */
 function createTag(color) {
@@ -69,7 +71,15 @@ export class Character {
     this.shield = new THREE.Mesh(SHIELD_GEOMETRY, new THREE.MeshStandardMaterial({ color: POWERUPS.escudo.color, transparent: true, opacity: 0.25, depthWrite: false }));
     this.shield.scale.setScalar(def.radius * 2.1);
     this.shield.visible = false;
-    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield);
+    // Bloque de hielo (Onda helada)
+    this.ice = new THREE.Mesh(ICE_GEOMETRY, new THREE.MeshStandardMaterial({ color: 0xbfefff, transparent: true, opacity: 0.45, roughness: 0.1, depthWrite: false }));
+    this.ice.scale.set(def.radius * 2.6, 1.3 * def.scale + 0.3, def.radius * 2.6);
+    this.ice.visible = false;
+    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield, this.ice);
+    this.superPower = null; // superhabilidad de un solo uso (caja dorada)
+    this.frozenUntil = 0; // congelado por una Onda helada
+    this.invisibleUntil = 0; // Fantasma
+    this.leap = null; // Supersalto en curso: { fromX, fromZ, toX, toZ, start, until }
     this.iconsUntil = 0; // los iconos de los power-ups se ven al cogerlos y en la cuenta atrás
     this.moveInput = { x: 0, y: 0 }; // último joystick de movimiento (Telequinesis guía el búmerang con él)
     this.abilities = []; // ids de power-up, de la más antigua a la más nueva
@@ -114,6 +124,7 @@ export class Character {
     if (now < this.iconsUntil || this.game.frozen) {
       line = this.abilities.map((id) => POWERUPS[id].icon).join(' ');
     }
+    if (this.superPower) line = `★${ALL[this.superPower].icon}${line ? `  ${line}` : ''}`; // la súper se ve siempre: ¡cuidado!
     const key = `${this.tagLabel}|${line}`;
     if (key === this.tagText) return;
     this.tagText = key;
@@ -143,8 +154,29 @@ export class Character {
 
   clearAbilities() {
     this.abilities = [];
+    this.superPower = null;
     this.refreshTag();
   }
+
+  /** Superhabilidad de la caja dorada: solo una; la nueva sustituye a la que hubiera. */
+  setSuper(id) {
+    this.superPower = id;
+    this.iconsUntil = performance.now() + ICONS_ON_PICKUP_MS;
+    this.refreshTag();
+  }
+
+  /** Si la superhabilidad se dispara con este gesto ('dash' o 'throw'), la gasta y devuelve su id. */
+  useSuper(trigger) {
+    const id = this.superPower;
+    if (!id || ALL[id].trigger !== trigger) return null;
+    this.superPower = null;
+    this.refreshTag();
+    return id;
+  }
+
+  isFrozen(now) { return now < this.frozenUntil; }
+
+  isInvisible(now) { return now < this.invisibleUntil; }
 
   // --- Cuchillada con embestida (como el cuchillo del COD) -----------------
 
@@ -172,6 +204,14 @@ export class Character {
     const dashPressed = this.readDash(input);
     const actions = { melee: false, throwCharge: null, dash: false, teleport: false };
     if (!this.alive) {
+      this.aimedThisPress = false;
+      return actions;
+    }
+    if (this.isFrozen(now)) { // congelado: ni se mueve ni ataca
+      this.body.velocity.set(0, 0, 0);
+      this.moving = 0;
+      this.charging = false;
+      this.charge = 0;
       this.aimedThisPress = false;
       return actions;
     }
@@ -232,7 +272,9 @@ export class Character {
     }
 
     const speed = this.def.speed * (this.charging ? this.def.aimSpeedFactor : 1);
-    this.body.velocity.set(mx * speed, 0, my * speed);
+    const k = 1 - Math.exp(-ACCELERATION * dt); // arranca y frena en ~0,15 s: se siente más suelto
+    const v = this.body.velocity;
+    v.set(v.x + (mx * speed - v.x) * k, 0, v.z + (my * speed - v.z) * k);
     this.moving = this.charging ? magnitude * this.def.aimSpeedFactor : magnitude;
     return actions;
   }
@@ -263,19 +305,25 @@ export class Character {
       const t = (now - this.dashStart) / this.def.dash.durationMs;
       group.position.y += Math.sin(Math.PI * t) * this.def.dash.hopHeight; // saltito durante el dash
     }
+    if (this.leap) group.position.y += this.leap.y; // Supersalto: por el aire
     const fall = this.falling; // cayendo: baja y da vueltas
     group.position.y += fall ? fall.y : 0;
-    group.rotation.x = fall ? Math.sin(fall.spin) * 0.9 : 0;
+    group.rotation.x = fall ? Math.sin(fall.spin) * 0.9 : this.leap ? -this.leap.flip : 0;
     group.rotation.z = fall ? fall.spin * 0.7 : 0;
-    this.tag.position.set(x, 1.3 * this.def.scale + 0.55 + (fall ? fall.y : 0), z);
+    this.tag.position.set(x, 1.3 * this.def.scale + 0.55 + (fall ? fall.y : 0) + (this.leap ? this.leap.y : 0), z);
+    const frozen = this.alive && this.isFrozen(now);
+    this.ice.visible = frozen;
+    if (frozen) this.ice.position.set(x, this.ice.scale.y / 2, z);
     this.shield.visible = this.alive && this.hasAbility('escudo');
     this.shield.position.set(x, this.def.radius * 1.6, z);
     this.refreshTag(now);
 
-    const blinking = now < this.invulnerableUntil && Math.floor(now / 90) % 2 === 1;
-    group.visible = this.alive && !blinking && !this.hidden; // en un matorral no se le ve
-    this.tag.visible = !this.hidden;
-    this.aim.update(x, z, this.facing, this.alive && this.charging, this.charge);
+    const blinking = now < this.invulnerableUntil && !this.leap && Math.floor(now / 90) % 2 === 1;
+    const unseen = this.hidden || this.isInvisible(now); // en un matorral o con Fantasma no se le ve
+    group.visible = this.alive && !blinking && !unseen;
+    this.tag.visible = !unseen;
+    this.shield.visible = this.shield.visible && !unseen;
+    this.aim.update(x, z, this.facing, this.alive && this.charging && !unseen, this.charge);
   }
 
   handPosition(target) {
@@ -285,6 +333,9 @@ export class Character {
   kill(respawnAt) {
     this.alive = false;
     this.falling = null;
+    this.leap = null;
+    this.frozenUntil = 0;
+    this.invisibleUntil = 0;
     this.lunge = null; // los power-ups se conservan durante toda la partida
     this.respawnAt = respawnAt;
     this.charging = false;
@@ -303,6 +354,9 @@ export class Character {
   respawn(x, z, now) {
     this.alive = true;
     this.falling = null;
+    this.leap = null;
+    this.frozenUntil = 0;
+    this.invisibleUntil = 0;
     this.body.position.set(x, this.def.radius, z);
     this.body.velocity.set(0, 0, 0);
     this.game.physics.add(this.body);
@@ -313,8 +367,9 @@ export class Character {
   destroy() {
     this.alive = false;
     this.game.physics.remove(this.body);
-    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield);
+    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield, this.ice);
     this.shield.material.dispose();
+    this.ice.material.dispose();
     this.tag.material.map.dispose();
     this.tag.material.dispose();
   }

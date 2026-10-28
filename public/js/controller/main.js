@@ -106,7 +106,17 @@ const aimStick = new Joystick({
   },
 });
 
-const dashButton = new ActionButton(document.getElementById('dash-btn'), (pressed) => sender.setButton(BUTTONS.DASH, pressed));
+const DASH_COOLDOWN_MS = 700; // como en el juego (content/characters.js): el botón se va rellenando mientras recarga
+const dashEl = document.getElementById('dash-btn');
+let dashReadyAt = 0;
+const dashButton = new ActionButton(dashEl, (pressed) => {
+  sender.setButton(BUTTONS.DASH, pressed);
+  if (!pressed || performance.now() < dashReadyAt) return;
+  dashReadyAt = performance.now() + DASH_COOLDOWN_MS;
+  dashEl.classList.remove('cooling');
+  void dashEl.offsetWidth; // reinicia la animación
+  dashEl.classList.add('cooling');
+});
 
 socket.on(EVENTS.WELCOME, (player) => {
   saveToken(player.token);
