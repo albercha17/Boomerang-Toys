@@ -17,16 +17,19 @@ const HEIGHT = 1.5;
 // brazo: |x| ≥ minX (unidades del modelo de 1,5 de alto) y altura entre minY y maxY (fracción de la altura);
 // `shoulder` es su punto de giro y el brazo se gira desde ahí para que cuelgue al costado (ver restArm).
 // `armsStill`: brazos quietos al andar (el soldadito sujeta el fusil con las dos manos).
+// `legsAxis: 'z'`: piernas una delante y otra detrás (modelo de perfil), en vez de izquierda y derecha.
+// `legSwing`: cuánto balancea las piernas (1 = normal; menos para los de piernas cortas y anchas).
 // Se miden con la foto de frente con rejilla (herramienta de pruebas frente_foto.js + frente_rejilla.py).
 const SETTINGS = {
-  soldado: { yaw: -Math.PI / 2, armsStill: true },
-  bichito: { rigid: true },
-  dino: { rigid: true },
+  soldado: { yaw: -Math.PI / 2, armsStill: true, legsAxis: 'z', legSwing: 0.5 },
+  bichito: { legSwing: 0.55, armsStill: true }, // sus «brazos» son los costados del cuerpo redondo
+  dino: { legSwing: 0.6, armsStill: true },
+  robot: { legSwing: 0.45 },
   payaso: {
     arms: { L: { minX: 0.21, minY: 0.5, maxY: 0.95, shoulder: [0.2, 0.56] }, R: { minX: 0.21, minY: 0.5, maxY: 0.95, shoulder: [-0.2, 0.56] } },
   },
   vaquero: { arms: { L: { minX: 0.13, minY: 0.5, maxY: 0.76, shoulder: [0.13, 0.56] } } },
-  capsula: { arms: { L: { minX: 0.19, minY: 0.45, maxY: 0.86, shoulder: [0.2, 0.5], hang: 0.75 } } }, // cuerpo ancho: más abierto
+  capsula: { arms: { L: { minX: 0.19, minY: 0.45, maxY: 1.01, shoulder: [0.2, 0.5], hang: 0.75 } } }, // cuerpo ancho: más abierto
 };
 const SOURCES = {}; // id -> { pieces: [{ kind, side, geometry, pivot }], material, size }
 const loader = new GLTFLoader();
@@ -35,6 +38,9 @@ const loader = new GLTFLoader();
 const LEG_TOP = 0.24;
 const NECK = 0.56;
 const ARM_X = 0.2;
+const SEAM_ARM = 0.07; // anchura (fracción del ancho) del arranque del brazo que se queda también en el cuerpo
+const SEAM_LEG = 0.05; // altura (fracción) de la parte alta de la pierna que se queda también en el cuerpo
+const SEAM_NECK = 0.03;
 const STRIDE = 2.25; // radianes de zancada por unidad recorrida (a 5 unidades/s, unas 1,8 zancadas por segundo)
 
 /** Carga los modelos que haya (public/models/ia/manifest.json, lo escribe herramientas/modelos_ia.py). */
@@ -107,10 +113,16 @@ function split(scene, settings) {
     let part;
     if (box && Math.abs(xu) >= box.minX && y >= box.minY && y <= box.maxY) part = `arm${side}`; // brazo levantado
     else if (y > NECK) part = 'head';
-    else if (y < LEG_TOP) part = x < 0 ? 'legR' : 'legL'; // el modelo mira a +z: su derecha es -x
+    else if (y < LEG_TOP) part = (settings.legsAxis === 'z' ? z < 0 : x < 0) ? 'legR' : 'legL'; // mira a +z: su derecha es -x
     else if (Math.abs(x) > ARM_X && y > 0.3 && z > -0.15) part = x < 0 ? 'armR' : 'armL'; // sin el pelo de detrás
     else part = 'torso';
     groups[part].push(i);
+    // Costura: el arranque de brazos y piernas y la base del cuello se quedan también en el cuerpo, para que al
+    // moverse no se abra un agujero donde estaban pegados
+    const seam = (part.startsWith('arm') && (box ? Math.abs(xu) <= box.minX + SEAM_ARM * W && y <= box.shoulder[1] + 0.05 : Math.abs(x) <= ARM_X + SEAM_ARM))
+      || (part.startsWith('leg') && y >= LEG_TOP - SEAM_LEG)
+      || (part === 'head' && y <= NECK + SEAM_NECK);
+    if (seam) groups.torso.push(i);
   }
 
   const pivots = {
@@ -118,6 +130,7 @@ function split(scene, settings) {
     armL: [ARM_X * W, (NECK - 0.03) * H, 0], armR: [-ARM_X * W, (NECK - 0.03) * H, 0],
     legL: [0.1 * W, LEG_TOP * H, 0], legR: [-0.1 * W, LEG_TOP * H, 0],
   };
+  if (settings.legsAxis === 'z') { pivots.legL = [0, LEG_TOP * H, 0.1 * D]; pivots.legR = [0, LEG_TOP * H, -0.1 * D]; }
   for (const [side, box] of Object.entries(armBoxes)) if (box.shoulder) pivots[`arm${side}`] = [box.shoulder[0], box.shoulder[1] * H, 0];
   const kinds = { head: 'head', torso: 'torso', armL: 'arm', armR: 'arm', legL: 'leg', legR: 'leg' };
   const pieces = [];
@@ -140,8 +153,8 @@ function split(scene, settings) {
   }
   const map = mesh.material.map ?? null;
   if (map) map.colorSpace = THREE.SRGBColorSpace;
-  const material = toonMaterial(0xffffff, map);
-  return { pieces, material, width: W, rigid: Boolean(settings.rigid), armsStill: Boolean(settings.armsStill) };
+  const material = toonMaterial(0xffffff, map, { side: THREE.DoubleSide }); // por dentro también: sin rendijas al fondo
+  return { pieces, material, width: W, rigid: Boolean(settings.rigid), armsStill: Boolean(settings.armsStill), legSwing: settings.legSwing ?? 1 };
 }
 
 export class IaFigure {
@@ -180,6 +193,7 @@ export class IaFigure {
 
     this.rigid = source.rigid;
     this.armsStill = source.armsStill;
+    this.legSwing = source.legSwing;
     this.walkPhase = 0;
     this.time = Math.random() * 10;
     this.action = null; // { kind: 'strike'|'throw', t }
@@ -214,8 +228,8 @@ export class IaFigure {
 
     // Piernas: se balancean (más largo al correr); en el dash, una delante y otra detrás
     const sin = Math.sin(this.walkPhase);
-    let legSwing = moving && !rigid ? sin * (0.45 + 0.35 * run) : 0;
-    if (dashing && !rigid) legSwing = 0.7;
+    let legSwing = moving && !rigid ? sin * (0.45 + 0.35 * run) * this.legSwing : 0;
+    if (dashing && !rigid) legSwing = 0.7 * this.legSwing;
     if (j.legL) j.legL.rotation.x = ease(j.legL.rotation.x, legSwing, 30);
     if (j.legR) j.legR.rotation.x = ease(j.legR.rotation.x, -legSwing, 30);
 
@@ -230,12 +244,12 @@ export class IaFigure {
     }
     // Brazo derecho: igual, salvo al apuntar (adelante) o al golpear/lanzar
     let arm = dashing && armsFree ? 0.9 : armsFree ? -armSwing : 0;
-    if (aiming && !rigid) arm = -1.35;
+    if (aiming && armsFree) arm = -1.35;
     if (this.action) {
       this.action.t += dt;
       const t = this.action.t / (this.action.kind === 'throw' ? 0.3 : 0.25);
       if (t >= 1) this.action = null;
-      else if (!rigid) arm = this.action.kind === 'throw' ? -2.4 + t * 3 : -1.6 * Math.sin(t * Math.PI);
+      else if (armsFree) arm = this.action.kind === 'throw' ? -2.4 + t * 3 : -1.6 * Math.sin(t * Math.PI); // los de brazos quietos no lo mueven
     }
     if (j.armR) {
       j.armR.rotation.x = ease(j.armR.rotation.x, arm, 22);
