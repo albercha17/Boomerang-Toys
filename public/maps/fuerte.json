@@ -402,90 +402,6 @@
       "collider": "box"
     },
     {
-      "id": "valla_0_i",
-      "model": "valla",
-      "x": -9.2,
-      "y": 0,
-      "z": 10.6,
-      "rot": 0,
-      "size": [
-        3,
-        1.23,
-        0.42
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "valla_0_d",
-      "model": "valla",
-      "x": 9.2,
-      "y": 0,
-      "z": 10.6,
-      "rot": 0,
-      "size": [
-        3,
-        1.23,
-        0.42
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "valla_1_i",
-      "model": "valla",
-      "x": -12.2,
-      "y": 0,
-      "z": 10.6,
-      "rot": 0,
-      "size": [
-        3,
-        1.23,
-        0.42
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "valla_1_d",
-      "model": "valla",
-      "x": 12.2,
-      "y": 0,
-      "z": 10.6,
-      "rot": 0,
-      "size": [
-        3,
-        1.23,
-        0.42
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "valla_2_i",
-      "model": "valla",
-      "x": -15.2,
-      "y": 0,
-      "z": 10.6,
-      "rot": 0,
-      "size": [
-        3,
-        1.23,
-        0.42
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "valla_2_d",
-      "model": "valla",
-      "x": 15.2,
-      "y": 0,
-      "z": 10.6,
-      "rot": 0,
-      "size": [
-        3,
-        1.23,
-        0.42
-      ],
-      "collider": "box"
-    },
-    {
       "id": "saloon",
       "model": "saloon",
       "x": -9.2,
@@ -509,20 +425,6 @@
       "size": [
         5,
         3.65,
-        4.8
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "carro",
-      "model": "carro",
-      "x": 0,
-      "y": 0,
-      "z": 0.5,
-      "rot": 90,
-      "size": [
-        2.4,
-        2.11,
         4.8
       ],
       "collider": "box"
@@ -838,6 +740,229 @@
         1.17
       ],
       "collider": "none"
+    },
+    {
+      "id": "empalizada_1",
+      "model": "empalizada",
+      "x": 16.8,
+      "y": 0,
+      "z": 9,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_2",
+      "model": "empalizada",
+      "x": -16.8,
+      "y": 0,
+      "z": 9,
+      "rot": 0,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_3",
+      "model": "empalizada",
+      "x": -15.4,
+      "y": 0,
+      "z": 10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_4",
+      "model": "empalizada",
+      "x": 12,
+      "y": 0,
+      "z": -10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_5",
+      "model": "empalizada",
+      "x": 12,
+      "y": 0,
+      "z": 10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_6",
+      "model": "empalizada",
+      "x": 5.2,
+      "y": 0,
+      "z": 10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_7",
+      "model": "empalizada",
+      "x": 8.6,
+      "y": 0,
+      "z": 10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_8",
+      "model": "empalizada",
+      "x": 15.4,
+      "y": 0,
+      "z": 10.7,
+      "rot": 90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_9",
+      "model": "empalizada",
+      "x": -8.6,
+      "y": 0,
+      "z": 10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_10",
+      "model": "empalizada",
+      "x": -5.2,
+      "y": 0,
+      "z": 10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "empalizada_11",
+      "model": "empalizada",
+      "x": -12,
+      "y": 0,
+      "z": 10.7,
+      "rot": -90,
+      "size": [
+        0.45,
+        3,
+        1.71
+      ],
+      "collider": "box",
+      "stretch": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "puerta_fuerte_1",
+      "model": "puerta_fuerte",
+      "x": 0,
+      "y": 0,
+      "z": 10.9,
+      "rot": -180,
+      "size": [
+        7,
+        4.13,
+        0.91
+      ],
+      "collider": "box"
     }
   ],
   "movers": [],

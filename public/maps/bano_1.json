@@ -10,7 +10,9 @@
     "tile": 1.4,
     "wallTile": 0.8,
     "pitDepth": 5,
-    "pits": []
+    "pits": [],
+    "floor": "baldosas",
+    "walls": "baldosas"
   },
   "water": [
     {
@@ -112,6 +114,20 @@
         -85,
         0
       ]
+    },
+    {
+      "id": "pianta_in_vaso_1",
+      "model": "pianta_in_vaso",
+      "x": -13,
+      "y": 0,
+      "z": 7.5,
+      "rot": 0,
+      "size": [
+        3.22,
+        3.51,
+        3.16
+      ],
+      "collider": "cylinder"
     }
   ],
   "movers": [],

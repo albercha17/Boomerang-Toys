@@ -142,5 +142,35 @@
     "id": "canon",
     "name": "Cañón",
     "source": "fuerte\\canon.glb"
+  },
+  {
+    "id": "acorn",
+    "name": "acorn",
+    "source": "acorn.glb"
+  },
+  {
+    "id": "chess_knight",
+    "name": "chess knight",
+    "source": "chess-knight.glb"
+  },
+  {
+    "id": "dice",
+    "name": "dice",
+    "source": "dice.glb"
+  },
+  {
+    "id": "pen",
+    "name": "pen",
+    "source": "pen.glb"
+  },
+  {
+    "id": "toothbrush",
+    "name": "toothbrush",
+    "source": "toothbrush.glb"
+  },
+  {
+    "id": "usb_cable",
+    "name": "usb cable",
+    "source": "usb-cable.glb"
   }
 ]
