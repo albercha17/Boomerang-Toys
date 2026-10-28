@@ -5,7 +5,7 @@
  *   { id, name, theme, play,                         play: false = no sale en la rotación del juego
  *     table: { w, d, chamfer, thickness, height }    mesa: salirse = caer (height = altura hasta el suelo)
  *     room:  { w, d, wallHeight, tile, wallTile, pitDepth, pits: [{ x, z, w, d, round }],   o habitación
- *              floor: 'baldosas' | 'arena' | 'hierba', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base)
+ *              floor: 'baldosas' | 'rosa' | 'arena' | 'hierba', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base)
  *     water: [{ x, z, w, d, y, round }]              agua: caer dentro = ahogarse
  *     objects: [{ id, model, x, y, z, rot, tilt: [x, z], size: [w, h, d], stretch: [x, y, z],
  *                 collider: 'box' | 'cylinder' | 'none', bush, loose }]
@@ -22,8 +22,8 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste'];
-  const FLOORS = ['baldosas', 'arena', 'hierba'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie'];
+  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba'];
   const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
   const round = (v) => Math.round(num(v) * 1000) / 1000;

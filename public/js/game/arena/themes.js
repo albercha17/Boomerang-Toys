@@ -149,6 +149,13 @@ export const THEMES = Object.freeze({
     blocks: [0xb5651d, 0x8c4b1f, 0xd9a066, 0x6b8e23, 0xc0392b, 0xe1b15b],
     props: ['naranja'],
   },
+  barbie: {
+    id: 'barbie', name: 'Mundo Barbie',
+    background: 0xffc8e4,
+    sky: 0xfff0f8, ground: 0xd98cb3, sun: 1.75,
+    blocks: [0xff5fa2, 0xffb3d9, 0xc77dff, 0x80ffdb, 0xffd166, 0xffffff],
+    props: ['cojin'],
+  },
   bano: {
     id: 'bano', name: 'Baño',
     background: 0xbfe3e8,

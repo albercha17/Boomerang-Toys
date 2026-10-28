@@ -100,8 +100,8 @@ def material_madera(nombre, tablones=6, largo_x=True):
     return m
 
 
-def material_baldosas(nombre, lado=1.6):
-    """Baldosas de cocina por código: blancas con algunas azul claro y junta gris."""
+def material_baldosas(nombre, lado=1.6, color2=(0.36, 0.58, 0.85)):
+    """Baldosas por código: blancas con algunas de color (azul claro; rosas en el mundo Barbie) y junta gris."""
     m = bpy.data.materials.new(nombre)
     m.use_nodes = True
     nt = m.node_tree
@@ -115,7 +115,7 @@ def material_baldosas(nombre, lado=1.6):
     ladrillo.inputs["Row Height"].default_value = 1
     ladrillo.inputs["Mortar Size"].default_value = 0.03
     ladrillo.inputs["Color1"].default_value = (0.95, 0.95, 0.93, 1)
-    ladrillo.inputs["Color2"].default_value = (0.36, 0.58, 0.85, 1)
+    ladrillo.inputs["Color2"].default_value = (*color2, 1)
     ladrillo.inputs["Mortar"].default_value = (0.7, 0.7, 0.72, 1)
     ladrillo.inputs["Bias"].default_value = 0.35  # mezcla de blancas y azules
     nt.links.new(coord.outputs["Object"], ladrillo.inputs["Vector"])
@@ -161,6 +161,8 @@ def material_terreno(nombre, tipo):
 
 
 def material_suelo(nombre, tipo, lado):
+    if tipo == "rosa":
+        return material_baldosas(nombre, lado, (0.97, 0.60, 0.77))
     return material_baldosas(nombre, lado) if tipo == "baldosas" else material_terreno(nombre, tipo)
 
 
@@ -265,13 +267,29 @@ else:
     for poligono in suelo.data.polygons:
         poligono.material_index = 0
     fuera = []
-    if TIPO != "baldosas":  # al aire libre: el terreno sigue más allá de la zona de juego
+    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba"}.get(TIPO)  # la terraza rosa, sobre césped
+    if FUERA and r.get("walls", "baldosas") == "ninguna":  # al aire libre: el terreno sigue más allá de la zona de juego
         bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -0.12, 0))
         f = bpy.context.active_object
         f.name = "HORNEADO_fuera"
         f.scale = (W * 3, D * 4, 1)
         bpy.ops.object.transform_apply(scale=True)
-        f.data.materials.append(material_terreno("fuera", TIPO))
+        # agujero del tamaño de la zona de juego: el terreno de fuera no tapa los huecos ni el agua
+        bpy.ops.mesh.primitive_cube_add(size=1, location=g2b(0, -0.12, 0))
+        corte = bpy.context.active_object
+        corte.scale = (W, D, 1)
+        bpy.ops.object.transform_apply(scale=True)
+        agujero = f.modifiers.new("agujero", "BOOLEAN")
+        agujero.operation = "DIFFERENCE"
+        agujero.solver = "EXACT"
+        agujero.object = corte
+        bpy.context.view_layer.objects.active = f
+        bpy.ops.object.modifier_apply(modifier=agujero.name)
+        bpy.data.objects.remove(corte, do_unlink=True)
+        f.data.materials.clear()  # el recorte deja huecos de material vacíos
+        f.data.materials.append(material_terreno("fuera", FUERA))
+        for poligono in f.data.polygons:
+            poligono.material_index = 0
         fuera.append(f)
     # Paredes: fondo y lados (la de delante no se pone: taparía la vista); ninguna si el mapa no las quiere
     paredes = []

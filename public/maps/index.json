@@ -26,5 +26,12 @@
     "theme": "oeste",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "barbie",
+    "name": "Mundo Barbie",
+    "theme": "barbie",
+    "play": true,
+    "baked": true
   }
 ]

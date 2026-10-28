@@ -172,5 +172,65 @@
     "id": "usb_cable",
     "name": "usb cable",
     "source": "usb-cable.glb"
+  },
+  {
+    "id": "casa_barbie",
+    "name": "Casa de Barbie",
+    "source": "barbie\\casa_barbie.glb"
+  },
+  {
+    "id": "coche_rosa",
+    "name": "Coche rosa",
+    "source": "barbie\\coche_rosa.glb"
+  },
+  {
+    "id": "palmera",
+    "name": "Palmera",
+    "source": "barbie\\palmera.glb"
+  },
+  {
+    "id": "sombrilla",
+    "name": "Sombrilla",
+    "source": "barbie\\sombrilla.glb"
+  },
+  {
+    "id": "flamenco",
+    "name": "Flamenco",
+    "source": "barbie\\flamenco.glb"
+  },
+  {
+    "id": "hamaca",
+    "name": "Hamaca",
+    "source": "barbie\\hamaca.glb"
+  },
+  {
+    "id": "colchoneta",
+    "name": "Colchoneta",
+    "source": "barbie\\colchoneta.glb"
+  },
+  {
+    "id": "flotador",
+    "name": "Flotador",
+    "source": "barbie\\flotador.glb"
+  },
+  {
+    "id": "corazon",
+    "name": "Corazón",
+    "source": "barbie\\corazon.glb"
+  },
+  {
+    "id": "pintalabios",
+    "name": "Pintalabios",
+    "source": "barbie\\pintalabios.glb"
+  },
+  {
+    "id": "bolso",
+    "name": "Bolso",
+    "source": "barbie\\bolso.glb"
+  },
+  {
+    "id": "rosal",
+    "name": "Rosal",
+    "source": "barbie\\rosal.glb"
   }
 ]

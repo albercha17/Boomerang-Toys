@@ -44,11 +44,12 @@ function woodTexture() {
   });
 }
 
-/** Baldosas blancas y azules con junta gris. Una repetición = 2 baldosas por lado. */
-function tileTexture() {
-  return canvasTexture('baldosas', 256, (g, n) => {
+/** Baldosas blancas y de color (azules; rosas en el mundo Barbie) con junta gris. Una repetición = 2 baldosas por lado. */
+function tileTexture(kind = 'baldosas') {
+  return canvasTexture(kind, 256, (g, n) => {
     const half = n / 2;
-    const colors = ['#f2f1ec', '#8fb4df', '#8fb4df', '#f2f1ec'];
+    const tint = kind === 'rosa' ? '#f7a8cd' : '#8fb4df';
+    const colors = ['#f2f1ec', tint, tint, '#f2f1ec'];
     for (let i = 0; i < 4; i++) {
       g.fillStyle = colors[i];
       g.fillRect((i % 2) * half, Math.floor(i / 2) * half, half, half);
@@ -163,12 +164,26 @@ export function buildProceduralBase(root, data) {
     floorGeometry.rotateX(-Math.PI / 2);
     floorGeometry.translate(0, -0.1, 0);
     const kind = r.floor ?? 'baldosas';
-    const floorMaterial = kind === 'baldosas' ? own(material(tileTexture(), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
+    const tiled = kind === 'baldosas' || kind === 'rosa';
+    const floorMaterial = tiled ? own(material(tileTexture(kind), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
     add(new THREE.Mesh(own(floorGeometry), floorMaterial));
-    if (kind !== 'baldosas') { // al aire libre: el terreno sigue más allá de la zona de juego
+    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba' }[kind]; // la terraza rosa, sobre césped
+    if (outsideKind && (r.walls ?? 'baldosas') === 'ninguna') { // al aire libre: el terreno sigue más allá de la zona de juego
       const outW = r.w * 3;
       const outD = r.d * 4;
-      const outside = add(new THREE.Mesh(own(new THREE.PlaneGeometry(outW, outD)), own(material(terrainTexture(kind), outW / 6, outD / 6, 0xd8d0c4))));
+      // Marco alrededor de la zona de juego (con su agujero: no tapa huecos ni agua)
+      const frame = new THREE.Shape();
+      frame.moveTo(-outW / 2, -outD / 2);
+      frame.lineTo(outW / 2, -outD / 2);
+      frame.lineTo(outW / 2, outD / 2);
+      frame.lineTo(-outW / 2, outD / 2);
+      const hole = new THREE.Path();
+      hole.moveTo(-r.w / 2, -r.d / 2);
+      hole.lineTo(-r.w / 2, r.d / 2);
+      hole.lineTo(r.w / 2, r.d / 2);
+      hole.lineTo(r.w / 2, -r.d / 2);
+      frame.holes.push(hole);
+      const outside = add(new THREE.Mesh(own(new THREE.ShapeGeometry(frame)), own(material(terrainTexture(outsideKind), 1 / 6, 1 / 6, 0xd8d0c4))));
       outside.rotation.x = -Math.PI / 2;
       outside.position.y = -0.12;
     }
@@ -199,7 +214,7 @@ export function buildPitLiners(root, data) {
     const geometry = new THREE.ExtrudeGeometry(pitShape, { depth: depth - 0.02, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2);
     geometry.translate(0, -depth, 0);
-    const material = new THREE.MeshStandardMaterial({ color: 0x9fb6c8, roughness: 0.6, side: THREE.BackSide });
+    const material = new THREE.MeshStandardMaterial({ color: 0xd2ecf7, roughness: 0.5, side: THREE.BackSide }) // azulejo claro de piscina;
     const liner = new THREE.Mesh(geometry, material);
     liner.receiveShadow = true;
     root.add(liner);
