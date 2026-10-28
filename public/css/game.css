@@ -117,3 +117,5 @@ html, body {
 .mo-name { width: 70px; font-weight: bold; }
 .mo-bar { flex: 1; height: 12px; border-radius: 6px; background: rgba(255, 244, 224, 0.15); overflow: hidden; }
 .mo-bar span { display: block; height: 100%; border-radius: 6px; }
+
+a.hud-btn { text-decoration: none; display: inline-flex; align-items: center; }

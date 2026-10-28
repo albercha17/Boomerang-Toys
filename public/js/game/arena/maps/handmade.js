@@ -10,14 +10,10 @@ import { createRandom, hashSeed } from '../generation/random.js';
  * Fuera del dibujo también es vacío.
  * `blocks`: modelos para los «#» (se reparten por el mapa); `movers`: lo que se mueve y aplasta.
  *
- * Los mapas con `scene: true` son de mejor acabado: se describen en public/maps/<id>.json y su escena se monta
- * y se hornea en Blender (herramientas/blender/construir_escena.py); los construye SceneMapBuilder.
+ * Los mapas con `scene: true` son los de verdad: se describen en public/maps/<id>.json (lista en index.json), se
+ * editan en /editor y los construye SceneMapBuilder. Se añaden al cargar con registerSceneMaps().
  */
 export const HANDMADE_MAPS = [
-  // Tablero de la mesa de la cocina: borde = caída, rodillo que rueda y aplasta, repollos para esconderse
-  { id: 'mesa', name: 'Encima de la mesa', theme: 'cocina', scene: true },
-  // Baño con la bañera hundida en el centro: caer al agua = ahogarse; patitos que se empujan
-  { id: 'banera', name: 'La bañera', theme: 'bano', scene: true },
   {
     // Sala lisa para las pruebas automáticas: no sale en la rotación; solo con /?mapa=prueba
     id: 'prueba',
@@ -35,7 +31,13 @@ export const HANDMADE_MAPS = [
   },
 ];
 
-const PLAYABLE = HANDMADE_MAPS.filter((m) => !m.hidden);
+const playable = () => HANDMADE_MAPS.filter((m) => !m.hidden);
+
+/** Añade los mapas de public/maps/index.json (en su orden, antes de la sala de pruebas). */
+export function registerSceneMaps(index) {
+  const entries = index.map((e) => ({ id: e.id, name: e.name, theme: e.theme, scene: true, hidden: e.play === false }));
+  HANDMADE_MAPS.splice(0, HANDMADE_MAPS.length - 1, ...entries);
+}
 
 const CHAR_CELL = { '.': CELL.EMPTY, S: CELL.EMPTY, o: CELL.EMPTY, B: CELL.EMPTY, '#': CELL.BLOCK, '~': CELL.EMPTY, ' ': CELL.EMPTY };
 const SPAWN_COUNT = 8;
@@ -49,15 +51,17 @@ const randomSeed = () => Math.floor(Math.random() * 1e6);
 export function readMapConfig(search = '') {
   const wanted = new URLSearchParams(search).get('mapa');
   const fixed = HANDMADE_MAPS.some((m) => m.id === wanted);
-  const first = fixed ? wanted : PLAYABLE[Math.floor(Math.random() * PLAYABLE.length)].id;
+  const list = playable().length ? playable() : HANDMADE_MAPS;
+  const first = fixed ? wanted : list[Math.floor(Math.random() * list.length)].id;
   return { mapId: first, fixed, seed: randomSeed() };
 }
 
 /** El mapa de la ronda siguiente (o de «Nuevo mapa»): el siguiente de la lista, salvo si se fijó uno. */
 export function nextMapConfig(config) {
   if (config.fixed) return { ...config, seed: randomSeed() };
-  const index = PLAYABLE.findIndex((m) => m.id === config.mapId);
-  return { ...config, mapId: PLAYABLE[(index + 1) % PLAYABLE.length].id, seed: randomSeed() };
+  const list = playable().length ? playable() : HANDMADE_MAPS;
+  const index = list.findIndex((m) => m.id === config.mapId);
+  return { ...config, mapId: list[(index + 1) % list.length].id, seed: randomSeed() };
 }
 
 /** Rejilla y datos del mapa de la configuración, listos para construir (HandmadeBuilder). */

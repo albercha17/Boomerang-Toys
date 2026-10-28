@@ -38,6 +38,8 @@ export class Stage {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(this.renderer.domElement);
+    this.container = container;
+    this.freeCamera = false; // el editor de mapas mueve la cámara a su aire (OrbitControls)
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x2a1d14);
@@ -134,8 +136,8 @@ export class Stage {
   }
 
   resize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = this.container.clientWidth || window.innerWidth;
+    const height = this.container.clientHeight || window.innerHeight;
     this.renderer.setSize(width, height);
     if (this.composer) {
       this.composer.setSize(width, height);
@@ -161,6 +163,7 @@ export class Stage {
 
   render(now) {
     this.adaptQuality(now);
+    if (this.freeCamera) return this.draw();
     this.camera.position.copy(this.basePosition);
     if (now < this.shakeUntil) {
       const s = this.shakeStrength;
@@ -168,6 +171,10 @@ export class Stage {
       this.camera.position.y += (Math.random() - 0.5) * s;
     }
     this.camera.lookAt(this.target);
+    this.draw();
+  }
+
+  draw() {
     if (this.composer) this.composer.render();
     else this.renderer.render(this.scene, this.camera);
   }

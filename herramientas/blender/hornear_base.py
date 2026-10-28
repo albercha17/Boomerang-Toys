@@ -1,10 +1,10 @@
-"""Monta en Blender la escena de un mapa (public/maps/<id>.json) y hornea su luz. Se ejecuta sin ventana:
+"""Hornea en Blender la base de un mapa (mesa o suelo con huecos y paredes) con su luz. Se ejecuta sin ventana:
 
-  blender -b --factory-startup --python herramientas/blender/construir_escena.py -- <id> [--muestras 96] [--rapido]
+  blender -b --factory-startup --python herramientas/blender/hornear_base.py -- <id> [--muestras 64] [--rapido] [--json <ruta>]
 
-Lee los modelos de herramientas/modelos_mapa/<id>/<modelo>.glb (de Tripo); si falta uno, pone una forma provisional.
-Escribe public/models/mapas/<id>/escena.glb (tablero, suelo, objetos fijos y fondo; la luz y las sombras de los
-objetos quedan horneadas en el tablero y el suelo) y los modelos que se mueven (p. ej. rodillo.glb) por separado.
+Lee public/maps/<id>.json (o el de --json) y escribe public/models/mapas/<id>/base.glb y las texturas horneadas.
+Los objetos NO van horneados: el juego los pone en vivo (con sombras en tiempo real) para poder editarlos.
+Lo lanza el servidor al guardar un mapa en el editor (server/maps.js), que luego escribe base.json con su huella.
 
 Ejes: el juego usa y arriba y z hacia la cámara; Blender usa z arriba. Punto del juego (x, y, z) = Blender (x, -z, y).
 """
@@ -22,8 +22,8 @@ args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 MAPA = args[0] if args else "mesa"
 MUESTRAS = int(args[args.index("--muestras") + 1]) if "--muestras" in args else 96
 RAPIDO = "--rapido" in args
-datos = json.loads((RAIZ / "public" / "maps" / f"{MAPA}.json").read_text(encoding="utf-8"))
-MODELOS = RAIZ / "herramientas" / "modelos_mapa" / MAPA
+RUTA_JSON = Path(args[args.index("--json") + 1]) if "--json" in args else RAIZ / "public" / "maps" / f"{MAPA}.json"
+datos = json.loads(RUTA_JSON.read_text(encoding="utf-8"))
 SALIDA = RAIZ / "public" / "models" / "mapas" / MAPA
 SALIDA.mkdir(parents=True, exist_ok=True)
 SUELOS = RAIZ / "public" / "art" / "suelos"
@@ -235,135 +235,6 @@ else:
     HORNEAR += [(suelo, 1024 if RAPIDO else 2048, "suelo_luz")] + [(p, 512 if RAPIDO else 1024, f"{p.name[9:]}_luz") for p in paredes]
 
 
-# --- objetos -----------------------------------------------------------------------
-CARAS_MAX = 12000  # los modelos de Tripo traen ~2 millones de caras: se reducen para el juego
-TEXTURA_MAX = 1024
-
-
-def aligerar(obj):
-    """Reduce la malla a CARAS_MAX caras y sus texturas a TEXTURA_MAX píxeles."""
-    caras = len(obj.data.polygons)
-    if caras > CARAS_MAX:
-        mod = obj.modifiers.new("aligerar", "DECIMATE")
-        mod.ratio = CARAS_MAX / caras
-        bpy.context.view_layer.objects.active = obj
-        bpy.ops.object.modifier_apply(modifier=mod.name)
-        print(f"  {obj.name}: {caras} -> {len(obj.data.polygons)} caras", flush=True)
-        bpy.ops.outliner.orphans_purge(do_recursive=True)  # libera la malla original (mucha memoria)
-    for slot in obj.material_slots:
-        if not slot.material or not slot.material.use_nodes:
-            continue
-        for nodo in slot.material.node_tree.nodes:
-            img = getattr(nodo, "image", None)
-            if img and max(img.size) > TEXTURA_MAX:
-                img.scale(TEXTURA_MAX, TEXTURA_MAX)
-
-
-CARGADOS = {}  # modelo -> objeto ya importado y aligerado (las demás copias comparten su malla)
-
-
-def importar(modelo, nombre):
-    """Copia del modelo (pivote en la base, centrado): se importa y aligera una sola vez. None si no existe."""
-    if modelo not in CARGADOS:
-        CARGADOS[modelo] = importar_glb(modelo, f"_{modelo}")
-        if CARGADOS[modelo] is not None:
-            CARGADOS[modelo].hide_render = True  # el original no sale: solo sus copias
-    original = CARGADOS[modelo]
-    if original is None:
-        return None
-    copia = original.copy()  # comparte malla y materiales
-    copia.hide_render = False
-    copia.name = nombre
-    scene.collection.objects.link(copia)
-    copia.scale = (1, 1, 1)
-    copia.rotation_euler = (0, 0, 0)
-    copia.location = (0, 0, 0)
-    return copia
-
-
-def importar_glb(modelo, nombre):
-    """Importa el GLB del modelo, lo junta en un objeto y lo aligera. None si no existe."""
-    ruta = MODELOS / f"{modelo}.glb"
-    if not ruta.exists():
-        return None
-    antes = set(bpy.data.objects)
-    bpy.ops.import_scene.gltf(filepath=str(ruta))
-    nuevos = [o for o in bpy.data.objects if o not in antes]
-    mallas = [o for o in nuevos if o.type == "MESH"]
-    if not mallas:
-        return None
-    for o in nuevos:
-        o.select_set(o in mallas)
-    bpy.context.view_layer.objects.active = mallas[0]
-    if len(mallas) > 1:
-        bpy.ops.object.join()
-    obj = bpy.context.active_object
-    for o in nuevos:
-        if o != obj and o.name in bpy.data.objects and o.type != "MESH":
-            bpy.data.objects.remove(o, do_unlink=True)
-    obj.parent = None
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    aligerar(obj)
-    # Corrección de cómo viene el modelo (p. ej. tumbado): "models": {"<modelo>": {"rotate": [x, y, z]}} en grados
-    giro = datos.get("models", {}).get(modelo, {}).get("rotate")
-    if giro:
-        from mathutils import Euler
-        obj.data.transform(Euler([math.radians(g) for g in giro]).to_matrix().to_4x4())
-    # pivote abajo y en el centro
-    pts = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
-    centro = Vector((sum(p.x for p in pts) / 8, sum(p.y for p in pts) / 8, min(p.z for p in pts)))
-    obj.data.transform(__import__("mathutils").Matrix.Translation(-centro))
-    obj.location = (0, 0, 0)
-    obj.name = nombre
-    return obj
-
-
-def provisional(obj_def, nombre):
-    w, h, d = obj_def["size"]
-    if obj_def.get("collider") == "cylinder" or obj_def.get("bush"):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.5, depth=1, location=(0, 0, 0.5))
-    else:
-        bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 0.5))
-    obj = bpy.context.active_object
-    bpy.ops.object.transform_apply(location=True)
-    obj.name = nombre
-    color = (0.3, 0.7, 0.3) if obj_def.get("bush") else (0.85, 0.85, 0.9)
-    obj.data.materials.append(material_color(f"prov_{nombre}", color))
-    return obj
-
-
-def encajar(obj, size):
-    """Escala el objeto a sus medidas (ancho x, alto y, fondo z del juego)."""
-    dims = obj.dimensions  # Blender: x, y (fondo), z (alto)
-    w, h, d = size
-    s = min(w / max(dims.x, 1e-3), d / max(dims.y, 1e-3), h / max(dims.z, 1e-3))
-    obj.scale = (s, s, s)
-
-
-faltan = []
-MEDIDAS = {}
-for o in datos["objects"]:
-    obj = importar(o["model"], o["id"])
-    if obj is None:
-        faltan.append(o["model"])
-        obj = provisional(o, o["id"])
-    encajar(obj, o["size"])
-    obj.rotation_euler = (0, 0, math.radians(o.get("rot", 0)))
-    obj.location = g2b(o["x"], o.get("y", 0), o["z"])
-    bpy.context.view_layer.update()
-    pts = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
-    MEDIDAS[o["id"]] = [round(max(p.x for p in pts) - min(p.x for p in pts), 3), round(max(p.z for p in pts) - min(p.z for p in pts), 3),
-                        round(max(p.y for p in pts) - min(p.y for p in pts), 3)]  # ancho, alto, fondo del juego
-
-# --- sillas gigantes alrededor -----------------------------------------------------------
-for i, (x, z, rot) in enumerate(datos.get("background", {}).get("chairs", []) if "table" in datos else []):
-    silla = importar("silla", f"silla_{i}")
-    if silla is None:
-        silla = provisional({"size": [4, 9, 4]}, f"silla_{i}")
-    encajar(silla, datos["background"].get("chairSize", [6, 11, 6]))
-    silla.rotation_euler = (0, 0, math.radians(rot))
-    silla.location = g2b(x, -ALTO, z)
-
 # --- luz: sol de ventana y cielo cálido (misma dirección que el sol del juego) ------------
 sol = bpy.data.lights.new("sol", type="SUN")
 sol.energy = 2.4
@@ -427,29 +298,13 @@ def hornear(obj, tam, nombre):
 
 for objeto, tam, nombre in HORNEAR:
     hornear(objeto, tam, nombre)
-(SALIDA / "medidas.json").write_text(json.dumps(MEDIDAS, indent=1), encoding="utf-8")  # para los choques del juego
+
 
 # --- exportar ------------------------------------------------------------------------------------
 for o in list(scene.objects):
-    if o.type == "LIGHT" or o.name.startswith("_"):  # luces y originales de los modelos (solo van sus copias)
+    if o.type == "LIGHT":
         bpy.data.objects.remove(o, do_unlink=True)
-bpy.ops.export_scene.gltf(filepath=str(SALIDA / "escena.glb"), export_format="GLB", export_yup=True,
+bpy.ops.export_scene.gltf(filepath=str(SALIDA / "base.glb"), export_format="GLB", export_yup=True,
                           export_image_format="JPEG", export_apply=True)
-print("escena exportada", SALIDA / "escena.glb", flush=True)
-
-# Lo que se mueve (rodillo) y los sueltos que se empujan (patitos): por separado, normalizados (pivote en la base)
-bpy.ops.wm.read_factory_settings(use_empty=True)
-aparte = {m["model"] for m in datos.get("movers", [])} | {s["model"] for s in datos.get("loose", [])}
-for modelo in sorted(aparte):
-    m = {"model": modelo}
-    obj = importar_glb(m["model"], m["model"])
-    if obj is None:
-        print("falta el modelo de", m["model"], flush=True)
-        continue
-    bpy.ops.object.select_all(action="DESELECT")
-    obj.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=str(SALIDA / f"{m['model']}.glb"), export_format="GLB", use_selection=True,
-                              export_yup=True, export_image_format="JPEG")
-    bpy.data.objects.remove(obj, do_unlink=True)
-print("FALTAN:", sorted(set(faltan)) if faltan else "ninguno", flush=True)
+print("base exportada", SALIDA / "base.glb", flush=True)
 print("FIN", flush=True)

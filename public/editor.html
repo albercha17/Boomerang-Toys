@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor de mapas · Bumerán de Juguete</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/editor.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/three.module.js",
+        "three/addons/": "/vendor/three-addons/",
+        "cannon-es": "/vendor/cannon/cannon-es.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="bar">
+    <span class="title">EDITOR DE MAPAS</span>
+    <select id="map-select" title="Abrir otro mapa"></select>
+    <button id="btn-new" type="button" title="Crear un mapa desde cero">Nuevo</button>
+    <button id="btn-save" type="button" class="primary" title="Ctrl+S">Guardar</button>
+    <button id="btn-copy" type="button" title="Guardar una copia con otro nombre">Guardar copia</button>
+    <button id="btn-delete" type="button" title="Quitar este mapa del juego">Quitar</button>
+    <span class="sep"></span>
+    <button id="btn-undo" type="button" title="Ctrl+Z">↶ Deshacer</button>
+    <button id="btn-redo" type="button" title="Ctrl+Y">↷ Rehacer</button>
+    <span class="sep"></span>
+    <button id="btn-play" type="button" class="play" title="Guarda y abre el mapa en el juego">▶ Probar</button>
+    <span class="status" id="status"></span>
+  </header>
+
+  <aside class="panel left" id="left">
+    <section>
+      <h2>Herramienta</h2>
+      <div class="tools" id="tools">
+        <button type="button" data-mode="translate" class="active" title="Tecla W">✥ Mover</button>
+        <button type="button" data-mode="rotate" title="Tecla E">⟳ Girar</button>
+        <button type="button" data-mode="scale" title="Tecla R">⤢ Tamaño</button>
+      </div>
+      <label class="check"><input type="checkbox" id="snap" checked> Ajustar (0,5 · 15° · 10 %)</label>
+      <label class="check"><input type="checkbox" id="show-colliders"> Ver choques</label>
+      <label class="check"><input type="checkbox" id="animate"> Mover rodillos</label>
+      <button type="button" id="btn-view" title="Tecla V">Vista del juego</button>
+    </section>
+    <section>
+      <h2>Añadir</h2>
+      <div class="add-special">
+        <button type="button" id="add-mover">Rodillo</button>
+        <button type="button" id="add-spawn">Aparición</button>
+        <button type="button" id="add-water">Agua</button>
+        <button type="button" id="add-pit">Hueco</button>
+      </div>
+      <input type="search" id="lib-filter" placeholder="Buscar objeto…">
+      <div class="library" id="library"></div>
+    </section>
+    <section>
+      <h2>Traer modelos <button type="button" id="btn-refresh-available" class="mini" title="Buscar otra vez">↻</button></h2>
+      <p class="hint" id="available-folder"></p>
+      <div class="available" id="available"></div>
+    </section>
+  </aside>
+
+  <main id="view"></main>
+
+  <aside class="panel right" id="right">
+    <div id="props"></div>
+    <section class="help">
+      <h2>Atajos</h2>
+      <p>Clic: elegir · arrastra las flechas para mover · <b>W</b> mover · <b>E</b> girar · <b>R</b> tamaño ·
+        flechas: mover un poco (Mayús: más) · <b>Q</b>/<b>A</b>: girar 15° · <b>+</b>/<b>−</b>: tamaño ·
+        <b>Ctrl+D</b> duplicar · <b>M</b> copia simétrica · <b>Supr</b> borrar · <b>Esc</b> soltar ·
+        botón derecho: girar la cámara · rueda: acercar · botón central: desplazar.</p>
+    </section>
+  </aside>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/shared/mapFormat.js"></script>
+  <script type="module" src="/js/editor/main.js"></script>
+</body>
+</html>

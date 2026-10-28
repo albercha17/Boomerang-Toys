@@ -6,3 +6,5 @@ __pycache__/
 
 # Modelos originales de Tripo (pesados); el juego usa la escena reducida de public/models/mapas
 herramientas/modelos_mapa/
+# Mapas quitados desde el editor (se guardan por si acaso)
+public/maps/borrados/

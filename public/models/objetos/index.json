@@ -1,0 +1,56 @@
+[
+  {
+    "id": "banera",
+    "name": "Bañera",
+    "source": "banera\\bañera 3d.glb"
+  },
+  {
+    "id": "botes",
+    "name": "Botes",
+    "source": "banera\\salt and pepper shakers 3d model.glb"
+  },
+  {
+    "id": "carton_leche",
+    "name": "Cartón de leche"
+  },
+  {
+    "id": "cesto",
+    "name": "Cesto",
+    "source": "banera\\woven basket 3d model.glb"
+  },
+  {
+    "id": "frutero",
+    "name": "Frutero"
+  },
+  {
+    "id": "lavadora",
+    "name": "Lavadora",
+    "source": "banera\\washing machine 3d model.glb"
+  },
+  {
+    "id": "patito",
+    "name": "Patito",
+    "source": "banera\\rubber duck 3d model.glb"
+  },
+  {
+    "id": "repollo",
+    "name": "Repollo"
+  },
+  {
+    "id": "rodillo",
+    "name": "Rodillo"
+  },
+  {
+    "id": "salero_pimentero",
+    "name": "Salero y pimentero"
+  },
+  {
+    "id": "silla",
+    "name": "Silla"
+  },
+  {
+    "id": "vater",
+    "name": "Váter",
+    "source": "banera\\toilet 3d model.glb"
+  }
+]

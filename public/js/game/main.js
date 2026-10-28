@@ -8,7 +8,7 @@ import { MatchOverlay } from './ui/MatchOverlay.js';
 import { loadArt } from './render/art.js';
 import { loadIaModels } from './entities/IaFigure.js';
 import { loadFurniture } from './render/furniture.js';
-import { HANDMADE_MAPS, readMapConfig } from './arena/maps/handmade.js';
+import { HANDMADE_MAPS, readMapConfig, registerSceneMaps } from './arena/maps/handmade.js';
 import { loadSceneMaps } from './arena/SceneMapBuilder.js';
 import { loadBoomerangModels } from './render/boomerangModels.js';
 
@@ -16,11 +16,10 @@ import { loadBoomerangModels } from './render/boomerangModels.js';
 const MAP_MODELS = HANDMADE_MAPS.filter((m) => !m.scene)
   .flatMap((m) => [...m.blocks, ...(m.props ?? []), m.bush, ...(m.movers ?? []).map((v) => v.model)])
   .filter((name) => name && name !== 'patito');
-const SCENE_MAPS = HANDMADE_MAPS.filter((m) => m.scene).map((m) => m.id);
 
 // Personajes (sus modelos 3D), mapas (modelos y escenas horneadas) y suelos ilustrados.
 const CHARACTER_IDS = window.CharacterCatalog.CHARACTERS.map((c) => c.id);
-await Promise.all([loadArt(), loadFurniture(MAP_MODELS), loadIaModels(['muneca', ...CHARACTER_IDS]), loadSceneMaps(SCENE_MAPS), loadBoomerangModels()]);
+await Promise.all([loadArt(), loadFurniture(MAP_MODELS), loadIaModels(['muneca', ...CHARACTER_IDS]), loadSceneMaps().then(registerSceneMaps), loadBoomerangModels()]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);

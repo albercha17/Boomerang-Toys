@@ -1,4 +1,5 @@
 import { WEAPON_STATE } from '../entities/Boomerang.js';
+import { moverNear } from '../arena/movers.js';
 
 const { BUTTONS } = window.Protocol;
 
@@ -142,7 +143,7 @@ export class BotBrain {
     const me = this.character;
     const arena = game.arena;
     const danger = (x, z) => arena.hazardAt(x, z) !== 0
-      || arena.movers.some((m) => Math.abs(z - m.z) < m.halfLength + 0.6 && Math.abs(x - m.x) < 2.6);
+      || arena.movers.some((m) => moverNear(m, x, z, 2.6, 0.6));
     const safe = (a) => [0.6, 1.2].every((d) => !danger(me.x + Math.cos(a) * d, me.z + Math.sin(a) * d));
     for (const turn of [0, 0.6, -0.6, 1.2, -1.2, 1.9, -1.9, Math.PI]) {
       if (safe(angle + turn)) return angle + turn;

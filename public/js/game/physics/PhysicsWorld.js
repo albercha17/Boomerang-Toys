@@ -96,8 +96,8 @@ export class PhysicsWorld {
     this.world.step(FIXED_STEP, dt, 5);
   }
 
-  /** Bloque fijo: centro y semitamaños en unidades del mundo. */
-  addWall(x, y, z, halfX, halfY, halfZ) {
+  /** Bloque fijo: centro y semitamaños en unidades del mundo; `yaw` lo gira sobre el eje vertical (radianes). */
+  addWall(x, y, z, halfX, halfY, halfZ, yaw = 0) {
     const body = new CANNON.Body({
       type: CANNON.Body.STATIC,
       shape: new CANNON.Box(new CANNON.Vec3(halfX, halfY, halfZ)),
@@ -106,6 +106,7 @@ export class PhysicsWorld {
       collisionFilterGroup: GROUP.WALL,
       collisionFilterMask: MASK.WALL,
     });
+    if (yaw) body.quaternion.setFromEuler(0, yaw, 0);
     body.kind = 'wall';
     this.world.addBody(body);
     return body;

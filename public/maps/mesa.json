@@ -2,6 +2,7 @@
   "id": "mesa",
   "name": "Encima de la mesa",
   "theme": "cocina",
+  "play": true,
   "note": "Unidades del juego (1 = una casilla; los muñecos miden 1,5). x a la derecha, z hacia la cámara. Todo simétrico izquierda-derecha.",
   "table": {
     "w": 38,
@@ -10,16 +11,18 @@
     "thickness": 0.7,
     "height": 9
   },
+  "water": [],
   "objects": [
     {
       "id": "repollo_0",
       "model": "repollo",
       "x": -14.98,
+      "y": 0,
       "z": -7.26,
       "rot": 20,
       "size": [
         2.6,
-        2.0,
+        2,
         2.6
       ],
       "collider": "none",
@@ -29,11 +32,12 @@
       "id": "repollo_1",
       "model": "repollo",
       "x": 14.98,
+      "y": 0,
       "z": -7.26,
       "rot": -20,
       "size": [
         2.6,
-        2.0,
+        2,
         2.6
       ],
       "collider": "none",
@@ -43,11 +47,12 @@
       "id": "repollo_2",
       "model": "repollo",
       "x": -14.98,
+      "y": 0,
       "z": 7.26,
       "rot": 160,
       "size": [
         2.6,
-        2.0,
+        2,
         2.6
       ],
       "collider": "none",
@@ -57,11 +62,12 @@
       "id": "repollo_3",
       "model": "repollo",
       "x": 14.98,
+      "y": 0,
       "z": 7.26,
       "rot": -160,
       "size": [
         2.6,
-        2.0,
+        2,
         2.6
       ],
       "collider": "none",
@@ -71,11 +77,12 @@
       "id": "repollo_4",
       "model": "repollo",
       "x": -16.99,
-      "z": 0.0,
+      "y": 0,
+      "z": 0,
       "rot": 90,
       "size": [
         2.6,
-        2.0,
+        2,
         2.6
       ],
       "collider": "none",
@@ -85,11 +92,12 @@
       "id": "repollo_5",
       "model": "repollo",
       "x": 16.99,
-      "z": 0.0,
+      "y": 0,
+      "z": 0,
       "rot": -90,
       "size": [
         2.6,
-        2.0,
+        2,
         2.6
       ],
       "collider": "none",
@@ -99,11 +107,12 @@
       "id": "leche_0",
       "model": "carton_leche",
       "x": -8.49,
+      "y": 0,
       "z": -7.59,
       "rot": 12,
       "size": [
         1.5,
-        3.0,
+        3,
         1.5
       ],
       "collider": "box"
@@ -112,11 +121,12 @@
       "id": "leche_1",
       "model": "carton_leche",
       "x": 8.49,
+      "y": 0,
       "z": -7.59,
       "rot": -12,
       "size": [
         1.5,
-        3.0,
+        3,
         1.5
       ],
       "collider": "box"
@@ -125,11 +135,12 @@
       "id": "leche_2",
       "model": "carton_leche",
       "x": -8.49,
+      "y": 0,
       "z": 7.59,
       "rot": 168,
       "size": [
         1.5,
-        3.0,
+        3,
         1.5
       ],
       "collider": "box"
@@ -138,11 +149,12 @@
       "id": "leche_3",
       "model": "carton_leche",
       "x": 8.49,
+      "y": 0,
       "z": 7.59,
       "rot": -168,
       "size": [
         1.5,
-        3.0,
+        3,
         1.5
       ],
       "collider": "box"
@@ -150,7 +162,8 @@
     {
       "id": "frutero_a",
       "model": "frutero",
-      "x": 0.0,
+      "x": 0,
+      "y": 0,
       "z": -7.81,
       "rot": 0,
       "size": [
@@ -163,7 +176,8 @@
     {
       "id": "frutero_b",
       "model": "frutero",
-      "x": 0.0,
+      "x": 0,
+      "y": 0,
       "z": 7.81,
       "rot": 180,
       "size": [
@@ -177,6 +191,7 @@
       "id": "sal_0",
       "model": "salero_pimentero",
       "x": -4.25,
+      "y": 0,
       "z": -5.17,
       "rot": 10,
       "size": [
@@ -190,6 +205,7 @@
       "id": "sal_1",
       "model": "salero_pimentero",
       "x": 4.25,
+      "y": 0,
       "z": -5.17,
       "rot": -10,
       "size": [
@@ -203,6 +219,7 @@
       "id": "sal_2",
       "model": "salero_pimentero",
       "x": -4.25,
+      "y": 0,
       "z": 5.17,
       "rot": 170,
       "size": [
@@ -216,6 +233,7 @@
       "id": "sal_3",
       "model": "salero_pimentero",
       "x": 4.25,
+      "y": 0,
       "z": 5.17,
       "rot": -170,
       "size": [
@@ -224,16 +242,106 @@
         1.5
       ],
       "collider": "box"
+    },
+    {
+      "id": "silla_0",
+      "model": "silla",
+      "x": -10.62,
+      "y": -9,
+      "z": -19.25,
+      "rot": 0,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla_1",
+      "model": "silla",
+      "x": 10.62,
+      "y": -9,
+      "z": -19.25,
+      "rot": 0,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla_2",
+      "model": "silla",
+      "x": -27.38,
+      "y": -9,
+      "z": 0,
+      "rot": 90,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla_3",
+      "model": "silla",
+      "x": 27.38,
+      "y": -9,
+      "z": 0,
+      "rot": -90,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla_4",
+      "model": "silla",
+      "x": -10.62,
+      "y": -9,
+      "z": 19.8,
+      "rot": 180,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla_5",
+      "model": "silla",
+      "x": 10.62,
+      "y": -9,
+      "z": 19.8,
+      "rot": 180,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "collider": "none"
     }
   ],
   "movers": [
     {
-      "type": "rodillo",
+      "id": "rodillo",
       "model": "rodillo",
-      "lane": 0,
+      "from": [
+        -12.74,
+        0
+      ],
+      "to": [
+        12.74,
+        0
+      ],
       "length": 6.6,
       "radius": 0.75,
-      "span": 12.74,
       "periodMs": 7000,
       "pauseMs": 900
     }
@@ -271,53 +379,5 @@
       17.21,
       4.18
     ]
-  ],
-  "background": {
-    "chairs": [
-      [
-        -10.62,
-        -19.25,
-        0
-      ],
-      [
-        10.62,
-        -19.25,
-        0
-      ],
-      [
-        -27.38,
-        0.0,
-        90
-      ],
-      [
-        27.38,
-        0.0,
-        -90
-      ],
-      [
-        -10.62,
-        19.8,
-        180
-      ],
-      [
-        10.62,
-        19.8,
-        180
-      ]
-    ],
-    "chairSize": [
-      7.0,
-      13.0,
-      7.0
-    ]
-  },
-  "models": {
-    "salero_pimentero": {
-      "rotate": [
-        0,
-        90,
-        0
-      ]
-    }
-  }
+  ]
 }

@@ -2,6 +2,7 @@ import { PhysicsWorld } from './physics/PhysicsWorld.js';
 import { generateArena, nextMapConfig } from './arena/maps/handmade.js';
 import { buildHandmade } from './arena/HandmadeBuilder.js';
 import { buildSceneMap } from './arena/SceneMapBuilder.js';
+import { moverHits, moverPushAngle } from './arena/movers.js';
 
 /** Mapa con escena horneada (Blender) o dibujado en texto. */
 const buildArena = (stage, physics, layout) => (layout.sceneMap ? buildSceneMap : buildHandmade)(stage, physics, layout);
@@ -160,8 +161,8 @@ export class ArenaGame {
       }
       for (const m of arena.movers) {
         const r = character.def.radius;
-        if (Math.abs(character.x - m.x) < m.radius + r * 0.7 && Math.abs(character.z - m.z) < m.halfLength + r * 0.5) {
-          this.kill(character, m.x > m.lastX ? 0 : Math.PI, now, { force: true });
+        if (moverHits(m, character.x, character.z, r)) {
+          this.kill(character, moverPushAngle(m), now, { force: true });
           this.stage.shake(200, 0.35);
           break;
         }

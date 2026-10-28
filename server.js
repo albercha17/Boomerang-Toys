@@ -7,6 +7,7 @@ const config = require('./server/config');
 const { getLanAddresses } = require('./server/network');
 const { PlayerManager } = require('./server/PlayerManager');
 const { registerSocketHandlers } = require('./server/socketHandlers');
+const { mapsRouter } = require('./server/maps');
 
 const CONTROLLER_PATH = '/mando';
 
@@ -25,6 +26,8 @@ app.use('/vendor/three', express.static(path.join(__dirname, 'node_modules', 'th
 app.use('/vendor/three-addons', express.static(path.join(__dirname, 'node_modules', 'three', 'examples', 'jsm')));
 app.use('/vendor/cannon', express.static(path.join(__dirname, 'node_modules', 'cannon-es', 'dist')));
 app.get(CONTROLLER_PATH, (req, res) => res.sendFile(path.join(__dirname, 'public', 'controller.html')));
+app.get('/editor', (req, res) => res.sendFile(path.join(__dirname, 'public', 'editor.html')));
+app.use('/api', mapsRouter()); // editor de mapas
 
 const addresses = getLanAddresses();
 const serverInfo = {
