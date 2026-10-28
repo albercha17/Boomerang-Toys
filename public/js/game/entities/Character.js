@@ -13,7 +13,6 @@ function rotateTowards(current, target, maxStep) {
 }
 
 const SHIELD_GEOMETRY = new THREE.SphereGeometry(1, 24, 16);
-const WARNING_COLOR = 0xff2a2a;
 
 /** Etiqueta "J1" flotando sobre la cabeza, con los iconos de sus habilidades debajo. */
 function createTag(color) {
@@ -70,12 +69,7 @@ export class Character {
     this.shield = new THREE.Mesh(SHIELD_GEOMETRY, new THREE.MeshStandardMaterial({ color: POWERUPS.escudo.color, transparent: true, opacity: 0.25, depthWrite: false }));
     this.shield.scale.setScalar(def.radius * 2.1);
     this.shield.visible = false;
-    // Halo rojo que parpadea fuera de la línea roja.
-    this.warning = new THREE.Mesh(SHIELD_GEOMETRY, new THREE.MeshBasicMaterial({ color: WARNING_COLOR, transparent: true, opacity: 0.45, depthWrite: false }));
-    this.warning.scale.setScalar(def.radius * 2.3);
-    this.warning.visible = false;
-    this.outsideLeftMs = null; // tiempo que le queda fuera de la zona antes de explotar (null = dentro)
-    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield, this.warning);
+    game.stage.scene.add(this.figure.group, this.aim.group, this.tag, this.shield);
     this.iconsUntil = 0; // los iconos de los power-ups se ven al cogerlos y en la cuenta atrás
     this.moveInput = { x: 0, y: 0 }; // último joystick de movimiento (Telequinesis guía el búmerang con él)
     this.abilities = []; // ids de power-up, de la más antigua a la más nueva
@@ -113,14 +107,11 @@ export class Character {
     this.refreshTag();
   }
 
-  /** Etiqueta: nombre y, debajo, la cuenta atrás fuera de la zona o los iconos de los power-ups (si toca verlos). */
+  /** Etiqueta: nombre y, debajo, los iconos de los power-ups (si toca verlos). */
   refreshTag(now = performance.now()) {
     let line = '';
     let lineColor;
-    if (this.outsideLeftMs !== null && this.outsideLeftMs !== undefined) {
-      line = `⚠ ${Math.ceil(this.outsideLeftMs / 1000)}`;
-      lineColor = '#ff4d4d';
-    } else if (now < this.iconsUntil || this.game.frozen) {
+    if (now < this.iconsUntil || this.game.frozen) {
       line = this.abilities.map((id) => POWERUPS[id].icon).join(' ');
     }
     const key = `${this.tagLabel}|${line}`;
@@ -277,12 +268,6 @@ export class Character {
     this.shield.position.set(x, this.def.radius * 1.6, z);
     this.refreshTag(now);
 
-    // Fuera de la línea roja: parpadeo rojo, cada vez más rápido según se acaba el tiempo.
-    const outside = this.alive && this.outsideLeftMs !== null;
-    const period = outside ? 90 + (this.outsideLeftMs / 5000) * 260 : 1;
-    this.warning.visible = outside && Math.floor(now / period) % 2 === 0;
-    this.warning.position.set(x, this.def.radius * 1.6, z);
-
     const blinking = now < this.invulnerableUntil && Math.floor(now / 90) % 2 === 1;
     group.visible = this.alive && !blinking && !this.hidden; // en un matorral no se le ve
     this.tag.visible = !this.hidden;
@@ -295,8 +280,7 @@ export class Character {
 
   kill(respawnAt) {
     this.alive = false;
-    this.lunge = null;
-    this.outsideLeftMs = null; // los power-ups se conservan durante toda la partida
+    this.lunge = null; // los power-ups se conservan durante toda la partida
     this.respawnAt = respawnAt;
     this.charging = false;
     this.charge = 0;
@@ -323,9 +307,8 @@ export class Character {
   destroy() {
     this.alive = false;
     this.game.physics.remove(this.body);
-    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield, this.warning);
+    this.game.stage.scene.remove(this.figure.group, this.aim.group, this.tag, this.shield);
     this.shield.material.dispose();
-    this.warning.material.dispose();
     this.tag.material.map.dispose();
     this.tag.material.dispose();
   }

@@ -28,7 +28,7 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 
 ### La partida
 
-1. **Sala de pruebas.** Al abrir la pantalla, los jugadores que se conectan aparecen en un mapa aleatorio con **vidas infinitas** para practicar (sin ventanas encima: solo una etiqueta arriba). Aquí se puede cambiar de mapa y añadir o quitar el bot.
+1. **Sala de pruebas.** Al abrir la pantalla, los jugadores que se conectan aparecen en uno de los mapas con **vidas infinitas** para practicar (sin ventanas encima: solo una etiqueta arriba). Aquí se puede cambiar de mapa y añadir o quitar el bot.
 2. **«▶ Empezar»** en la barra superior (o la tecla **Intro**), cuando haya al menos 2 jugadores (vale el bot).
 3. Cada ronda empieza con una **cuenta atrás** (3, 2, 1) en un **mapa nuevo**, con todos quietos. En la ronda **no se reaparece**: quien cae queda eliminado (su móvil muestra **ELIMINADO · espera a la siguiente ronda**).
 4. **El último que queda vivo gana un punto.** Si caen todos a la vez, es empate y nadie suma. Se muestra el marcador y empieza la siguiente ronda en otro mapa.
@@ -60,25 +60,20 @@ Cada pocos segundos aparece una **caja sorpresa** en el mapa (hasta 3 a la vez).
 | 🧠 Telequinesis | En la ida, guías tu búmerang con el joystick de movimiento |
 | 🔥 Fuego | El búmerang deja un rastro de llamas que elimina a los rivales que lo pisan |
 
-### Zonas de la casa y estilo de dibujos animados
+### Mapas
 
-Cada mapa se juega en una zona de la casa, con su suelo, sus colores, su luz, sus objetos sueltos (que se empujan y ruedan) y algo de decorado al fondo:
+Los mapas están **diseñados a mano**, al estilo de Boomerang Fu: pequeños (caben en una pantalla y se cruzan en unos segundos), simétricos y **cada uno con su truco**. Se turnan en cada ronda.
 
-| Zona | Suelo | Objetos sueltos | Al fondo |
-|---|---|---|---|
-| Salón | Listones de madera | Dados, libros, cojines, pelotas de playa | Sofá con cojines y lámpara |
-| Cocina | Baldosas a cuadros | Naranjas, tazas, cajas de cereales | Muebles, encimera y nevera |
-| Patio | Césped con florecitas | Balones, macetas, pelotas de playa | Valla y arbustos |
-| Dormitorio | Moqueta de estrellas | Dados, cojines, libros, pelotas | Cama y baúl de juguetes |
-| Baño | Azulejos | Patitos de goma y pastillas de jabón | Bañera, lavabo y toalla |
+| Mapa | Zona | Truco |
+|---|---|---|
+| **Encima de la mesa** | Cocina | Se juega sobre el tablero: si te sales del borde, **te caes**. Un **rodillo de cocina** rueda de lado a lado por el centro y aplasta. Repollos para esconderse |
+| **La bañera** | Baño | Bañera llena en el centro: si caes, **te ahogas**. Lavabos, retretes y lavadoras para cubrirse; patitos que se empujan |
 
-La zona cambia con cada mapa (al azar según la semilla) y se anuncia en la cuenta atrás de cada ronda. Para fijarla: `/?zona=cocina` (`salon`, `cocina`, `patio`, `dormitorio`, `bano`). Se añaden zonas en `public/js/game/arena/themes.js`.
+- En los **matorrales** (repollos, setos…) no se te ve; se mueven si andas dentro y se te ve mientras cargas el búmerang.
+- Si el búmerang cae al agua o al vacío, vuelve al suelo firme más cercano.
+- `/?mapa=mesa` (o `banera`) juega siempre ese mapa.
 
-Todo se dibuja como en los dibujos animados: sombreado por bandas de color planas y contorno negro en personajes, búmerangs, bloques, juguetes y decorado (`public/js/game/render/toon.js`).
-
-### Mapas grandes y línea roja
-
-Los mapas son más grandes (pequeña 24×14, mediana 32×18 por defecto, grande 40×24). En la mayoría **no hay paredes en el borde**: hay una **línea roja**. Si la cruzas, tienes **5 segundos** para volver: parpadeas en rojo (cada vez más rápido), sobre tu cabeza se ve la cuenta atrás y el móvil vibra y muestra **«¡VUELVE A LA ZONA!»**. Si no vuelves, explotas. Más allá de la línea hay un poco de mesa y un tope invisible. Uno de cada cinco mapas tiene paredes de bloques; `/?paredes=si` o `/?paredes=no` lo fuerzan.
+Todo se dibuja como en los dibujos animados: sombreado por bandas de color planas y contorno negro (`public/js/game/render/toon.js`), con un ligero desenfoque de maqueta en los bordes de la pantalla (`/?calidad=baja` lo quita).
 
 ### Búmerangs, rebotes y cuchillada
 
@@ -91,7 +86,7 @@ Quien conecta su móvil con una ronda empezada espera a la siguiente. Los puntos
 2. En cada móvil, abre la dirección que aparece arriba a la derecha (`http://<IP-del-ordenador>:3000/mando`).
 3. Cada jugador aparece en la arena con su color y su búmerang en la mano.
 4. Para jugar contra la máquina, en la sala pulsa **«+ Añadir bot»** (o la tecla **B**). El mismo botón lo quita. Por ahora hay un bot como máximo.
-5. En la sala, **«Nuevo mapa»** (o la tecla **M**) genera otra arena al momento. Pasando el ratón por el botón se ve la semilla del mapa actual.
+5. En la sala, **«Nuevo mapa»** (o la tecla **M**) pasa al mapa siguiente. Pasando el ratón por el botón se ve cuál es.
 
 ### Mando a pantalla completa y sin zoom
 
@@ -99,19 +94,15 @@ Quien conecta su móvil con una ronda empezada espera a la siguiente. Los puntos
 - **iPhone (Safari):** Apple no deja que una web se ponga sola a pantalla completa. Pulsa **Compartir → Añadir a pantalla de inicio** y abre el mando desde ese icono: así ocupa toda la pantalla, sin barras. El mando muestra un aviso con estos pasos (se puede cerrar).
 - En los dos, el doble toque, el pellizco y la pulsación larga no hacen zoom ni abren menús.
 
-### Elegir la arena
+### Opciones de la pantalla
 
 Desde la dirección de la pantalla del juego (todo opcional):
 
 | Parámetro | Ejemplo | Qué hace |
 |---|---|---|
-| `mapa` | `/?mapa=grande` | Tamaño predefinido: `pequena` (24×14), `mediana` (32×18, por defecto), `grande` (40×24) |
-| `zona` | `/?zona=patio` | Zona de la casa: `salon`, `cocina`, `patio`, `dormitorio`, `bano` (por defecto, una al azar por mapa) |
-| `paredes` | `/?paredes=si` | `si`: borde de bloques; `no`: línea roja (por defecto, al azar: 1 de cada 5 con paredes) |
-| `ancho`, `alto` | `/?ancho=30&alto=16` | Tamaño a medida en casillas, borde incluido (ancho 12–64, alto 10–40) |
-| `densidad` | `/?densidad=0.25` | Cantidad de obstáculos (0–0,3) |
-| `semilla` | `/?semilla=42` | Repite exactamente un mapa (misma semilla = mismo mapa) |
-| `simetria` | `/?simetria=no` | Por defecto el mapa es simétrico izquierda-derecha, para que sea justo |
+| `mapa` | `/?mapa=mesa` | Juega siempre ese mapa (`mesa`, `banera`); sin él, se turnan |
+| `puntos` | `/?puntos=3` | Puntos para ganar la partida (1 a 50; 10 por defecto) |
+| `calidad` | `/?calidad=baja` | Sin efectos de imagen, para ordenadores lentos |
 
 El mando funciona como en Brawl Stars (mejor con el móvil en horizontal):
 
@@ -165,8 +156,8 @@ public/js/game/content/        Catálogos de personajes, armas y power-ups (aqu�
 public/js/game/entities/       Character, ToyFigure (muñeco por piezas), Boomerang, AimIndicator
 public/js/game/effects/        DebrisSystem (piezas con física) y Effects (confeti, ondas, tajos)
 public/js/game/input/          ButtonGesture: toque / mantener / soltar
-public/js/game/arena/          presets (tamaños y límites), ArenaBuilder (3D y física de la arena)
-public/js/game/arena/generation/  Generador procedural puro: semillas, zonas, piezas, accesibilidad, apariciones
+public/js/game/arena/maps/     Mapas diseñados a mano (dibujados en texto) y su lectura
+public/js/game/arena/          HandmadeBuilder (3D, física, agua, vacío, matorrales y lo que se mueve) y zonas de la casa
 public/js/game/bots/           BotBrain: inteligencia del bot (genera la misma entrada que un mando)
 public/js/game/powerups/       PowerUpSpawner: cajas sorpresa en el mapa y entrega de habilidades
 public/js/game/match/          Match: sala, rondas, puntos, victoria y pausa
@@ -177,16 +168,21 @@ public/icons/                  Iconos del mando
 public/js/controller/          Joysticks (movimiento y ataque), botón de dash, envío de entradas, pantalla completa y bloqueo del zoom
 ```
 
-### Generación de arenas
+### Añadir un mapa
 
-1. Se crea la rejilla con su borde y se divide en **zonas de 8×8 casillas** (chunks). Cada zona tiene su propia semilla derivada de la semilla del mapa, así que se puede generar por separado: es la base para escenarios más grandes o que se amplían.
-2. En cada zona se estampan piezas al azar (bloque, pareja, muro, ele, cuadrado, te, torre redonda), siempre con al menos una casilla libre alrededor: nunca se cierran pasillos ni se pegan al borde.
-3. Con simetría, solo se genera la mitad izquierda y se refleja.
-4. Se buscan las regiones de suelo conectadas: los huecos aislados se rellenan con bloques, así **todo el suelo libre es accesible**. Si queda poco suelo libre, se repite con otra variante.
-5. Las **apariciones** se eligen en casillas con todo su alrededor libre, lo más separadas posible entre sí; nadie aparece dentro de un obstáculo ni pegado a él.
-6. Los **juguetes sueltos** (dados y pelotas, con física: se empujan y ruedan) se colocan en el suelo libre, lejos de las apariciones.
+Cada mapa es una entrada en `public/js/game/arena/maps/handmade.js`, dibujado en texto (todas las filas del mismo ancho):
 
-Para el rendimiento, los bloques y torres se dibujan con mallas instanciadas (una llamada de dibujo por tipo de pieza, se vea el tamaño que se vea) y las filas de bloques de cada zona comparten una sola caja física. `buildArena(..., { meshPerChunk: true })` crea mallas por zona para que la cámara descarte las que no ve en escenarios más grandes que la pantalla. Generar un mapa tarda menos de 1 ms.
+| Carácter | Qué es |
+|---|---|
+| `.` | Suelo |
+| `#` | Objeto que bloquea (en el borde, pared; dentro, uno de los modelos de `blocks`) |
+| `~` | Agua: te ahogas |
+| (espacio) | Vacío: te caes (fuera del dibujo también es vacío) |
+| `B` | Matorral: quien está dentro no se ve |
+| `S` | Aparición (si hay menos de 8, se añaden lejos de las demás) |
+| `o` | Juguete suelto que se empuja (de `props`) |
+
+Además: `theme` (zona de la casa: luz y colores), `bush` (modelo del matorral) y `movers` (lo que se mueve y aplasta, como el rodillo). El aspecto propio de cada mapa (la mesa flotando sobre la cocina, la bañera con su agua) se monta en `arena/HandmadeBuilder.js`.
 
 ### Añadir personajes y armas
 
@@ -213,7 +209,7 @@ El rol se indica al conectar: `io({ auth: { role: 'screen' } })` o `io({ auth: {
 | `s:phase` | servidor → mandos | `'lobby'` o `'match'` |
 | `g:abilities` | pantalla anfitriona → servidor | `[idJugador, [idPowerup…]]` cuando cambian (el servidor valida los ids con `shared/powerups.js`) |
 | `s:abilities` | servidor → mando | `[idPowerup…]`, de la más antigua a la más nueva |
-| `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma, 4 = ronda en juego (no se reaparece), 8 = fuera de la línea roja |
+| `s:feedback` | servidor → mando | `estado`: máscara de bits, 1 = vivo, 2 = con arma, 4 = ronda en juego (no se reaparece) |
 | `s:screenInit` | servidor → pantalla | `{ server, roster, state }` al conectar |
 | `s:roster` | servidor → pantalla | lista de jugadores (al entrar/salir; latencia como mucho 1/s) |
 | `s:state` | servidor → pantalla | `{ t, p: [[id, mx, my, ax, ay, botones, ataques, dashes, obsoleto]] }`, a 20 Hz y solo si hay cambios |

@@ -58,10 +58,10 @@ export class Hud {
     this.showArenaInfo();
   }
 
-  /** Semilla y tamaño de la arena actual en la ayuda del botón (para repetir un mapa con ?semilla=). */
+  /** Mapa actual en la ayuda del botón (para jugar siempre ese: ?mapa=id). */
   showArenaInfo() {
-    const { seed, cols, rows } = this.game.arenaConfig;
-    this.mapButton.title = `Tecla M · semilla ${seed} · ${cols}×${rows}`;
+    const { mapId } = this.game.arenaConfig;
+    this.mapButton.title = `Tecla M · ${this.game.arena.theme.name} (?mapa=${mapId})`;
   }
 
   update() {

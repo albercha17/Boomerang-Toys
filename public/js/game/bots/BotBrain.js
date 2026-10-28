@@ -93,7 +93,7 @@ export class BotBrain {
       input.aimX = input.aimY = 0;
     }
 
-    moveAngle = this.stayInside(game, this.avoidWalls(now, moveAngle));
+    moveAngle = this.avoidHazards(game, this.avoidWalls(now, moveAngle));
     input.x = moveAngle === null ? 0 : Math.cos(moveAngle) * speed;
     input.y = moveAngle === null ? 0 : Math.sin(moveAngle) * speed;
     this.dodge(game, now); // si esquiva, sustituye la dirección de movimiento por la del dash
@@ -136,21 +136,7 @@ export class BotBrain {
     return best;
   }
 
-  /** No cruza la línea roja: cerca del borde (o fuera) vuelve hacia el centro. */
-  stayInside(game, angle) {
-    const me = this.character;
-    if (game.arena.handmade) return this.avoidHazards(game, angle);
-    const { minX, maxX, minZ, maxZ } = game.arena.bounds;
-    const margin = 1.2;
-    const near = me.x < minX + margin || me.x > maxX - margin || me.z < minZ + margin || me.z > maxZ - margin;
-    if (!near || angle === null) return near ? Math.atan2(-me.z, -me.x) : angle;
-    const nx = me.x + Math.cos(angle) * margin;
-    const nz = me.z + Math.sin(angle) * margin;
-    const leaving = nx < minX + 0.5 || nx > maxX - 0.5 || nz < minZ + 0.5 || nz > maxZ - 0.5;
-    return leaving ? Math.atan2(-me.z, -me.x) : angle;
-  }
-
-  /** Mapas hechos a mano: no se tira al agua, al vacío ni delante del rodillo; busca el rumbo seguro más parecido. */
+  /** No se tira al agua, al vacío ni delante del rodillo: busca el rumbo seguro más parecido. */
   avoidHazards(game, angle) {
     if (angle === null) return angle;
     const me = this.character;

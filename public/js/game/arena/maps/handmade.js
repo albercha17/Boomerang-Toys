@@ -55,16 +55,55 @@ export const HANDMADE_MAPS = [
     props: ['patito'],
     movers: [],
   },
+  {
+    // Sala lisa para las pruebas automáticas: no sale en la rotación; solo con /?mapa=prueba
+    id: 'prueba',
+    name: 'Sala de pruebas',
+    theme: 'bano',
+    hidden: true,
+    rows: [
+      '#'.repeat(28),
+      ...Array.from({ length: 14 }, () => `#${'.'.repeat(26)}#`),
+      '#'.repeat(28),
+    ],
+    blocks: ['bathroomCabinetDrawer'],
+    props: [],
+    movers: [],
+  },
 ];
+
+const PLAYABLE = HANDMADE_MAPS.filter((m) => !m.hidden);
 
 const CHAR_CELL = { '.': CELL.EMPTY, S: CELL.EMPTY, o: CELL.EMPTY, B: CELL.EMPTY, '#': CELL.BLOCK, '~': CELL.EMPTY, ' ': CELL.EMPTY };
 const SPAWN_COUNT = 8;
 
-export function pickHandmade(seed, wanted = null) {
-  return HANDMADE_MAPS.find((m) => m.id === wanted) ?? HANDMADE_MAPS[Math.abs(seed) % HANDMADE_MAPS.length];
+const randomSeed = () => Math.floor(Math.random() * 1e6);
+
+/**
+ * Configuración de mapa desde la dirección: /?mapa=mesa juega siempre ese mapa; si no, se van turnando.
+ * @returns {{ mapId: string, fixed: boolean, seed: number }}
+ */
+export function readMapConfig(search = '') {
+  const wanted = new URLSearchParams(search).get('mapa');
+  const fixed = HANDMADE_MAPS.some((m) => m.id === wanted);
+  const first = fixed ? wanted : PLAYABLE[Math.floor(Math.random() * PLAYABLE.length)].id;
+  return { mapId: first, fixed, seed: randomSeed() };
 }
 
-/** Convierte un mapa dibujado en el formato de arena del juego (como el que da ArenaGenerator). */
+/** El mapa de la ronda siguiente (o de «Nuevo mapa»): el siguiente de la lista, salvo si se fijó uno. */
+export function nextMapConfig(config) {
+  if (config.fixed) return { ...config, seed: randomSeed() };
+  const index = PLAYABLE.findIndex((m) => m.id === config.mapId);
+  return { ...config, mapId: PLAYABLE[(index + 1) % PLAYABLE.length].id, seed: randomSeed() };
+}
+
+/** Rejilla y datos del mapa de la configuración, listos para construir (HandmadeBuilder). */
+export function generateArena(config) {
+  const map = HANDMADE_MAPS.find((m) => m.id === config.mapId) ?? HANDMADE_MAPS[0];
+  return parseHandmade(map, config.seed);
+}
+
+/** Convierte un mapa dibujado en el formato de arena del juego (lo que construye HandmadeBuilder). */
 export function parseHandmade(map, seed) {
   const rows = map.rows.length;
   const cols = map.rows[0].length;

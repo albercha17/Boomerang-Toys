@@ -53,9 +53,8 @@
     ALIVE: 1,
     ARMED: 2,
     IN_MATCH: 4, // ronda en juego: quien cae no reaparece hasta la siguiente
-    OUTSIDE: 8, // fuera de la línea roja: explota si no vuelve a tiempo
   });
-  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED | FEEDBACK.IN_MATCH | FEEDBACK.OUTSIDE;
+  const FEEDBACK_MASK = FEEDBACK.ALIVE | FEEDBACK.ARMED | FEEDBACK.IN_MATCH;
 
   // Los ejes viajan como enteros en [-AXIS_MAX, AXIS_MAX] para que los mensajes sean compactos.
   const AXIS_MAX = 100;

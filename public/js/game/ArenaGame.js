@@ -1,7 +1,6 @@
 import { PhysicsWorld } from './physics/PhysicsWorld.js';
-import { generateArena } from './arena/generation/ArenaGenerator.js';
-import { buildArena } from './arena/ArenaBuilder.js';
-import { withNewSeed } from './arena/presets.js';
+import { generateArena, nextMapConfig } from './arena/maps/handmade.js';
+import { buildHandmade as buildArena } from './arena/HandmadeBuilder.js';
 import { Character } from './entities/Character.js';
 import { Boomerang, WEAPON_STATE } from './entities/Boomerang.js';
 import { Decoy } from './entities/Decoy.js';
@@ -18,7 +17,6 @@ const { FEEDBACK } = window.Protocol;
 const { CharacterCatalog } = window;
 
 const RESPAWN_MS = 2500;
-const OUTSIDE_LIMIT_MS = 5000; // tiempo fuera de la línea roja antes de explotar
 // Clase que implementa cada tipo de arma del catálogo.
 const WEAPON_CLASSES = { boomerang: Boomerang };
 const MAX_BOTS = 1;
@@ -29,7 +27,7 @@ const BOT_COLOR = '#8d99ae';
  * La simulación corre aquí (pantalla anfitriona); el servidor aporta jugadores y entradas validadas.
  */
 export class ArenaGame {
-  /** @param arenaConfig configuración de la arena (ver arena/presets.js) */
+  /** @param arenaConfig mapa que se juega (ver readMapConfig en arena/maps/handmade.js) */
   constructor(store, network, stage, arenaConfig) {
     this.store = store;
     this.network = network;
@@ -88,8 +86,7 @@ export class ArenaGame {
     this.physics.step(dt);
 
     this.arena.sync();
-    if (this.arena.handmade) this.checkMapHazards(now);
-    else this.checkBoundary(now);
+    this.checkMapHazards(now);
     for (const character of this.characters.values()) character.render(dt, now);
     for (const weapon of this.weapons) weapon.sync(dt);
     this.checkWeaponHits(now);
@@ -103,8 +100,8 @@ export class ArenaGame {
 
   // --- Arena -------------------------------------------------------------
 
-  /** Genera y construye otra arena; todos reaparecen en ella con su búmerang (y conservan sus power-ups). */
-  newArena(now, config = withNewSeed(this.arenaConfig)) {
+  /** Construye el mapa siguiente; todos reaparecen en él con su búmerang (y conservan sus power-ups). */
+  newArena(now, config = nextMapConfig(this.arenaConfig)) {
     this.arenaConfig = config;
     this.arena.dispose();
     this.debris.clear();
@@ -130,8 +127,6 @@ export class ArenaGame {
       character.respawn(spawn.x, spawn.z, now);
       character.facing = Math.atan2(-spawn.z, -spawn.x);
       character.lunge = null;
-      character.outsideSince = 0;
-      character.outsideLeftMs = null;
       character.homeWeapon.attachTo(character);
     }
   }
@@ -183,26 +178,6 @@ export class ArenaGame {
   nearestSafePoint(x, z) {
     const points = this.arena.freePoints.length ? this.arena.freePoints : this.arena.spawnPoints;
     return points.reduce((best, p) => (Math.hypot(p.x - x, p.z - z) < Math.hypot(best.x - x, best.z - z) ? p : best), points[0]);
-  }
-
-  /** Línea roja: fuera de la zona hay 5 s para volver; después, se explota. */
-  checkBoundary(now) {
-    const { minX, maxX, minZ, maxZ } = this.arena.bounds;
-    for (const character of this.characters.values()) {
-      const outside = character.alive && !this.frozen
-        && (character.x < minX || character.x > maxX || character.z < minZ || character.z > maxZ);
-      if (!outside) {
-        character.outsideSince = 0;
-        character.outsideLeftMs = null;
-        continue;
-      }
-      if (!character.outsideSince) character.outsideSince = now;
-      character.outsideLeftMs = Math.max(0, OUTSIDE_LIMIT_MS - (now - character.outsideSince));
-      if (character.outsideLeftMs === 0) {
-        this.explosionEffect(character.x, character.z);
-        this.hit(character, Math.random() * Math.PI * 2, now, { force: true });
-      }
-    }
   }
 
   // --- Jugadores ---------------------------------------------------------
@@ -535,8 +510,7 @@ export class ArenaGame {
       if (character.isBot) continue; // los bots no tienen mando
       const flags = (character.alive ? FEEDBACK.ALIVE : 0)
         | (character.weapon ? FEEDBACK.ARMED : 0)
-        | (this.respawnEnabled ? 0 : FEEDBACK.IN_MATCH)
-        | (character.outsideLeftMs !== null ? FEEDBACK.OUTSIDE : 0);
+        | (this.respawnEnabled ? 0 : FEEDBACK.IN_MATCH);
       if (this.feedbackSent.get(character.id) !== flags) {
         this.feedbackSent.set(character.id, flags);
         this.network.sendFeedback(character.id, flags);

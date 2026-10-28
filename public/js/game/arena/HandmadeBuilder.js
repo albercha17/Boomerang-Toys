@@ -11,8 +11,8 @@ const WALL_HEIGHT = 1.4;
 
 /**
  * Construye un mapa diseñado a mano (arena/maps/handmade.js) en la escena y en el mundo físico.
- * Devuelve la misma interfaz que buildArena y además: hazardAt(x, z) (0 suelo, 1 vacío, 2 agua),
- * bushAt(x, z), movers (lo que aplasta), update(now, dt) y rustle(bush).
+ * Devuelve la arena: spawnPoints y freePoints (mundo), bounds, theme, stats, hazardAt(x, z) (0 suelo,
+ * 1 vacío, 2 agua), bushAt(x, z), movers (lo que aplasta), update(now, dt), rustle(bush), sync() y dispose().
  */
 export function buildHandmade(stage, physics, layout) {
   const { cols, rows, grid, hazard, handmade: map } = layout;
@@ -218,7 +218,6 @@ export function buildHandmade(stage, physics, layout) {
     layout,
     theme,
     walled: true,
-    handmade: true,
     stats: { chunks: 1, blocks: grid.filter((v) => v === CELL.BLOCK).length, pillars: 0, props: props.length, colliders: bodies.length, drawObjects: 0 },
     spawnPoints: layout.spawnPoints.map(({ col, row }) => center(col, row)),
     freePoints,

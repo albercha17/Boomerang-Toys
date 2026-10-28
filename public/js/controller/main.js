@@ -22,7 +22,6 @@ const ui = {
   aimStick: document.getElementById('aim-stick'),
   actionLabel: document.getElementById('action-label'),
   actionHint: document.getElementById('action-hint'),
-  outsideWarning: document.getElementById('outside-warning'),
 };
 
 const abilities = new AbilitiesPanel({
@@ -39,11 +38,7 @@ function showFeedback(flags) {
   const alive = (flags & FEEDBACK.ALIVE) !== 0;
   const armed = (flags & FEEDBACK.ARMED) !== 0;
   const wasAlive = lastFeedback === null || (lastFeedback & FEEDBACK.ALIVE) !== 0;
-  const outside = alive && (flags & FEEDBACK.OUTSIDE) !== 0;
-  const wasOutside = lastFeedback !== null && (lastFeedback & FEEDBACK.OUTSIDE) !== 0;
   if (wasAlive && !alive && navigator.vibrate) navigator.vibrate([90, 50, 160]);
-  else if (outside && !wasOutside && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-  ui.outsideWarning.hidden = !outside;
   lastFeedback = flags;
 
   ui.aimStick.classList.toggle('ko', !alive);
@@ -57,7 +52,6 @@ function showFeedback(flags) {
 
 function resetFeedback() {
   lastFeedback = null;
-  ui.outsideWarning.hidden = true;
   ui.aimStick.classList.remove('ko', 'unarmed');
   ui.actionLabel.textContent = 'LANZAR';
   ui.actionHint.innerHTML = DEFAULT_HINT;
