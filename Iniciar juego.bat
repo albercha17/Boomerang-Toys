@@ -15,8 +15,17 @@ echo Comprobando dependencias...
 call npm install --no-audit --no-fund --loglevel=error
 if errorlevel 1 goto :fin
 
-rem Abre la pantalla del juego en el navegador cuando el servidor ya esta escuchando.
+rem Abre la pantalla del juego cuando el servidor ya esta escuchando. Con Chrome, en una ventana propia del juego
+rem que usa la tarjeta grafica potente (en portatiles con dos, Chrome coge la lenta y el juego va a tirones).
+set "CHROME=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
+if not exist "%CHROME%" set "CHROME=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
+if not exist "%CHROME%" set "CHROME=%LocalAppData%\Google\Chrome\Application\chrome.exe"
+if not exist "%CHROME%" goto :sin_chrome
+start "" /b cmd /c "timeout /t 2 /nobreak >nul & start "" "%CHROME%" --force_high_performance_gpu --user-data-dir="%LocalAppData%\BumeranJuguete\chrome" --no-first-run --start-maximized --app=http://localhost:3000/"
+goto :servidor
+:sin_chrome
 start "" /b cmd /c "timeout /t 2 /nobreak >nul & start "" http://localhost:3000/"
+:servidor
 
 echo Deja esta ventana abierta mientras jugais.
 node server.js --port 3000
