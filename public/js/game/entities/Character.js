@@ -263,7 +263,11 @@ export class Character {
       const t = (now - this.dashStart) / this.def.dash.durationMs;
       group.position.y += Math.sin(Math.PI * t) * this.def.dash.hopHeight; // saltito durante el dash
     }
-    this.tag.position.set(x, 1.3 * this.def.scale + 0.55, z);
+    const fall = this.falling; // cayendo: baja y da vueltas
+    group.position.y += fall ? fall.y : 0;
+    group.rotation.x = fall ? Math.sin(fall.spin) * 0.9 : 0;
+    group.rotation.z = fall ? fall.spin * 0.7 : 0;
+    this.tag.position.set(x, 1.3 * this.def.scale + 0.55 + (fall ? fall.y : 0), z);
     this.shield.visible = this.alive && this.hasAbility('escudo');
     this.shield.position.set(x, this.def.radius * 1.6, z);
     this.refreshTag(now);
@@ -280,6 +284,7 @@ export class Character {
 
   kill(respawnAt) {
     this.alive = false;
+    this.falling = null;
     this.lunge = null; // los power-ups se conservan durante toda la partida
     this.respawnAt = respawnAt;
     this.charging = false;
@@ -297,6 +302,7 @@ export class Character {
 
   respawn(x, z, now) {
     this.alive = true;
+    this.falling = null;
     this.body.position.set(x, this.def.radius, z);
     this.body.velocity.set(0, 0, 0);
     this.game.physics.add(this.body);

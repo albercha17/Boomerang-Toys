@@ -70,6 +70,10 @@ export class ArenaGame {
     this.syncRoster(now);
 
     for (const character of [...this.characters.values()]) {
+      if (character.falling) { // cayendo de la mesa o al agua: sin control hasta que llega abajo
+        this.updateFall(character, dt, now);
+        continue;
+      }
       let input = null; // congelados: nadie se mueve ni ataca
       if (!this.frozen) input = character.isBot ? this.bots.get(character.id).update(now, this) : this.store.inputs.get(character.id) ?? null;
       const actions = character.update(dt, now, input);
@@ -148,11 +152,10 @@ export class ArenaGame {
     const arena = this.arena;
     for (const character of this.characters.values()) {
       character.hidden = false;
-      if (!character.alive || this.frozen) continue;
+      if (!character.alive || this.frozen || character.falling) continue;
       const hazard = arena.hazardAt(character.x, character.z);
       if (hazard) {
-        if (hazard === 2) this.effects.burst(character.x, 0.2, character.z, [0x4fc3f7, 0xffffff, 0xb3e5fc], 22, 0.9); // ¡chof!
-        this.kill(character, Math.random() * Math.PI * 2, now, { force: true });
+        this.startFall(character, hazard);
         continue;
       }
       for (const m of arena.movers) {
@@ -177,6 +180,41 @@ export class ArenaGame {
       weapon.body.velocity.set(0, 0, 0);
       this.effects.ring(safe.x, safe.z);
     }
+  }
+
+  /** Se sale de la mesa o cae al agua: sigue con su impulso, sin control, y la gravedad hace el resto. */
+  startFall(character, hazard) {
+    const v = character.body.velocity;
+    const water = hazard === 2;
+    character.falling = { y: 0, vy: water ? -0.4 : 1.4, vx: v.x * 0.9, vz: v.z * 0.9, spin: 0, water };
+    character.charging = false;
+    character.lunge = null;
+    this.physics.remove(character.body);
+    if (water) this.effects.burst(character.x, 0.2, character.z, [0x4fc3f7, 0xffffff, 0xb3e5fc], 26, 1); // ¡chof!
+  }
+
+  /** Cayendo: gravedad y vueltas; al llegar al suelo de abajo explota (en el agua, se hunde y se ahoga). */
+  updateFall(character, dt, now) {
+    const f = character.falling;
+    const gravity = f.water ? 6 : 24;
+    f.vy -= gravity * dt;
+    f.y += f.vy * dt;
+    const damping = f.water ? 0.92 : 1;
+    f.vx *= damping;
+    f.vz *= damping;
+    character.body.position.x += f.vx * dt;
+    character.body.position.z += f.vz * dt;
+    f.spin += dt * (f.water ? 2 : 7);
+    const bottom = f.water ? -0.9 : (this.arena.fallDepth ?? -6) + 0.3;
+    if (f.y > bottom) return;
+    const { x, z } = character;
+    if (f.water) {
+      this.effects.burst(x, -0.1, z, [0x4fc3f7, 0xffffff], 18, 0.6);
+    } else {
+      this.effects.burst(x, f.y + 0.6, z, [0xff4d00, 0xffd000, 0xffffff, 0x2a1d14], 44, 1.3); // ¡bum! contra el suelo
+      this.stage.shake(220, 0.35);
+    }
+    this.kill(character, Math.atan2(f.vz, f.vx), now, { force: true }); // las piezas se quedan allí abajo
   }
 
   nearestSafePoint(x, z) {

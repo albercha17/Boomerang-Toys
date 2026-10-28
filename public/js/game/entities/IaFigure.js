@@ -11,6 +11,13 @@ import { playerRing } from './playerRing.js';
  * Interfaz de figura: group, parts, animate, handWorldPosition, partsInWorld, strike y throw.
  */
 const HEIGHT = 1.5;
+// Ajustes por personaje: `yaw` gira el modelo (radianes) si no viene mirando al frente; `rigid` para los de cuerpo
+// redondo (no mueven piernas ni brazos sueltos al andar, se contonean enteros; al morir sí se desmontan)
+const SETTINGS = {
+  soldado: { yaw: -Math.PI / 2 },
+  bichito: { rigid: true },
+  dino: { rigid: true },
+};
 const SOURCES = {}; // id -> { pieces: [{ kind, side, geometry, pivot }], material, size }
 const loader = new GLTFLoader();
 
@@ -28,7 +35,7 @@ export async function loadIaModels(ids) {
   } catch { /* sin modelos IA */ }
   await Promise.all(ids.filter((id) => available.includes(id) && !SOURCES[id]).map((id) => new Promise((resolve) => {
     loader.load(`/models/ia/${id}.glb`, (gltf) => {
-      try { SOURCES[id] = split(gltf.scene); } catch (error) { console.warn(`Modelo IA ${id}:`, error); }
+      try { SOURCES[id] = split(gltf.scene, SETTINGS[id] ?? {}); } catch (error) { console.warn(`Modelo IA ${id}:`, error); }
       resolve();
     }, undefined, () => resolve()); // sin modelo: se usa el muñeco de bloques
   })));
@@ -37,12 +44,13 @@ export async function loadIaModels(ids) {
 export const hasIaModel = (id) => Boolean(SOURCES[id]);
 
 /** Une las mallas del modelo y reparte sus triángulos en las 6 piezas. */
-function split(scene) {
+function split(scene, settings) {
   scene.updateMatrixWorld(true);
   const meshes = [];
   scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
   const mesh = meshes[0];
   const geometry = mesh.geometry.clone().applyMatrix4(mesh.matrixWorld).toNonIndexed();
+  if (settings.yaw) geometry.rotateY(settings.yaw);
   geometry.computeBoundingBox();
   const box = geometry.boundingBox;
   const size = box.getSize(new THREE.Vector3());
@@ -94,7 +102,7 @@ function split(scene) {
   const map = mesh.material.map ?? null;
   if (map) map.colorSpace = THREE.SRGBColorSpace;
   const material = toonMaterial(0xffffff, map);
-  return { pieces, material, width: W };
+  return { pieces, material, width: W, rigid: Boolean(settings.rigid) };
 }
 
 export class IaFigure {
@@ -131,6 +139,7 @@ export class IaFigure {
     (this.joints.armR ?? this.model).add(this.hand);
     if (ringColor !== null && ringColor !== undefined) this.group.add(playerRing(ringColor));
 
+    this.rigid = source.rigid;
     this.walkPhase = 0;
     this.time = Math.random() * 10;
     this.action = null; // { kind: 'strike'|'throw', t }
@@ -143,27 +152,29 @@ export class IaFigure {
     this.time += dt;
     this.walkPhase += dt * 11 * speed01;
     const moving = speed01 > 0.05;
-    const swing = moving ? Math.sin(this.walkPhase) * 0.55 * Math.min(1, speed01 * 1.3) : 0;
+    const rigid = this.rigid;
+    const swing = moving && !rigid ? Math.sin(this.walkPhase) * 0.55 * Math.min(1, speed01 * 1.3) : 0;
     const j = this.joints;
     if (j.legL) j.legL.rotation.x = swing;
     if (j.legR) j.legR.rotation.x = -swing;
     if (j.armL) j.armL.rotation.x = -swing * 0.8;
 
-    // Brazo derecho: balanceo, apuntando (adelante) o el golpe/lanzamiento en curso
+    // Brazo derecho: balanceo, apuntando (adelante) o el golpe/lanzamiento en curso (los de cuerpo redondo, quietos)
     let arm = swing * 0.8;
-    if (aiming) arm = -1.35;
+    if (aiming && !rigid) arm = -1.35;
     if (this.action) {
       this.action.t += dt;
       const t = this.action.t / (this.action.kind === 'throw' ? 0.3 : 0.25);
       if (t >= 1) this.action = null;
-      else arm = this.action.kind === 'throw' ? -2.4 + t * 3 : -1.6 * Math.sin(t * Math.PI);
+      else if (!rigid) arm = this.action.kind === 'throw' ? -2.4 + t * 3 : -1.6 * Math.sin(t * Math.PI);
     }
     if (j.armR) j.armR.rotation.x += (arm - j.armR.rotation.x) * Math.min(1, dt * 22);
     if (j.head) j.head.rotation.z = moving ? Math.sin(this.walkPhase * 0.5) * 0.06 : Math.sin(this.time * 1.6) * 0.04;
 
     // Cuerpo: botecito y contoneo al andar; respira parado
     this.body.position.y = moving ? Math.abs(Math.sin(this.walkPhase)) * 0.09 * this.scale : 0;
-    this.body.rotation.x = moving ? Math.sin(this.walkPhase) * 0.07 : 0; // contoneo lateral (el modelo está girado)
+    const waddle = rigid ? 0.16 : 0.07; // los de cuerpo redondo se contonean más (no mueven las piernas)
+    this.body.rotation.x = moving ? Math.sin(this.walkPhase) * waddle : 0; // contoneo lateral (el modelo está girado)
     this.body.rotation.z = moving ? -0.12 * speed01 : 0; // se inclina hacia delante al correr
     const breathe = moving ? 1 : 1 + Math.sin(this.time * 2.4) * 0.015;
     this.model.scale.set(this.scale, this.scale * breathe, this.scale);

@@ -174,7 +174,7 @@ for sx in (-1, 1):
 bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -ALTO, 0))
 suelo = bpy.context.active_object
 suelo.name = "HORNEADO_suelo"
-suelo.scale = (70, 50, 1)
+suelo.scale = (W * 3.6, D * 4.2, 1)
 bpy.ops.object.transform_apply(scale=True)
 suelo.data.materials.append(material_baldosas("baldosas"))
 

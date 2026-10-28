@@ -124,7 +124,7 @@ export function buildSceneMap(stage, physics, layout) {
   });
 
   stage.setMood(theme);
-  stage.frame(t.w + 1.2, t.d + 1.2);
+  stage.frame(t.w + 1.5, t.d + 3); // con margen: que se vea el borde de abajo de la mesa
 
   // Puntos libres para los power-ups: encima de la mesa, lejos de objetos, matorrales y del carril del rodillo
   const blockers = data.objects.map((o) => ({ x: o.x, z: o.z, r: Math.max(o.size[0], o.size[2]) / 2 + 0.9 }));
@@ -148,6 +148,7 @@ export function buildSceneMap(stage, physics, layout) {
     bounds: { minX: -t.w / 2, maxX: t.w / 2, minZ: -t.d / 2, maxZ: t.d / 2 },
     movers,
     bushes,
+    fallDepth: -t.height, // el suelo de la cocina, donde se estrella quien cae de la mesa
 
     hazardAt(x, z) {
       return onTable(t, x, z) ? 0 : 1;

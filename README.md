@@ -39,9 +39,9 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 
 Al abrir el mando hay que **elegir personaje** y pulsar **JUGAR** para entrar en la sala de espera. Los personajes no se repiten **mientras quede alguno libre**: los que ya tiene otro jugador salen **tachados** («Elegido por J2»); si están todos cogidos, se pueden repetir (el color del aro y del nombre distingue a cada jugador). El servidor es quien decide. En la sala, el botón **👤 Cambiar** del mando permite elegir otro; con la partida empezada no se puede cambiar. El bot coge uno libre (o repite si no queda).
 
-Por ahora hay un personaje: la **muñeca fashion**, un modelo 3D sacado de su dibujo (que se parte en cabeza, torso, brazos y piernas para andar como un juguete y desmontarse al morir). Los demás se irán añadiendo uno a uno.
+Hay 9 juguetes: muñeca fashion, Muñeca Pop, peluche azul, payaso, vaquero, dinosaurio, bichito amarillo, soldadito y robot transformable. Cada uno es un modelo 3D (de Tripo o sacado de su dibujo) que el juego parte en cabeza, torso, brazos y piernas para andar como un juguete y desmontarse al morir. Los de cuerpo redondo (dinosaurio y bichito) se contonean enteros. Ajustes por personaje (giro, cuerpo redondo) en `entities/IaFigure.js`.
 
-Para añadir uno: su entrada en `shared/characters.js` (nombre, icono, descripción) y su modelo en `public/models/ia/<id>.glb` (apuntado en `public/models/ia/manifest.json`). `herramientas/modelos_ia.py <id>` saca el modelo de su dibujo (`herramientas/dibujos/personaje_<id>.png`) con TRELLIS.
+Para añadir uno: su entrada en `shared/characters.js` (nombre, icono, descripción) y su modelo en `public/models/ia/<id>.glb` (apuntado en `public/models/ia/manifest.json`). Un modelo de Tripo se prepara con `blender -b --python herramientas/blender/preparar_personaje.py -- entrada.glb public/models/ia/<id>.glb` (lo reduce a 15.000 caras); `herramientas/modelos_ia.py <id>` lo saca de su dibujo con TRELLIS.
 
 ### Power-ups (inspirados en Boomerang Fu)
 
@@ -66,7 +66,7 @@ Los mapas están **diseñados a mano**, al estilo de Boomerang Fu: pequeños (ca
 
 | Mapa | Zona | Truco |
 |---|---|---|
-| **Encima de la mesa** | Cocina | Se juega sobre el tablero: si te sales del borde, **te caes**. Un **rodillo de cocina** rueda de lado a lado por el centro y aplasta. Repollos para esconderse |
+| **Encima de la mesa** | Cocina | Se juega sobre el tablero (34×20): si te sales del borde, **te caes** con tu impulso, dando vueltas, y explotas al llegar al suelo de la cocina. Un **rodillo de cocina** rueda de lado a lado por el centro y aplasta. Repollos para esconderse |
 | **La bañera** | Baño | Bañera llena en el centro: si caes, **te ahogas**. Lavabos, retretes y lavadoras para cubrirse; patitos que se empujan |
 
 - En los **matorrales** (repollos, setos…) no se te ve; se mueven si andas dentro y se te ve mientras cargas el búmerang.

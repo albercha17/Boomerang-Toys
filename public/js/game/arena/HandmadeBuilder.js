@@ -224,6 +224,7 @@ export function buildHandmade(stage, physics, layout) {
     bounds: { minX: originX, maxX: -originX, minZ: originZ, maxZ: -originZ },
     movers,
     bushes,
+    fallDepth: map.theme === 'cocina' ? -TABLE_DROP : -TUB_DEPTH,
 
     /** 0 suelo, 1 vacío (te caes), 2 agua (te ahogas). Fuera del mapa, vacío. */
     hazardAt(x, z) {
