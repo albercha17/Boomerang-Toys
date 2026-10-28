@@ -117,7 +117,7 @@ def material_baldosas(nombre, lado=1.6):
     ladrillo.inputs["Color1"].default_value = (0.95, 0.95, 0.93, 1)
     ladrillo.inputs["Color2"].default_value = (0.36, 0.58, 0.85, 1)
     ladrillo.inputs["Mortar"].default_value = (0.7, 0.7, 0.72, 1)
-    ladrillo.inputs["Bias"].default_value = 0.7  # sobre todo blancas
+    ladrillo.inputs["Bias"].default_value = 0.35  # mezcla de blancas y azules
     nt.links.new(coord.outputs["Object"], ladrillo.inputs["Vector"])
     nt.links.new(ladrillo.outputs["Color"], bsdf.inputs["Base Color"])
     return m
@@ -132,51 +132,103 @@ def material_color(nombre, rgb, rugosidad=0.5):
     return m
 
 
-# --- la mesa: tablero con esquinas recortadas y patas -------------------------
-t = datos["table"]
-W, D, C, GROSOR, ALTO = t["w"], t["d"], t["chamfer"], t["thickness"], t["height"]
-contorno = [(-W / 2 + C, -D / 2), (W / 2 - C, -D / 2), (W / 2, -D / 2 + C), (W / 2, D / 2 - C),
-            (W / 2 - C, D / 2), (-W / 2 + C, D / 2), (-W / 2, D / 2 - C), (-W / 2, -D / 2 + C)]
-malla = bpy.data.meshes.new("tablero")
-bm = bmesh.new()
-arriba = [bm.verts.new(g2b(x, 0, z)) for x, z in contorno]
-abajo = [bm.verts.new(g2b(x, -GROSOR, z)) for x, z in contorno]
-bm.faces.new(arriba)
-bm.faces.new(list(reversed(abajo)))
-for i in range(len(contorno)):
-    j = (i + 1) % len(contorno)
-    bm.faces.new([arriba[i], abajo[i], abajo[j], arriba[j]])
-bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-bm.to_mesh(malla)
-bm.free()
-tablero = bpy.data.objects.new("HORNEADO_tablero", malla)
-scene.collection.objects.link(tablero)
-madera = material_madera("madera")
-tablero.data.materials.append(madera)
-bpy.context.view_layer.objects.active = tablero
-tablero.select_set(True)
-bpy.ops.object.mode_set(mode="EDIT")
-bpy.ops.mesh.select_all(action="SELECT")
-bpy.ops.uv.cube_project(cube_size=W)  # coordenadas para la textura de madera
-bpy.ops.object.mode_set(mode="OBJECT")
-tablero.select_set(False)
+HORNEAR = []  # (objeto, tamaño de la imagen, nombre)
+if "table" in datos:
+    # --- la mesa: tablero con esquinas recortadas y patas -------------------------
+    t = datos["table"]
+    W, D, C, GROSOR, ALTO = t["w"], t["d"], t["chamfer"], t["thickness"], t["height"]
+    contorno = [(-W / 2 + C, -D / 2), (W / 2 - C, -D / 2), (W / 2, -D / 2 + C), (W / 2, D / 2 - C),
+                (W / 2 - C, D / 2), (-W / 2 + C, D / 2), (-W / 2, D / 2 - C), (-W / 2, -D / 2 + C)]
+    malla = bpy.data.meshes.new("tablero")
+    bm = bmesh.new()
+    arriba = [bm.verts.new(g2b(x, 0, z)) for x, z in contorno]
+    abajo = [bm.verts.new(g2b(x, -GROSOR, z)) for x, z in contorno]
+    bm.faces.new(arriba)
+    bm.faces.new(list(reversed(abajo)))
+    for i in range(len(contorno)):
+        j = (i + 1) % len(contorno)
+        bm.faces.new([arriba[i], abajo[i], abajo[j], arriba[j]])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(malla)
+    bm.free()
+    tablero = bpy.data.objects.new("HORNEADO_tablero", malla)
+    scene.collection.objects.link(tablero)
+    madera = material_madera("madera")
+    tablero.data.materials.append(madera)
+    bpy.context.view_layer.objects.active = tablero
+    tablero.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.cube_project(cube_size=W)  # coordenadas para la textura de madera
+    bpy.ops.object.mode_set(mode="OBJECT")
+    tablero.select_set(False)
 
-patas = material_color("patas", (0.55, 0.32, 0.16), 0.55)
-for sx in (-1, 1):
-    for sz in (-1, 1):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.55, depth=ALTO - GROSOR,
-                                            location=g2b(sx * (W / 2 - 1.6), -GROSOR - (ALTO - GROSOR) / 2, sz * (D / 2 - 1.4)))
-        pata = bpy.context.active_object
-        pata.name = f"pata_{sx}_{sz}"
-        pata.data.materials.append(patas)
+    patas = material_color("patas", (0.55, 0.32, 0.16), 0.55)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.55, depth=ALTO - GROSOR,
+                                                location=g2b(sx * (W / 2 - 1.6), -GROSOR - (ALTO - GROSOR) / 2, sz * (D / 2 - 1.4)))
+            pata = bpy.context.active_object
+            pata.name = f"pata_{sx}_{sz}"
+            pata.data.materials.append(patas)
 
-# --- suelo de la cocina -----------------------------------------------------------
-bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -ALTO, 0))
-suelo = bpy.context.active_object
-suelo.name = "HORNEADO_suelo"
-suelo.scale = (W * 3.6, D * 4.2, 1)
-bpy.ops.object.transform_apply(scale=True)
-suelo.data.materials.append(material_baldosas("baldosas"))
+    # --- suelo de la cocina -----------------------------------------------------------
+    bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -ALTO, 0))
+    suelo = bpy.context.active_object
+    suelo.name = "HORNEADO_suelo"
+    suelo.scale = (W * 3.6, D * 4.2, 1)
+    bpy.ops.object.transform_apply(scale=True)
+    suelo.data.materials.append(material_baldosas("baldosas"))
+
+
+
+    HORNEAR += [(tablero, 1024 if RAPIDO else 2048, "tablero_luz"), (suelo, 512 if RAPIDO else 1024, "suelo_luz")]
+else:
+    # --- habitación: suelo de azulejos con huecos (la bañera hundida) y paredes al fondo y a los lados ----------
+    r = datos["room"]
+    W, D, ALTO_PARED = r["w"], r["d"], r.get("wallHeight", 3)
+    ALTO = r.get("pitDepth", 3)  # profundidad de los huecos (allí va el suelo de fondo de la física)
+    huecos = r.get("pits", [])
+    # Suelo: losa fina con los huecos recortados (cajas de esquinas redondeadas, con la forma de la bañera)
+    bpy.ops.mesh.primitive_cube_add(size=1, location=g2b(0, -0.05, 0))
+    suelo = bpy.context.active_object
+    suelo.name = "HORNEADO_suelo"
+    suelo.scale = (W, D, 0.1)
+    bpy.ops.object.transform_apply(scale=True)
+    for i, h in enumerate(huecos):
+        bpy.ops.mesh.primitive_cube_add(size=1, location=g2b(h["x"], -1, h["z"]))
+        corte = bpy.context.active_object
+        corte.scale = (h["w"], h["d"], 4)
+        bpy.ops.object.transform_apply(scale=True)
+        if h.get("round"):
+            bisel = corte.modifiers.new("redondo", "BEVEL")
+            bisel.width = min(h["round"], h["w"] / 2 - 0.01, h["d"] / 2 - 0.01)
+            bisel.segments = 10
+            bisel.affect = "EDGES"
+            bpy.context.view_layer.objects.active = corte
+            bpy.ops.object.modifier_apply(modifier=bisel.name)
+        hueco = suelo.modifiers.new(f"hueco{i}", "BOOLEAN")
+        hueco.operation = "DIFFERENCE"
+        hueco.solver = "EXACT"
+        hueco.object = corte
+        bpy.context.view_layer.objects.active = suelo
+        bpy.ops.object.modifier_apply(modifier=hueco.name)
+        bpy.data.objects.remove(corte, do_unlink=True)
+    suelo.data.materials.clear()  # el recorte deja huecos de material vacíos
+    suelo.data.materials.append(material_baldosas("baldosas", r.get("tile", 1.4)))
+    for poligono in suelo.data.polygons:
+        poligono.material_index = 0
+    # Paredes: fondo y lados (la de delante no se pone: taparía la vista)
+    paredes = []
+    for nombre, (x, z, w, d) in {"fondo": (0, -D / 2 - 0.25, W + 1, 0.5), "izq": (-W / 2 - 0.25, 0, 0.5, D), "der": (W / 2 + 0.25, 0, 0.5, D)}.items():
+        bpy.ops.mesh.primitive_cube_add(size=1, location=g2b(x, ALTO_PARED / 2, z))
+        p = bpy.context.active_object
+        p.scale = (w, d, ALTO_PARED)
+        bpy.ops.object.transform_apply(scale=True)
+        p.name = f"HORNEADO_pared_{nombre}"
+        p.data.materials.append(material_baldosas(f"azulejos_{nombre}", r.get("wallTile", 0.7)))
+        paredes.append(p)
+    HORNEAR += [(suelo, 1024 if RAPIDO else 2048, "suelo_luz")] + [(p, 512 if RAPIDO else 1024, f"{p.name[9:]}_luz") for p in paredes]
 
 
 # --- objetos -----------------------------------------------------------------------
@@ -285,6 +337,7 @@ def encajar(obj, size):
 
 
 faltan = []
+MEDIDAS = {}
 for o in datos["objects"]:
     obj = importar(o["model"], o["id"])
     if obj is None:
@@ -292,10 +345,14 @@ for o in datos["objects"]:
         obj = provisional(o, o["id"])
     encajar(obj, o["size"])
     obj.rotation_euler = (0, 0, math.radians(o.get("rot", 0)))
-    obj.location = g2b(o["x"], 0, o["z"])
+    obj.location = g2b(o["x"], o.get("y", 0), o["z"])
+    bpy.context.view_layer.update()
+    pts = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+    MEDIDAS[o["id"]] = [round(max(p.x for p in pts) - min(p.x for p in pts), 3), round(max(p.z for p in pts) - min(p.z for p in pts), 3),
+                        round(max(p.y for p in pts) - min(p.y for p in pts), 3)]  # ancho, alto, fondo del juego
 
 # --- sillas gigantes alrededor -----------------------------------------------------------
-for i, (x, z, rot) in enumerate(datos.get("background", {}).get("chairs", [])):
+for i, (x, z, rot) in enumerate(datos.get("background", {}).get("chairs", []) if "table" in datos else []):
     silla = importar("silla", f"silla_{i}")
     if silla is None:
         silla = provisional({"size": [4, 9, 4]}, f"silla_{i}")
@@ -364,8 +421,9 @@ def hornear(obj, tam, nombre):
     print(f"horneado {nombre}", flush=True)
 
 
-hornear(tablero, 1024 if RAPIDO else 2048, "tablero_luz")
-hornear(suelo, 512 if RAPIDO else 1024, "suelo_luz")
+for objeto, tam, nombre in HORNEAR:
+    hornear(objeto, tam, nombre)
+(SALIDA / "medidas.json").write_text(json.dumps(MEDIDAS, indent=1), encoding="utf-8")  # para los choques del juego
 
 # --- exportar ------------------------------------------------------------------------------------
 for o in list(scene.objects):
@@ -375,9 +433,11 @@ bpy.ops.export_scene.gltf(filepath=str(SALIDA / "escena.glb"), export_format="GL
                           export_image_format="JPEG", export_apply=True)
 print("escena exportada", SALIDA / "escena.glb", flush=True)
 
-# Modelos que se mueven (rodillo): por separado, normalizados (pivote centrado en la base)
+# Lo que se mueve (rodillo) y los sueltos que se empujan (patitos): por separado, normalizados (pivote en la base)
 bpy.ops.wm.read_factory_settings(use_empty=True)
-for m in datos.get("movers", []):
+aparte = {m["model"] for m in datos.get("movers", [])} | {s["model"] for s in datos.get("loose", [])}
+for modelo in sorted(aparte):
+    m = {"model": modelo}
     obj = importar_glb(m["model"], m["model"])
     if obj is None:
         print("falta el modelo de", m["model"], flush=True)
@@ -386,5 +446,6 @@ for m in datos.get("movers", []):
     obj.select_set(True)
     bpy.ops.export_scene.gltf(filepath=str(SALIDA / f"{m['model']}.glb"), export_format="GLB", use_selection=True,
                               export_yup=True, export_image_format="JPEG")
+    bpy.data.objects.remove(obj, do_unlink=True)
 print("FALTAN:", sorted(set(faltan)) if faltan else "ninguno", flush=True)
 print("FIN", flush=True)

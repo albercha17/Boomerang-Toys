@@ -18,10 +18,13 @@ export async function loadSceneMaps(ids) {
       const base = `/models/mapas/${id}`;
       const scene = (await loader.loadAsync(`${base}/escena.glb`)).scene;
       const movers = {};
-      for (const m of data.movers ?? []) {
-        try { movers[m.model] = (await loader.loadAsync(`${base}/${m.model}.glb`)).scene; } catch { /* sin modelo: cilindro */ }
+      const apart = new Set([...(data.movers ?? []), ...(data.loose ?? [])].map((m) => m.model));
+      for (const model of apart) {
+        try { movers[model] = (await loader.loadAsync(`${base}/${model}.glb`)).scene; } catch { /* sin modelo: forma simple */ }
       }
-      CACHE[id] = { data, scene, movers };
+      let sizes = {};
+      try { sizes = await (await fetch(`${base}/medidas.json`, { cache: 'no-cache' })).json(); } catch { /* medidas del JSON */ }
+      CACHE[id] = { data, scene, movers, sizes };
     } catch (error) {
       console.warn(`Mapa ${id} sin escena:`, error);
     }
@@ -37,9 +40,40 @@ function onTable(t, x, z) {
   return ax <= t.w / 2 && az <= t.d / 2 && (ax - (t.w / 2 - t.chamfer)) + (az - (t.d / 2 - t.chamfer)) <= t.chamfer;
 }
 
+const inRect = (r, x, z, margin = 0) => Math.abs(x - r.x) < r.w / 2 + margin && Math.abs(z - r.z) < r.d / 2 + margin;
+
+/** Dentro de un rectángulo de esquinas redondeadas (`round` = radio), con margen. */
+function inRounded(r, x, z, margin = 0) {
+  if (!inRect(r, x, z, margin)) return false;
+  const rad = Math.min(r.round ?? 0, r.w / 2, r.d / 2);
+  const dx = Math.max(0, Math.abs(x - r.x) - (r.w / 2 - rad));
+  const dz = Math.max(0, Math.abs(z - r.z) - (r.d / 2 - rad));
+  return Math.hypot(dx, dz) < rad + margin;
+}
+
+/** Forma plana de un rectángulo de esquinas redondeadas, centrada (para el agua). */
+function roundedShape(w, d, round) {
+  const r = Math.min(round, w / 2, d / 2);
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2 + r, -d / 2);
+  s.lineTo(w / 2 - r, -d / 2);
+  s.quadraticCurveTo(w / 2, -d / 2, w / 2, -d / 2 + r);
+  s.lineTo(w / 2, d / 2 - r);
+  s.quadraticCurveTo(w / 2, d / 2, w / 2 - r, d / 2);
+  s.lineTo(-w / 2 + r, d / 2);
+  s.quadraticCurveTo(-w / 2, d / 2, -w / 2, d / 2 - r);
+  s.lineTo(-w / 2, -d / 2 + r);
+  s.quadraticCurveTo(-w / 2, -d / 2, -w / 2 + r, -d / 2);
+  return s;
+}
+
 export function buildSceneMap(stage, physics, layout) {
-  const { data, scene, movers: moverModels } = CACHE[layout.sceneMap];
-  const t = data.table;
+  const { data, scene, movers: moverModels, sizes } = CACHE[layout.sceneMap];
+  // Dos tipos: una mesa (salirse = caer) o una habitación (paredes, y el agua de la bañera ahoga)
+  const room = data.room ?? null;
+  const t = data.table ?? { w: room.w, d: room.d, chamfer: 0, thickness: 0.3, height: room.pitDepth ?? 3 };
+  const waters = data.water ?? [];
+  const onArea = (x, z) => (room ? Math.abs(x) <= room.w / 2 && Math.abs(z) <= room.d / 2 : onTable(t, x, z));
   const root = new THREE.Group();
   stage.scene.add(root);
   const owned = [];
@@ -63,6 +97,18 @@ export function buildSceneMap(stage, physics, layout) {
   });
   root.add(view);
 
+  // Agua (bañera): superficie azul que se mece un poco
+  const waterMeshes = waters.map((w) => {
+    const geometry = w.round ? new THREE.ShapeGeometry(roundedShape(w.w, w.d, w.round), 12) : new THREE.PlaneGeometry(w.w, w.d);
+    const mesh = new THREE.Mesh(own(geometry),
+      own(new THREE.MeshStandardMaterial({ color: 0x5ec8f0, roughness: 0.08, metalness: 0.1, transparent: true, opacity: 0.72 })));
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(w.x, w.y ?? -0.3, w.z);
+    mesh.receiveShadow = true;
+    root.add(mesh);
+    return mesh;
+  });
+
   // Las sombras de los muñecos y del rodillo, sobre el tablero (capa transparente que solo recibe sombras)
   const shadowShape = new THREE.Shape();
   const C = t.chamfer;
@@ -70,18 +116,47 @@ export function buildSceneMap(stage, physics, layout) {
     [t.w / 2 - C, t.d / 2], [-t.w / 2 + C, t.d / 2], [-t.w / 2, t.d / 2 - C], [-t.w / 2, -t.d / 2 + C]];
   shadowShape.moveTo(pts[0][0], -pts[0][1]);
   for (const [x, z] of pts.slice(1)) shadowShape.lineTo(x, -z);
+  for (const p of room?.pits ?? []) { // sin sombras flotando sobre el hueco de la bañera
+    const hole = new THREE.Path();
+    hole.moveTo(p.x - p.w / 2, -(p.z - p.d / 2));
+    hole.lineTo(p.x - p.w / 2, -(p.z + p.d / 2));
+    hole.lineTo(p.x + p.w / 2, -(p.z + p.d / 2));
+    hole.lineTo(p.x + p.w / 2, -(p.z - p.d / 2));
+    shadowShape.holes.push(hole);
+  }
   const catcher = new THREE.Mesh(own(new THREE.ShapeGeometry(shadowShape)), own(new THREE.ShadowMaterial({ opacity: 0.3 })));
   catcher.rotation.x = -Math.PI / 2;
   catcher.position.y = 0.01;
   catcher.receiveShadow = true;
   root.add(catcher);
 
-  // Física: suelo de la cocina abajo, tablero, y los choques de cada objeto
+  // Física: suelo de abajo (cocina o fondo de la bañera), losas de suelo, paredes y los choques de cada objeto
   physics.setGroundLevel(-t.height);
-  bodies.push(physics.addFloorBox(0, -t.thickness / 2, 0, t.w / 2, t.thickness / 2, t.d / 2));
+  if (room) {
+    const pits = room.pits ?? [];
+    const xs = [...new Set([-room.w / 2, room.w / 2, ...pits.flatMap((p) => [p.x - p.w / 2, p.x + p.w / 2])])].sort((a, b) => a - b);
+    const zs = [...new Set([-room.d / 2, room.d / 2, ...pits.flatMap((p) => [p.z - p.d / 2, p.z + p.d / 2])])].sort((a, b) => a - b);
+    for (let i = 0; i < xs.length - 1; i++) {
+      for (let j = 0; j < zs.length - 1; j++) {
+        const cx = (xs[i] + xs[i + 1]) / 2;
+        const cz = (zs[j] + zs[j + 1]) / 2;
+        if (pits.some((p) => inRect(p, cx, cz))) continue;
+        bodies.push(physics.addFloorBox(cx, -0.15, cz, (xs[i + 1] - xs[i]) / 2, 0.15, (zs[j + 1] - zs[j]) / 2));
+      }
+    }
+    const H = 1.5;
+    const W2 = room.w / 2;
+    const D2 = room.d / 2;
+    bodies.push(physics.addWall(0, H, -D2 - 0.25, W2 + 0.5, H, 0.25)); // fondo
+    bodies.push(physics.addWall(0, H, D2 + 0.25, W2 + 0.5, H, 0.25)); // delante (invisible: no tapa la vista)
+    bodies.push(physics.addWall(-W2 - 0.25, H, 0, 0.25, H, D2 + 0.5));
+    bodies.push(physics.addWall(W2 + 0.25, H, 0, 0.25, H, D2 + 0.5));
+  } else {
+    bodies.push(physics.addFloorBox(0, -t.thickness / 2, 0, t.w / 2, t.thickness / 2, t.d / 2));
+  }
   for (const o of data.objects) {
     if (o.collider === 'none' || !o.collider) continue;
-    const [w, h, d] = o.colliderSize ?? o.size;
+    const [w, h, d] = o.colliderSize ?? sizes[o.id] ?? o.size; // medidas reales (Blender) si están
     if (o.collider === 'cylinder') bodies.push(physics.addPillar(o.x, o.z, Math.max(w, d) / 2 * 0.92, h));
     else bodies.push(physics.addWall(o.x, h / 2, o.z, (w / 2) * 0.92, h / 2, (d / 2) * 0.92));
   }
@@ -123,15 +198,38 @@ export function buildSceneMap(stage, physics, layout) {
     return { ...def, pin, body, z: def.lane, halfLength: length / 2, span: { from: -def.span, to: def.span }, x: -def.span, lastX: -def.span, rows: null };
   });
 
-  stage.setMood(theme);
-  stage.frame(t.w + 1.5, t.d + 3); // con margen: que se vea el borde de abajo de la mesa
+  // Sueltos que se empujan (patitos...): su modelo encajado en una caja física
+  const props = (data.loose ?? []).map((l) => {
+    const [w, h, d] = l.size;
+    const object = new THREE.Group();
+    const model = moverModels[l.model];
+    if (model) {
+      const copy = model.clone(true);
+      const box = new THREE.Box3().setFromObject(copy);
+      const size = box.getSize(new THREE.Vector3());
+      const s = Math.min(w / size.x, h / size.y, d / size.z);
+      copy.scale.setScalar(s);
+      copy.position.set(-((box.min.x + box.max.x) / 2) * s, -box.min.y * s - h / 2, -((box.min.z + box.max.z) / 2) * s);
+      copy.rotation.y = l.rot ? (l.rot * Math.PI) / 180 : 0;
+      copy.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+      object.add(copy);
+    }
+    root.add(object);
+    const body = physics.createPropBody({ box: [w / 2, h / 2, d / 2] }, l.x, h / 2 + 0.05, l.z);
+    bodies.push(body);
+    return { mesh: object, body };
+  });
 
-  // Puntos libres para los power-ups: encima de la mesa, lejos de objetos, matorrales y del carril del rodillo
+  stage.setMood(theme);
+  stage.frame(t.w + 1.5, t.d + 3); // con margen: que se vea el borde de abajo
+
+  // Puntos libres para los power-ups: lejos de objetos, matorrales, agua y del carril del rodillo
   const blockers = data.objects.map((o) => ({ x: o.x, z: o.z, r: Math.max(o.size[0], o.size[2]) / 2 + 0.9 }));
   const freePoints = [];
   for (let x = -t.w / 2 + 1.5; x <= t.w / 2 - 1.5; x += 1) {
     for (let z = -t.d / 2 + 1.2; z <= t.d / 2 - 1.2; z += 1) {
-      if (!onTable(t, x, z) || !onTable(t, x + Math.sign(x) * 1.2, z + Math.sign(z) * 1.2)) continue;
+      if (!onArea(x, z) || !onArea(x + Math.sign(x) * 1.2, z + Math.sign(z) * 1.2)) continue;
+      if (waters.some((w) => inRect(w, x, z, 1.4)) || (room?.pits ?? []).some((p) => inRect(p, x, z, 0.8))) continue;
       if (blockers.some((b) => Math.hypot(b.x - x, b.z - z) < b.r)) continue;
       if (movers.some((m) => Math.abs(z - m.z) < m.halfLength + 0.8 && Math.abs(x) < m.span.to + m.radius + 0.6)) continue;
       freePoints.push({ x, z });
@@ -142,7 +240,7 @@ export function buildSceneMap(stage, physics, layout) {
     layout,
     theme,
     walled: true,
-    stats: { chunks: 1, blocks: data.objects.length, pillars: 0, props: 0, colliders: bodies.length, drawObjects: 0 },
+    stats: { chunks: 1, blocks: data.objects.length, pillars: 0, props: props.length, colliders: bodies.length, drawObjects: 0 },
     spawnPoints: data.spawns.map(([x, z]) => ({ x, z })),
     freePoints,
     bounds: { minX: -t.w / 2, maxX: t.w / 2, minZ: -t.d / 2, maxZ: t.d / 2 },
@@ -150,8 +248,10 @@ export function buildSceneMap(stage, physics, layout) {
     bushes,
     fallDepth: -t.height, // el suelo de la cocina, donde se estrella quien cae de la mesa
 
+    /** 0 suelo, 1 vacío (te caes), 2 agua (te ahogas). */
     hazardAt(x, z) {
-      return onTable(t, x, z) ? 0 : 1;
+      if (waters.some((w) => inRounded(w, x, z))) return 2;
+      return onArea(x, z) ? 0 : 1;
     },
 
     bushAt(x, z) {
@@ -185,9 +285,15 @@ export function buildSceneMap(stage, physics, layout) {
         if (!b.object) continue;
         b.object.rotation.z = now < b.shakeUntil ? Math.sin(now / 30) * 0.06 : b.object.rotation.z * 0.8;
       }
+      waterMeshes.forEach((m, i) => { m.position.y = (waters[i].y ?? -0.3) + Math.sin(now / 700 + i) * 0.02; });
     },
 
-    sync() {},
+    sync() {
+      for (const { mesh, body } of props) {
+        mesh.position.set(body.position.x, body.position.y, body.position.z);
+        mesh.quaternion.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w);
+      }
+    },
 
     dispose() {
       stage.scene.remove(root);

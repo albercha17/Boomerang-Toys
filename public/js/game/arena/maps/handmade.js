@@ -16,27 +16,8 @@ import { createRandom, hashSeed } from '../generation/random.js';
 export const HANDMADE_MAPS = [
   // Tablero de la mesa de la cocina: borde = caída, rodillo que rueda y aplasta, repollos para esconderse
   { id: 'mesa', name: 'Encima de la mesa', theme: 'cocina', scene: true },
-  {
-    id: 'banera',
-    name: 'La bañera',
-    theme: 'bano',
-    rows: [
-      '##################',
-      '#S......o.......S#',
-      '#..##........##..#',
-      '#..#..~~~~~~..#..#',
-      '#....~~~~~~~~....#',
-      '#.S..~~~~~~~~..S.#',
-      '#....~~~~~~~~....#',
-      '#..#..~~~~~~..#..#',
-      '#..##........##..#',
-      '#S.......o......S#',
-      '##################',
-    ],
-    blocks: ['toilet', 'bathroomSink', 'washer', 'bathroomCabinetDrawer', 'dryer'],
-    props: ['patito'],
-    movers: [],
-  },
+  // Baño con la bañera hundida en el centro: caer al agua = ahogarse; patitos que se empujan
+  { id: 'banera', name: 'La bañera', theme: 'bano', scene: true },
   {
     // Sala lisa para las pruebas automáticas: no sale en la rotación; solo con /?mapa=prueba
     id: 'prueba',
