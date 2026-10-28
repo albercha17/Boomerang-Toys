@@ -300,7 +300,16 @@ export class Character {
     const group = this.figure.group;
     group.position.set(x, 0, z);
     group.rotation.y = -this.facing;
-    this.figure.animate(dt, this.moving, this.charging);
+    // Movimiento real para la animación: velocidad, aceleración hacia delante y giro
+    const speed = this.alive ? Math.hypot(this.body.velocity.x, this.body.velocity.z) : 0;
+    const accel = dt > 0 ? (speed - (this.lastSpeed ?? speed)) / dt : 0;
+    const turnDiff = Math.atan2(Math.sin(this.facing - (this.lastFacing ?? this.facing)), Math.cos(this.facing - (this.lastFacing ?? this.facing)));
+    this.lastSpeed = speed;
+    this.lastFacing = this.facing;
+    this.smoothAccel = (this.smoothAccel ?? 0) + (accel - (this.smoothAccel ?? 0)) * Math.min(1, dt * 10);
+    this.figure.animate(dt, this.moving, this.charging, {
+      speed: this.isFrozen(now) ? 0 : speed, accel: this.smoothAccel, turn: dt > 0 ? turnDiff / dt : 0, dashing: this.isDashing(now),
+    });
     if (this.isDashing(now)) {
       const t = (now - this.dashStart) / this.def.dash.durationMs;
       group.position.y += Math.sin(Math.PI * t) * this.def.dash.hopHeight; // saltito durante el dash

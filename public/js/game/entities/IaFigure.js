@@ -12,12 +12,21 @@ import { playerRing } from './playerRing.js';
  */
 const HEIGHT = 1.5;
 // Ajustes por personaje: `yaw` gira el modelo (radianes) si no viene mirando al frente; `rigid` para los de cuerpo
-// redondo (no mueven piernas ni brazos sueltos al andar, se contonean enteros; al morir sí se desmontan)
+// redondo (no mueven piernas ni brazos sueltos al andar, se contonean enteros; al morir sí se desmontan).
+// `arms`: para los que traen un brazo levantado (L = su izquierda, +x; R = su derecha, -x), qué triángulos son ese
+// brazo: |x| ≥ minX (unidades del modelo de 1,5 de alto) y altura entre minY y maxY (fracción de la altura);
+// `shoulder` es su punto de giro y el brazo se gira desde ahí para que cuelgue al costado (ver restArm).
+// `armsStill`: brazos quietos al andar (el soldadito sujeta el fusil con las dos manos).
+// Se miden con la foto de frente con rejilla (herramienta de pruebas frente_foto.js + frente_rejilla.py).
 const SETTINGS = {
-  soldado: { yaw: -Math.PI / 2 },
+  soldado: { yaw: -Math.PI / 2, armsStill: true },
   bichito: { rigid: true },
   dino: { rigid: true },
-  capsula: { rigid: true },
+  payaso: {
+    arms: { L: { minX: 0.21, minY: 0.5, maxY: 0.95, shoulder: [0.2, 0.56] }, R: { minX: 0.21, minY: 0.5, maxY: 0.95, shoulder: [-0.2, 0.56] } },
+  },
+  vaquero: { arms: { L: { minX: 0.13, minY: 0.5, maxY: 0.76, shoulder: [0.13, 0.56] } } },
+  capsula: { arms: { L: { minX: 0.19, minY: 0.45, maxY: 0.86, shoulder: [0.2, 0.5], hang: 0.75 } } }, // cuerpo ancho: más abierto
 };
 const SOURCES = {}; // id -> { pieces: [{ kind, side, geometry, pivot }], material, size }
 const loader = new GLTFLoader();
@@ -26,6 +35,7 @@ const loader = new GLTFLoader();
 const LEG_TOP = 0.24;
 const NECK = 0.56;
 const ARM_X = 0.2;
+const STRIDE = 2.25; // radianes de zancada por unidad recorrida (a 5 unidades/s, unas 1,8 zancadas por segundo)
 
 /** Carga los modelos que haya (public/models/ia/manifest.json, lo escribe herramientas/modelos_ia.py). */
 export async function loadIaModels(ids) {
@@ -43,6 +53,26 @@ export async function loadIaModels(ids) {
 }
 
 export const hasIaModel = (id) => Boolean(SOURCES[id]);
+
+const HANG = 0.28; // los brazos en reposo cuelgan algo abiertos hacia fuera
+
+/**
+ * Brazo levantado (el modelo viene saludando o con las manos arriba): se gira desde el hombro para que cuelgue al
+ * costado, y así el balanceo al correr parte de los brazos abajo. La geometría ya está en coordenadas del hombro.
+ * @param side 1 para el izquierdo (+x), -1 para el derecho
+ * @param hang cuánto se abre hacia fuera
+ */
+function restArm(geometry, side, hang = HANG) {
+  const pos = geometry.attributes.position;
+  const centroid = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) centroid.add(v.fromBufferAttribute(pos, i));
+  centroid.divideScalar(pos.count);
+  if (centroid.lengthSq() < 1e-6) return;
+  const turn = new THREE.Quaternion().setFromUnitVectors(centroid.normalize(), new THREE.Vector3(side * hang, -1, 0.04).normalize());
+  geometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(turn));
+  geometry.computeVertexNormals();
+}
 
 /** Une las mallas del modelo y reparte sus triángulos en las 6 piezas. */
 function split(scene, settings) {
@@ -66,12 +96,17 @@ function split(scene, settings) {
   const pos = geometry.attributes.position;
   const groups = { head: [], torso: [], armL: [], armR: [], legL: [], legR: [] };
   const D = size.z * s;
+  const armBoxes = settings.arms ?? {};
   for (let i = 0; i < pos.count; i += 3) {
     const y = (pos.getY(i) + pos.getY(i + 1) + pos.getY(i + 2)) / 3 / H;
-    const x = (pos.getX(i) + pos.getX(i + 1) + pos.getX(i + 2)) / 3 / W;
+    const xu = (pos.getX(i) + pos.getX(i + 1) + pos.getX(i + 2)) / 3;
+    const x = xu / W;
     const z = (pos.getZ(i) + pos.getZ(i + 1) + pos.getZ(i + 2)) / 3 / D;
+    const side = x < 0 ? 'R' : 'L';
+    const box = armBoxes[side];
     let part;
-    if (y > NECK) part = 'head';
+    if (box && Math.abs(xu) >= box.minX && y >= box.minY && y <= box.maxY) part = `arm${side}`; // brazo levantado
+    else if (y > NECK) part = 'head';
     else if (y < LEG_TOP) part = x < 0 ? 'legR' : 'legL'; // el modelo mira a +z: su derecha es -x
     else if (Math.abs(x) > ARM_X && y > 0.3 && z > -0.15) part = x < 0 ? 'armR' : 'armL'; // sin el pelo de detrás
     else part = 'torso';
@@ -83,6 +118,7 @@ function split(scene, settings) {
     armL: [ARM_X * W, (NECK - 0.03) * H, 0], armR: [-ARM_X * W, (NECK - 0.03) * H, 0],
     legL: [0.1 * W, LEG_TOP * H, 0], legR: [-0.1 * W, LEG_TOP * H, 0],
   };
+  for (const [side, box] of Object.entries(armBoxes)) if (box.shoulder) pivots[`arm${side}`] = [box.shoulder[0], box.shoulder[1] * H, 0];
   const kinds = { head: 'head', torso: 'torso', armL: 'arm', armR: 'arm', legL: 'leg', legR: 'leg' };
   const pieces = [];
   for (const [name, starts] of Object.entries(groups)) {
@@ -97,13 +133,15 @@ function split(scene, settings) {
     }
     const [px, py, pz] = pivots[name];
     part.translate(-px, -py, -pz);
+    if (name === 'armL' && armBoxes.L) restArm(part, 1, armBoxes.L.hang);
+    if (name === 'armR' && armBoxes.R) restArm(part, -1, armBoxes.R.hang);
     part.computeBoundingBox();
     pieces.push({ name, kind: kinds[name], geometry: part, pivot: new THREE.Vector3(px, py, pz) });
   }
   const map = mesh.material.map ?? null;
   if (map) map.colorSpace = THREE.SRGBColorSpace;
   const material = toonMaterial(0xffffff, map);
-  return { pieces, material, width: W, rigid: Boolean(settings.rigid) };
+  return { pieces, material, width: W, rigid: Boolean(settings.rigid), armsStill: Boolean(settings.armsStill) };
 }
 
 export class IaFigure {
@@ -141,27 +179,57 @@ export class IaFigure {
     if (ringColor !== null && ringColor !== undefined) this.group.add(playerRing(ringColor));
 
     this.rigid = source.rigid;
+    this.armsStill = source.armsStill;
     this.walkPhase = 0;
     this.time = Math.random() * 10;
     this.action = null; // { kind: 'strike'|'throw', t }
+    this.lean = 0; // inclinación hacia delante (suavizada)
+    this.bank = 0; // ladeo hacia dentro de la curva (suavizado)
+    this.squash = null; // aplastamiento al aterrizar: { t, k }
+    this.wasDashing = false;
   }
 
   strike() { this.action = { kind: 'strike', t: 0 }; }
   throw() { this.action = { kind: 'throw', t: 0 }; }
+  /** Se aplasta un instante (al terminar el dash o al caer del Supersalto). */
+  land(k = 1) { this.squash = { t: 0, k }; }
 
-  animate(dt, speed01, aiming) {
+  /**
+   * @param speed01 0..1 cuánto corre (respecto a su velocidad máxima)
+   * @param aiming apunta para lanzar (brazo derecho adelante)
+   * @param motion { speed (unidades/s), accel (aceleración hacia delante), turn (rad/s de giro), dashing } — si falta
+   *   (señuelos), se anima solo con speed01
+   */
+  animate(dt, speed01, aiming, motion = null) {
     this.time += dt;
-    this.walkPhase += dt * 11 * speed01;
-    const moving = speed01 > 0.05;
+    const speed = motion ? motion.speed : speed01 * 5;
+    const dashing = Boolean(motion?.dashing);
+    // Zancada según lo recorrido (no según el tiempo): los pies no patinan
+    this.walkPhase += Math.min(speed, 7) * dt * STRIDE;
+    const moving = speed01 > 0.05 || speed > 0.25;
     const rigid = this.rigid;
-    const swing = moving && !rigid ? Math.sin(this.walkPhase) * 0.55 * Math.min(1, speed01 * 1.3) : 0;
+    const run = Math.min(1, speed01 * 1.2);
     const j = this.joints;
-    if (j.legL) j.legL.rotation.x = swing;
-    if (j.legR) j.legR.rotation.x = -swing;
-    if (j.armL) j.armL.rotation.x = -swing * 0.8;
+    const ease = (from, to, rate) => from + (to - from) * Math.min(1, dt * rate);
 
-    // Brazo derecho: balanceo, apuntando (adelante) o el golpe/lanzamiento en curso (los de cuerpo redondo, quietos)
-    let arm = swing * 0.8;
+    // Piernas: se balancean (más largo al correr); en el dash, una delante y otra detrás
+    const sin = Math.sin(this.walkPhase);
+    let legSwing = moving && !rigid ? sin * (0.45 + 0.35 * run) : 0;
+    if (dashing && !rigid) legSwing = 0.7;
+    if (j.legL) j.legL.rotation.x = ease(j.legL.rotation.x, legSwing, 30);
+    if (j.legR) j.legR.rotation.x = ease(j.legR.rotation.x, -legSwing, 30);
+
+    // Brazos: opuestos a las piernas y algo abiertos al correr; parados se mecen; en el dash, echados atrás
+    const armsFree = !rigid && !this.armsStill;
+    let armSwing = moving && armsFree ? -sin * (0.4 + 0.6 * run) : Math.sin(this.time * 1.7) * 0.05;
+    if (dashing && armsFree) armSwing = 0.9;
+    const spread = armsFree ? 0.06 + 0.12 * run : 0; // hacia fuera (eje del hombro)
+    if (j.armL) {
+      j.armL.rotation.x = ease(j.armL.rotation.x, armsFree ? armSwing : 0, 22);
+      j.armL.rotation.z = ease(j.armL.rotation.z, -spread, 12);
+    }
+    // Brazo derecho: igual, salvo al apuntar (adelante) o al golpear/lanzar
+    let arm = dashing && armsFree ? 0.9 : armsFree ? -armSwing : 0;
     if (aiming && !rigid) arm = -1.35;
     if (this.action) {
       this.action.t += dt;
@@ -169,16 +237,39 @@ export class IaFigure {
       if (t >= 1) this.action = null;
       else if (!rigid) arm = this.action.kind === 'throw' ? -2.4 + t * 3 : -1.6 * Math.sin(t * Math.PI);
     }
-    if (j.armR) j.armR.rotation.x += (arm - j.armR.rotation.x) * Math.min(1, dt * 22);
-    if (j.head) j.head.rotation.z = moving ? Math.sin(this.walkPhase * 0.5) * 0.06 : Math.sin(this.time * 1.6) * 0.04;
+    if (j.armR) {
+      j.armR.rotation.x = ease(j.armR.rotation.x, arm, 22);
+      j.armR.rotation.z = ease(j.armR.rotation.z, aiming ? 0 : spread, 12);
+    }
 
-    // Cuerpo: botecito y contoneo al andar; respira parado
-    this.body.position.y = moving ? Math.abs(Math.sin(this.walkPhase)) * 0.09 * this.scale : 0;
-    const waddle = rigid ? 0.16 : 0.07; // los de cuerpo redondo se contonean más (no mueven las piernas)
-    this.body.rotation.x = moving ? Math.sin(this.walkPhase) * waddle : 0; // contoneo lateral (el modelo está girado)
-    this.body.rotation.z = moving ? -0.12 * speed01 : 0; // se inclina hacia delante al correr
-    const breathe = moving ? 1 : 1 + Math.sin(this.time * 2.4) * 0.015;
-    this.model.scale.set(this.scale, this.scale * breathe, this.scale);
+    // Cuerpo: se inclina adelante al correr y al acelerar, y se ladea hacia dentro en las curvas
+    const accel = motion ? Math.max(-12, Math.min(12, motion.accel)) : 0;
+    const leanTarget = dashing ? 0.38 : moving ? 0.08 + 0.12 * run + accel * 0.012 : 0;
+    const bankTarget = motion ? Math.max(-0.28, Math.min(0.28, -motion.turn * speed * 0.02)) : 0;
+    this.lean = ease(this.lean, leanTarget, 9);
+    this.bank = ease(this.bank, bankTarget, 7);
+    if (j.head) {
+      j.head.rotation.z = (moving ? Math.sin(this.walkPhase * 0.5) * 0.06 : Math.sin(this.time * 1.6) * 0.04) + this.lean * 0.4; // mira al frente
+      j.head.rotation.x = -this.bank * 0.5;
+    }
+    this.body.position.y = moving && !dashing ? Math.abs(sin) * (0.05 + 0.05 * run) * this.scale : 0; // bote: dos por zancada
+    const waddle = rigid ? 0.16 : 0.05; // los de cuerpo redondo se contonean más (no mueven las piernas)
+    this.body.rotation.x = (moving && !dashing ? sin * waddle : 0) + this.bank; // lateral (el modelo está girado)
+    this.body.rotation.z = -this.lean;
+
+    // Estirado en el dash; aplastado un instante al terminarlo (o al caer del Supersalto); respira parado
+    if (this.wasDashing && !dashing) this.land(0.8);
+    this.wasDashing = dashing;
+    let sy = moving ? 1 : 1 + Math.sin(this.time * 2.4) * 0.015;
+    let sxz = 1;
+    if (dashing) { sy = 1.07; sxz = 0.96; }
+    if (this.squash) {
+      this.squash.t += dt;
+      const t = this.squash.t / 0.18;
+      if (t >= 1) this.squash = null;
+      else { const k = Math.sin(t * Math.PI) * 0.14 * this.squash.k; sy -= k; sxz += k * 0.6; }
+    }
+    this.model.scale.set(this.scale * sxz, this.scale * sy, this.scale * sxz);
   }
 
   handWorldPosition(target) {

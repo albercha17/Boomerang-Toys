@@ -29,6 +29,7 @@ const MAX_BOTS = 1;
 const BOT_COLOR = '#8d99ae';
 const CATCH_MARGIN = 0.4; // tu propio búmerang de vuelta se recoge desde un poco más lejos
 const PARRY_REACH = 0.6; // la cuchillada devuelve los búmerangs que pasan a este margen más de su alcance
+const DASH_PUSH = 9; // velocidad con la que un dash aparta al rival con el que choca (se frena solo enseguida)
 
 /**
  * Partida en la arena: personajes, armas, power-ups, impactos y reapariciones.
@@ -108,6 +109,7 @@ export class ArenaGame {
     this.physics.step(dt);
 
     this.arena.sync();
+    this.dashBumps(now);
     this.checkMapHazards(now);
     for (const character of this.characters.values()) character.render(dt, now);
     for (const weapon of this.weapons) weapon.sync(dt);
@@ -420,6 +422,27 @@ export class ArenaGame {
     }
   }
 
+  /** Un dash contra otro personaje lo aparta (empujón de juguete; no mata). */
+  dashBumps(now) {
+    const all = [...this.characters.values()].filter((c) => c.alive && !c.falling && !c.leap);
+    for (const a of all) {
+      if (!a.isDashing(now)) continue;
+      for (const b of all) {
+        if (b === a || (b.bumpedUntil ?? 0) > now) continue;
+        const dx = b.x - a.x;
+        const dz = b.z - a.z;
+        const d = Math.hypot(dx, dz);
+        if (d > a.def.radius + b.def.radius + 0.15 || d < 1e-3) continue;
+        b.body.velocity.x += (dx / d) * DASH_PUSH;
+        b.body.velocity.z += (dz / d) * DASH_PUSH;
+        b.bumpedUntil = now + 250;
+        b.figure.land?.(0.6);
+        this.effects.burst((a.x + b.x) / 2, 0.6, (a.z + b.z) / 2, [0xffffff, 0xe8d3b0], 10, 0.4);
+        this.stage.shake(80, 0.12);
+      }
+    }
+  }
+
   /** Hipermultiplicación: 10 clones en abanico alrededor del dash (solo en este primer dash). */
   hyperClone(character, now) {
     const def = SUPERS.hipermultiplicacion;
@@ -466,6 +489,7 @@ export class ArenaGame {
     character.leap = null;
     character.body.velocity.set(0, 0, 0);
     this.physics.add(character.body);
+    character.figure.land?.(1.6);
     this.landingWave(character, now);
   }
 
