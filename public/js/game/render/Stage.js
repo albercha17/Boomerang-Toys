@@ -55,7 +55,9 @@ export class Stage {
 
   /** Cadena de efectos: escena -> color -> desenfoque de miniatura -> viñeta -> salida. */
   setupEffects() {
-    const composer = new EffectComposer(this.renderer);
+    // Imagen intermedia con suavizado de bordes (multimuestreo): sin esto salen dientes de sierra
+    const target = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { samples: FANCY ? 4 : 0, type: THREE.HalfFloatType });
+    const composer = new EffectComposer(this.renderer, target);
     composer.addPass(new RenderPass(this.scene, this.camera));
     const color = new ShaderPass(HueSaturationShader);
     color.uniforms.saturation.value = 0.12;

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { plastic } from '../render/materials.js';
 import { POWERUPS } from '../content/powerups.js';
 import { addOutlines } from '../render/toon.js';
+import { boomerangModel } from '../render/boomerangModels.js';
 
 export const WEAPON_STATE = Object.freeze({
   HELD: 'held', // en la mano de alguien
@@ -44,10 +45,15 @@ export class Boomerang {
     this.game = game;
     this.def = def;
     this.temporary = temporary;
-    this.mesh = new THREE.Mesh(GEOMETRY, plastic(0xffffff));
+    // Grupo con la V de siempre (del color del jugador) y, si el personaje lo tiene, su búmerang propio
+    this.mesh = new THREE.Group();
+    this.vShape = new THREE.Mesh(GEOMETRY, plastic(0xffffff));
+    this.vShape.castShadow = true;
+    addOutlines(this.vShape, 0.018);
+    this.mesh.add(this.vShape);
+    this.custom = null;
+    this.customFor = null;
     this.mesh.scale.setScalar(def.scale);
-    this.mesh.castShadow = true;
-    addOutlines(this.mesh, 0.018);
     game.stage.scene.add(this.mesh);
 
     this.body = game.physics.createWeaponBody(def.radius);
@@ -86,8 +92,20 @@ export class Boomerang {
     this.owner = character;
     character.weapon = this;
     this.game.physics.remove(this.body);
-    this.mesh.material = plastic(character.color);
+    this.setLook(character);
     this.mesh.scale.setScalar(this.def.scale * HELD_SCALE);
+  }
+
+  /** Aspecto según el personaje: su búmerang propio o la V de su color. */
+  setLook(character) {
+    this.vShape.material = plastic(character.color);
+    if (this.customFor !== character.figureId) {
+      if (this.custom) this.mesh.remove(this.custom);
+      this.custom = boomerangModel(character.figureId);
+      this.customFor = character.figureId;
+      if (this.custom) this.mesh.add(this.custom);
+    }
+    this.vShape.visible = !this.custom;
   }
 
   /** Lanza el arma desde el centro del portador (nunca empieza dentro de una pared). */
@@ -100,7 +118,7 @@ export class Boomerang {
   /** Vuelo desde un personaje en una dirección (también para las copias del Multibúmerang). */
   throwFrom(thrower, angle, charge) {
     this.owner = thrower;
-    this.mesh.material = plastic(thrower.color);
+    this.setLook(thrower);
     this.state = WEAPON_STATE.OUT;
     this.flightMs = 0;
     this.bounces = 0;

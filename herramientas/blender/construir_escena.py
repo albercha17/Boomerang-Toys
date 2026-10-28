@@ -157,6 +157,10 @@ if "table" in datos:
     tablero.data.materials.append(madera)
     bpy.context.view_layer.objects.active = tablero
     tablero.select_set(True)
+    canto = tablero.modifiers.new("canto", "BEVEL")  # canto redondeado, como una mesa de verdad
+    canto.width = 0.22
+    canto.segments = 4
+    bpy.ops.object.modifier_apply(modifier=canto.name)
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.cube_project(cube_size=W)  # coordenadas para la textura de madera
