@@ -21,6 +21,8 @@
     { id: 'bichito', name: 'Bichito amarillo', emoji: '👓', description: 'Amarillo, con gafas y peto vaquero.' },
     { id: 'soldado', name: 'Soldadito', emoji: '🪖', description: 'Soldadito de juguete en posición de firmes.' },
     { id: 'robot', name: 'Robot transformable', emoji: '🤖', description: 'Robot de juguete de piezas de colores.' },
+    { id: 'capsula', name: 'Cápsula', emoji: '💊', description: 'Cápsula roja y blanca con zapatillas, siempre saludando.' },
+    { id: 'cristi', name: 'Cristi', emoji: '⭐', description: 'Melena rubia ondulada y chaqueta vaquera.' },
   ]);
 
   const BY_ID = Object.freeze(Object.fromEntries(CHARACTERS.map((c) => [c.id, c])));

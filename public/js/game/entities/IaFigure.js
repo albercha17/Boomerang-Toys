@@ -17,6 +17,7 @@ const SETTINGS = {
   soldado: { yaw: -Math.PI / 2 },
   bichito: { rigid: true },
   dino: { rigid: true },
+  capsula: { rigid: true },
 };
 const SOURCES = {}; // id -> { pieces: [{ kind, side, geometry, pivot }], material, size }
 const loader = new GLTFLoader();
