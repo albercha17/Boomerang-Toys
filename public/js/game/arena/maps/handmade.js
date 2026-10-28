@@ -9,31 +9,13 @@ import { createRandom, hashSeed } from '../generation/random.js';
  *   S  aparición        o  juguete suelto que se empuja
  * Fuera del dibujo también es vacío.
  * `blocks`: modelos para los «#» (se reparten por el mapa); `movers`: lo que se mueve y aplasta.
+ *
+ * Los mapas con `scene: true` son de mejor acabado: se describen en public/maps/<id>.json y su escena se monta
+ * y se hornea en Blender (herramientas/blender/construir_escena.py); los construye SceneMapBuilder.
  */
 export const HANDMADE_MAPS = [
-  {
-    id: 'mesa',
-    name: 'Encima de la mesa',
-    theme: 'cocina',
-    rows: [
-      '   ............   ',
-      '  .S..........S.  ',
-      ' ...##......##... ',
-      '..B.#...o....#.B..',
-      '..................',
-      '..................',
-      '..................',
-      '..B.#....o...#.B..',
-      ' ...##......##... ',
-      '  .S..........S.  ',
-      '   ............   ',
-    ],
-    blocks: ['comida/carton', 'comida/loaf-round', 'comida/cake', 'comida/pot-stew', 'comida/watermelon', 'comida/knife-block'],
-    bush: 'comida/cabbage',
-    props: ['comida/apple', 'comida/orange', 'comida/tomato'],
-    // El rodillo de cocina rueda de un lado a otro por la franja central (filas 4 a 6)
-    movers: [{ type: 'rodillo', model: 'comida/rollingPin', rows: [4, 6], periodMs: 6500, pauseMs: 900 }],
-  },
+  // Tablero de la mesa de la cocina: borde = caída, rodillo que rueda y aplasta, repollos para esconderse
+  { id: 'mesa', name: 'Encima de la mesa', theme: 'cocina', scene: true },
   {
     id: 'banera',
     name: 'La bañera',
@@ -100,6 +82,7 @@ export function nextMapConfig(config) {
 /** Rejilla y datos del mapa de la configuración, listos para construir (HandmadeBuilder). */
 export function generateArena(config) {
   const map = HANDMADE_MAPS.find((m) => m.id === config.mapId) ?? HANDMADE_MAPS[0];
+  if (map.scene) return { sceneMap: map.id, theme: map.theme, seed: config.seed };
   return parseHandmade(map, config.seed);
 }
 

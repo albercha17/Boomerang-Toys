@@ -11,14 +11,16 @@ import { TOY_BASES, TOYS } from './content/toys.js';
 import { loadIaModels } from './entities/IaFigure.js';
 import { loadFurniture } from './render/furniture.js';
 import { HANDMADE_MAPS, readMapConfig } from './arena/maps/handmade.js';
+import { loadSceneMaps } from './arena/SceneMapBuilder.js';
 
-// Modelos de los mapas hechos a mano (bloques, matorrales, sueltos y lo que se mueve)
-const MAP_MODELS = HANDMADE_MAPS.flatMap((m) => [...m.blocks, ...(m.props ?? []), m.bush, ...(m.movers ?? []).map((v) => v.model)])
+// Modelos de los mapas dibujados en texto (bloques, matorrales, sueltos y lo que se mueve)
+const MAP_MODELS = HANDMADE_MAPS.filter((m) => !m.scene)
+  .flatMap((m) => [...m.blocks, ...(m.props ?? []), m.bush, ...(m.movers ?? []).map((v) => v.model)])
   .filter((name) => name && name !== 'patito');
-MAP_MODELS.push('chair'); // sillas gigantes alrededor de la mesa
+const SCENE_MAPS = HANDMADE_MAPS.filter((m) => m.scene).map((m) => m.id);
 
-// Muñecos 3D animados, modelos de los mapas y suelos ilustrados; lo que falte se dibuja por código.
-await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture(MAP_MODELS), loadIaModels(Object.keys(TOYS))]);
+// Muñecos 3D animados, mapas (modelos y escenas horneadas) y suelos ilustrados; lo que falte se dibuja por código.
+await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture(MAP_MODELS), loadIaModels(Object.keys(TOYS)), loadSceneMaps(SCENE_MAPS)]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);

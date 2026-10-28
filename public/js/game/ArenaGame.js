@@ -1,6 +1,10 @@
 import { PhysicsWorld } from './physics/PhysicsWorld.js';
 import { generateArena, nextMapConfig } from './arena/maps/handmade.js';
-import { buildHandmade as buildArena } from './arena/HandmadeBuilder.js';
+import { buildHandmade } from './arena/HandmadeBuilder.js';
+import { buildSceneMap } from './arena/SceneMapBuilder.js';
+
+/** Mapa con escena horneada (Blender) o dibujado en texto. */
+const buildArena = (stage, physics, layout) => (layout.sceneMap ? buildSceneMap : buildHandmade)(stage, physics, layout);
 import { Character } from './entities/Character.js';
 import { Boomerang, WEAPON_STATE } from './entities/Boomerang.js';
 import { Decoy } from './entities/Decoy.js';

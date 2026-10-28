@@ -1,0 +1,24 @@
+{
+  "id": "mesa",
+  "name": "Encima de la mesa",
+  "theme": "cocina",
+  "note": "Unidades del juego (1 = una casilla; los muñecos miden 1,5). x a la derecha, z hacia la cámara. Todo simétrico izquierda-derecha.",
+  "table": { "w": 20, "d": 12, "chamfer": 1.8, "thickness": 0.6, "height": 7 },
+  "objects": [
+    { "id": "repollo_ai", "model": "repollo", "x": -7.6, "z": -3.6, "rot": 20, "size": [2.4, 1.9, 2.4], "collider": "none", "bush": true },
+    { "id": "repollo_ad", "model": "repollo", "x": 7.6, "z": -3.6, "rot": -20, "size": [2.4, 1.9, 2.4], "collider": "none", "bush": true },
+    { "id": "repollo_bi", "model": "repollo", "x": -7.6, "z": 3.6, "rot": 160, "size": [2.4, 1.9, 2.4], "collider": "none", "bush": true },
+    { "id": "repollo_bd", "model": "repollo", "x": 7.6, "z": 3.6, "rot": -160, "size": [2.4, 1.9, 2.4], "collider": "none", "bush": true },
+    { "id": "leche_i", "model": "carton_leche", "x": -4.2, "z": -3.9, "rot": 12, "size": [1.4, 2.8, 1.4], "collider": "box" },
+    { "id": "leche_d", "model": "carton_leche", "x": 4.2, "z": -3.9, "rot": -12, "size": [1.4, 2.8, 1.4], "collider": "box" },
+    { "id": "tarta", "model": "tarta", "x": 0, "z": -3.9, "rot": 0, "size": [2.7, 1.5, 2.7], "collider": "cylinder" },
+    { "id": "frutero", "model": "frutero", "x": -4.2, "z": 3.9, "rot": 0, "size": [2.6, 1.3, 2.6], "collider": "cylinder" },
+    { "id": "mermelada", "model": "mermelada", "x": 0, "z": 4.0, "rot": 8, "size": [2.6, 1.9, 2.6], "collider": "cylinder", "colliderSize": [1.4, 1.9, 1.4] },
+    { "id": "sal_pimienta", "model": "salero_pimentero", "x": 4.2, "z": 3.9, "rot": -10, "size": [1.8, 1.8, 1.4], "collider": "box" }
+  ],
+  "movers": [
+    { "type": "rodillo", "model": "rodillo", "lane": 0, "length": 4.4, "radius": 0.6, "span": 6.3, "periodMs": 6000, "pauseMs": 900 }
+  ],
+  "spawns": [[-8.2, -0.1], [8.2, -0.1], [-2.2, -5.0], [2.2, -5.0], [-2.2, 5.1], [2.2, 5.1], [-6.0, -5.1], [6.0, 5.1]],
+  "background": { "chairs": [[-5.5, -9.6, 0], [5.5, -9.6, 0], [-13.5, 0, 90], [13.5, 0, -90], [-5.5, 9.8, 180], [5.5, 9.8, 180]] }
+}
