@@ -36,7 +36,7 @@ export class CharacterSelect {
   /** Los retratos se dibujan en 3D en el propio móvil, con los mismos muñecos (mientras, se ve un emoji). */
   async loadPortraits() {
     try {
-      const { renderPortraits } = await import('/js/game/figures/portraits.js');
+      const { renderPortraits } = await import('/js/game/entities/portraits.js');
       this.portraits = await renderPortraits(CHARACTERS.map((c) => c.id));
       this.render();
     } catch (error) {

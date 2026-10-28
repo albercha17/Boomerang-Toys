@@ -223,6 +223,7 @@ export function buildHandmade(stage, physics, layout) {
     freePoints,
     bounds: { minX: originX, maxX: -originX, minZ: originZ, maxZ: -originZ },
     movers,
+    bushes,
 
     /** 0 suelo, 1 vacío (te caes), 2 agua (te ahogas). Fuera del mapa, vacío. */
     hazardAt(x, z) {

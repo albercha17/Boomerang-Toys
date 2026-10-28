@@ -1,15 +1,13 @@
 import * as THREE from 'three';
-import { loadModels } from '../render/models.js';
-import { TOY_BASES } from '../content/toys.js';
-import { makeFigure } from '../entities/makeFigure.js';
-import { loadIaModels } from '../entities/IaFigure.js';
+import { makeFigure } from './makeFigure.js';
+import { loadIaModels } from './IaFigure.js';
 
 /**
  * Retratos de los personajes (para la pantalla de elección del móvil), con los mismos muñecos 3D que en la
  * partida. Devuelve { id: imagen PNG en dataURL }.
  */
 export async function renderPortraits(ids, size = 192) {
-  await Promise.all([loadModels(TOY_BASES), loadIaModels(ids)]);
+  await loadIaModels([...new Set(['muneca', ...ids])]);
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1);
   renderer.setSize(size, size);
@@ -37,7 +35,7 @@ export async function renderPortraits(ids, size = 192) {
   return portraits;
 }
 
-/** Espera a que las pieles (texturas) del muñeco estén descargadas. */
+/** Espera a que las texturas del muñeco estén descargadas. */
 async function waitTextures(root) {
   const maps = new Set();
   root.traverse((o) => { if (o.isMesh && o.material.map) maps.add(o.material.map); });

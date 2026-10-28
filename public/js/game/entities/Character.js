@@ -49,7 +49,7 @@ function createTag(color) {
 
 /**
  * Personaje controlado por un mando. Separa el cuerpo físico (esfera en el plano del suelo)
- * de su aspecto (ToyFigure). No conoce a los demás personajes: devuelve sus intenciones
+ * de su aspecto (la figura de makeFigure). No conoce a los demás personajes: devuelve sus intenciones
  * (golpear, lanzar) y ArenaGame las resuelve.
  */
 export class Character {

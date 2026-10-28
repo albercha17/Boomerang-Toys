@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { toonMaterial, addOutlines } from '../render/toon.js';
-import { playerRing } from '../content/figures.js';
+import { playerRing } from './playerRing.js';
 
 /**
  * Muñeco 3D generado por IA a partir del dibujo del personaje (herramientas/modelos_ia.py: TRELLIS).
  * El modelo llega en una sola pieza rígida; al cargarlo se parte en 6 (cabeza, torso, brazos y piernas) por
  * alturas y lados, cada una con su punto de giro (cuello, hombros, caderas). Así anda como un juguete
  * (piernas y brazos que se balancean, botecito y contoneo) y se desmonta en esas piezas al morir.
- * Misma interfaz que ToyFigure: group, parts, animate, handWorldPosition, partsInWorld (+ strike y throw).
+ * Interfaz de figura: group, parts, animate, handWorldPosition, partsInWorld, strike y throw.
  */
 const HEIGHT = 1.5;
 const SOURCES = {}; // id -> { pieces: [{ kind, side, geometry, pivot }], material, size }

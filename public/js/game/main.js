@@ -6,8 +6,6 @@ import { Match } from './match/Match.js';
 import { Hud } from './ui/Hud.js';
 import { MatchOverlay } from './ui/MatchOverlay.js';
 import { loadArt } from './render/art.js';
-import { loadModels } from './render/models.js';
-import { TOY_BASES, TOYS } from './content/toys.js';
 import { loadIaModels } from './entities/IaFigure.js';
 import { loadFurniture } from './render/furniture.js';
 import { HANDMADE_MAPS, readMapConfig } from './arena/maps/handmade.js';
@@ -19,8 +17,9 @@ const MAP_MODELS = HANDMADE_MAPS.filter((m) => !m.scene)
   .filter((name) => name && name !== 'patito');
 const SCENE_MAPS = HANDMADE_MAPS.filter((m) => m.scene).map((m) => m.id);
 
-// Muñecos 3D animados, mapas (modelos y escenas horneadas) y suelos ilustrados; lo que falte se dibuja por código.
-await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture(MAP_MODELS), loadIaModels(Object.keys(TOYS)), loadSceneMaps(SCENE_MAPS)]);
+// Personajes (sus modelos 3D), mapas (modelos y escenas horneadas) y suelos ilustrados.
+const CHARACTER_IDS = window.CharacterCatalog.CHARACTERS.map((c) => c.id);
+await Promise.all([loadArt(), loadFurniture(MAP_MODELS), loadIaModels(['muneca', ...CHARACTER_IDS]), loadSceneMaps(SCENE_MAPS)]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);

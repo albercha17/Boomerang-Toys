@@ -37,11 +37,11 @@ Opcional: `--max-players 4` (de 1 a 8, por defecto 8).
 
 ### Personajes
 
-Al abrir el mando hay que **elegir personaje** y pulsar **JUGAR** para entrar en la sala de espera. Los personajes no se repiten: los que ya tiene otro jugador salen **tachados** («Elegido por J2») y no se pueden escoger; el servidor es quien decide, así que dos jugadores nunca se quedan el mismo. En la sala, el botón **👤 Cambiar** del mando permite elegir otro; con la partida empezada no se puede cambiar. El bot coge uno libre (y se cambia si un jugador elige el suyo).
+Al abrir el mando hay que **elegir personaje** y pulsar **JUGAR** para entrar en la sala de espera. Los personajes no se repiten **mientras quede alguno libre**: los que ya tiene otro jugador salen **tachados** («Elegido por J2»); si están todos cogidos, se pueden repetir (el color del aro y del nombre distingue a cada jugador). El servidor es quien decide. En la sala, el botón **👤 Cambiar** del mando permite elegir otro; con la partida empezada no se puede cambiar. El bot coge uno libre (o repite si no queda).
 
-12 juguetes, todos con el mismo cuerpo físico (solo cambia el aspecto) y desmontables en sus 6 piezas con los accesorios incluidos: peón de madera, muñeca fashion, héroe de acción, soldadito verde (con su peana), ranger espacial, bichito amarillo, robot de hojalata, osito de peluche, caballero, dinosaurio de goma, pirata y vaquero. Los retratos del mando los dibuja el propio móvil en 3D con el mismo código. El color del jugador va en el aro de los pies y en su nombre.
+Por ahora hay un personaje: la **muñeca fashion**, un modelo 3D sacado de su dibujo (que se parte en cabeza, torso, brazos y piernas para andar como un juguete y desmontarse al morir). Los demás se irán añadiendo uno a uno.
 
-Para añadir uno: entrada en `shared/characters.js` (nombre, icono, descripción) y su aspecto en `public/js/game/content/figures.js` (proporciones, materiales, texturas y accesorios sobre el esqueleto común de `figures/rig.js`).
+Para añadir uno: su entrada en `shared/characters.js` (nombre, icono, descripción) y su modelo en `public/models/ia/<id>.glb` (apuntado en `public/models/ia/manifest.json`). `herramientas/modelos_ia.py <id>` saca el modelo de su dibujo (`herramientas/dibujos/personaje_<id>.png`) con TRELLIS.
 
 ### Power-ups (inspirados en Boomerang Fu)
 

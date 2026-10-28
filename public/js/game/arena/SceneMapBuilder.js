@@ -147,6 +147,7 @@ export function buildSceneMap(stage, physics, layout) {
     freePoints,
     bounds: { minX: -t.w / 2, maxX: t.w / 2, minZ: -t.d / 2, maxZ: t.d / 2 },
     movers,
+    bushes,
 
     hazardAt(x, z) {
       return onTable(t, x, z) ? 0 : 1;
