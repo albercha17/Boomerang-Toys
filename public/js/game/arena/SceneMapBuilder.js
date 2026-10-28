@@ -310,7 +310,8 @@ export function buildSceneMap(stage, physics, layout) {
   });
 
   stage.setMood(theme);
-  stage.frame(t.w + 1.5, t.d + 3); // con margen: que se vea el borde de abajo
+  // Se ve entero: con el canto delantero de la mesa o, en una habitación, con la pared del fondo
+  stage.frame(t.w, t.d, room ? { rise: room.wallHeight ?? 3 } : { drop: t.thickness + 0.25 });
 
   // Puntos libres para los power-ups: lejos de objetos, matorrales, agua y del recorrido de los rodillos
   const onMoverPath = (m, x, z) => {

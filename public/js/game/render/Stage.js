@@ -23,7 +23,8 @@ const TILT_FOCUS = 0.5; // altura de la pantalla que queda nítida (0 abajo, 1 a
 const TILT_BLUR = 0.7; // fuerza del desenfoque hacia arriba y abajo (suave: solo los bordes)
 
 const CAMERA_TILT = THREE.MathUtils.degToRad(60); // inclinación sobre el suelo, como en Boomerang Fu
-const HUD_ROOM = 0.6; // margen (en unidades) para que la barra superior no tape la arena
+const HUD_PX = 56; // alto de la barra superior del juego: la arena se encuadra por debajo
+const MARGIN_PX = 18; // margen libre alrededor de la arena (también abajo: que se vea el canto de la mesa)
 
 /**
  * Escena 3D: renderizador, cámara cenital inclinada, luces con sombras y temblor de cámara.
@@ -123,9 +124,13 @@ export class Stage {
     this.sun.intensity = sun;
   }
 
-  /** Ajusta cámara y sombras para que se vea entero un rectángulo del suelo centrado en el origen. */
-  frame(width, depth) {
-    this.frameSize = { width, depth };
+  /**
+   * Ajusta cámara y sombras para que se vea entero un rectángulo del suelo centrado en el origen.
+   * `drop`: lo que baja el canto delantero (el grosor de la mesa), que también tiene que caber abajo;
+   * `rise`: lo alto de la pared del fondo (habitaciones), que tiene que caber arriba.
+   */
+  frame(width, depth, { drop = 0, rise = 0 } = {}) {
+    this.frameSize = { width, depth, drop, rise };
     const shadow = this.sun.shadow.camera;
     shadow.left = -width / 2 - 2;
     shadow.right = width / 2 + 2;
@@ -146,14 +151,56 @@ export class Stage {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
-    const vHalf = THREE.MathUtils.degToRad(this.camera.fov / 2);
-    const hHalf = Math.atan(Math.tan(vHalf) * this.camera.aspect);
-    const fitWidth = (this.frameSize.width / 2) * 1.04 / Math.tan(hHalf);
-    const fitDepth = ((this.frameSize.depth / 2) * Math.sin(CAMERA_TILT) * 1.12 + HUD_ROOM) / Math.tan(vHalf);
-    const distance = Math.max(fitWidth, fitDepth);
+    this.fitCamera(width, height);
+  }
 
-    this.target.set(0, 0, -HUD_ROOM * 0.6 - 1.1); // algo más arriba: asoma el decorado del fondo
-    this.basePosition.set(0, Math.sin(CAMERA_TILT) * distance, Math.cos(CAMERA_TILT) * distance).add(this.target);
+  /**
+   * Busca la distancia y el centro de la cámara para que las esquinas de la arena (y el canto delantero) queden
+   * dentro de la pantalla con margen, por debajo de la barra superior. Con la cámara inclinada lo de delante se ve
+   * más grande, así que se prueba proyectando las esquinas de verdad.
+   */
+  fitCamera(width, height) {
+    const { width: w, depth: d, drop = 0, rise = 0 } = this.frameSize;
+    const hud = this.freeCamera ? 0 : HUD_PX;
+    const limits = { top: 1 - ((hud + MARGIN_PX) / height) * 2, bottom: -1 + (MARGIN_PX / height) * 2, side: 1 - (MARGIN_PX / width) * 2 };
+    const corners = [[-w / 2, rise, -d / 2], [w / 2, rise, -d / 2], [-w / 2, 0, d / 2], [w / 2, 0, d / 2], [-w / 2, -drop, d / 2], [w / 2, -drop, d / 2]]
+      .map(([x, y, z]) => new THREE.Vector3(x, y, z));
+    const camera = this.camera.clone();
+    const v = new THREE.Vector3();
+    const place = (distance, tz) => {
+      camera.position.set(0, Math.sin(CAMERA_TILT) * distance, tz + Math.cos(CAMERA_TILT) * distance);
+      camera.lookAt(0, 0, tz);
+      camera.updateMatrixWorld();
+      let minY = Infinity;
+      let maxY = -Infinity;
+      let maxX = 0;
+      for (const c of corners) {
+        v.copy(c).project(camera);
+        minY = Math.min(minY, v.y);
+        maxY = Math.max(maxY, v.y);
+        maxX = Math.max(maxX, Math.abs(v.x));
+      }
+      return { minY, maxY, maxX };
+    };
+    let tz = 0;
+    let distance = 40;
+    for (let round = 0; round < 4; round++) {
+      // Distancia mínima con la que cabe (búsqueda binaria)
+      let lo = 2;
+      let hi = 400;
+      for (let i = 0; i < 40; i++) {
+        const mid = (lo + hi) / 2;
+        const p = place(mid, tz);
+        if (p.maxX <= limits.side && p.maxY - p.minY <= limits.top - limits.bottom) hi = mid; else lo = mid;
+      }
+      distance = hi;
+      // Centrar en vertical entre la barra y el borde de abajo (mover el centro hacia delante o hacia atrás)
+      const p = place(distance, tz);
+      const excess = (p.maxY + p.minY) / 2 - (limits.top + limits.bottom) / 2;
+      tz -= excess * d * 0.5;
+    }
+    this.target.set(0, 0, tz);
+    this.basePosition.set(0, Math.sin(CAMERA_TILT) * distance, tz + Math.cos(CAMERA_TILT) * distance);
   }
 
   shake(durationMs, strength) {
