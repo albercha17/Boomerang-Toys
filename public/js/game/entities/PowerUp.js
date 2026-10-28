@@ -14,8 +14,18 @@ const GOLD = 0xffc93c;
 const SIZE = { regalo: 0.82, cofre: 1.15 }; // lado mayor en unidades
 const OPEN_MS = 450;
 
+const ICON_TEXTURES = new Map(); // emoji -> textura (se dibuja una vez y se reutiliza)
+
 /** Icono del power-up (emoji) flotando sobre la caja. */
 function createIcon(emoji) {
+  if (!ICON_TEXTURES.has(emoji)) ICON_TEXTURES.set(emoji, drawIcon(emoji));
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: ICON_TEXTURES.get(emoji), depthTest: false, transparent: true }));
+  sprite.scale.set(0.7, 0.7, 1);
+  sprite.renderOrder = 9;
+  return sprite;
+}
+
+function drawIcon(emoji) {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 96;
   const g = canvas.getContext('2d');
@@ -25,10 +35,7 @@ function createIcon(emoji) {
   g.fillText(emoji, 48, 54);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true }));
-  sprite.scale.set(0.7, 0.7, 1);
-  sprite.renderOrder = 9;
-  return sprite;
+  return texture;
 }
 
 /** La caja de antes, por código (de reserva). */
@@ -144,8 +151,12 @@ export class PowerUp {
 
   destroy() {
     this.stage.scene.remove(this.group);
+    this.release();
+  }
+
+  /** Libera lo propio de esta caja (la textura del icono es compartida y se queda). */
+  release() {
     if (this.glow) { this.glow.material.dispose(); this.sparks[0]?.material.dispose(); }
-    this.icon.material.map.dispose();
     this.icon.material.dispose();
   }
 }

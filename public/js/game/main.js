@@ -12,6 +12,7 @@ import { HANDMADE_MAPS, readMapConfig, registerSceneMaps } from './arena/maps/ha
 import { loadSceneMaps } from './arena/SceneMapBuilder.js';
 import { loadBoomerangModels } from './render/boomerangModels.js';
 import { loadBoxModels } from './render/boxModels.js';
+import { warmUp } from './render/warmup.js';
 
 // Modelos de los mapas dibujados en texto (bloques, matorrales, sueltos y lo que se mueve)
 const MAP_MODELS = HANDMADE_MAPS.filter((m) => !m.scene)
@@ -31,6 +32,7 @@ const network = new GameNetwork(store);
 const stage = new Stage(document.getElementById('game'));
 // Mapa: se van turnando; /?mapa=mesa juega siempre ese (ver arena/maps/handmade.js)
 const game = new ArenaGame(store, network, stage, readMapConfig(location.search));
+warmUp(stage, game); // compila y sube todo ya: sin tirones cuando salga por primera vez
 const match = new Match(game, { targetScore });
 const hud = new Hud(store, game, match);
 const overlay = new MatchOverlay(document.getElementById('match-overlay'), match);

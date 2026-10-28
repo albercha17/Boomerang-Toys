@@ -516,6 +516,7 @@ export class ArenaGame {
       if (other === character || !other.alive) continue;
       if (Math.hypot(other.x - character.x, other.z - character.z) > radius) continue;
       other.frozenUntil = now + freezeMs;
+      other.body.velocity.set(0, 0, 0); // en seco, aunque ya se hubiera movido en este fotograma
       other.charging = false;
       other.lunge = null;
       this.effects.burst(other.x, 0.8, other.z, [color, 0xffffff], 14, 0.5);

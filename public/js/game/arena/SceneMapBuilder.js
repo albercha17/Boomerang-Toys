@@ -309,6 +309,7 @@ export function buildSceneMap(stage, physics, layout) {
       pathLength: Math.hypot(def.to[0] - x0, def.to[1] - z0) };
   });
 
+  stage.tuneMaterials(root); // con la luz nueva, que los modelos no reflejen tanto el entorno
   stage.setMood(theme);
   // Se ve entero: con el canto delantero de la mesa o, en una habitación, con la pared del fondo
   stage.frame(t.w, t.d, room ? { rise: room.wallHeight ?? 3 } : { drop: t.thickness + 0.25 });

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { NEW_LIGHT, LIGHT } from './lightMode.js';
 
 /**
  * Estilo de dibujos animados: sombreado por bandas (3 tonos planos) y contorno negro.
@@ -19,7 +20,12 @@ export const TOON_GRADIENT = (() => {
   return texture;
 })();
 
+/**
+ * Material de juguete. Con la luz nueva, plástico suave (con brillo y reflejo del entorno); con la vieja, dibujos
+ * por bandas. El contorno negro (addOutlines) se mantiene en los dos.
+ */
 export function toonMaterial(color, map = null, extra = {}) {
+  if (NEW_LIGHT) return new THREE.MeshStandardMaterial({ color, map, roughness: 0.55, metalness: 0, envMapIntensity: LIGHT.env, ...extra });
   return new THREE.MeshToonMaterial({ color, map, gradientMap: TOON_GRADIENT, ...extra });
 }
 

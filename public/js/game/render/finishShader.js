@@ -44,6 +44,9 @@ export const FinishShader = {
       vec2 uv = (vUv - vec2(0.5)) * vec2(vignetteOffset);
       c.rgb = mix(c.rgb, vec3(1.0 - vignetteDarkness), dot(uv, uv));
 
+      #ifdef TONE_MAPPING
+        c.rgb = toneMapping(c.rgb); // la escena va a una imagen intermedia: el mapeo de tonos se hace aquí
+      #endif
       gl_FragColor = linearToOutputTexel(c);
     }`,
 };

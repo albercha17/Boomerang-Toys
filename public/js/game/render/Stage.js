@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { FinishShader } from './finishShader.js';
+import { NEW_LIGHT, LIGHT } from './lightMode.js';
 
 // Calidad: por defecto se adapta sola (baja un escalón si no llega a MIN_FPS); /?calidad=alta la fija al máximo y
 // /?calidad=baja quita el acabado de maqueta (desenfoque de miniatura, color y viñeta) desde el principio.
@@ -51,15 +53,25 @@ export class Stage {
     this.shakeUntil = 0;
     this.shakeStrength = 0;
 
-    this.hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b4a2e, 1.1);
+    // Luz nueva: un estudio luminoso de fondo (brillos y reflejos en los materiales) + sol + cielo suave, con mapeo
+    // de tonos cinematográfico; la vieja (/?luz=vieja): solo cielo fuerte y sol
+    this.lightScale = NEW_LIGHT ? { hemi: LIGHT.hemi, sun: LIGHT.sun } : { hemi: 1, sun: 1 };
+    if (NEW_LIGHT) {
+      if (LIGHT.aces) this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = LIGHT.exposure;
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      this.scene.environment = pmrem.fromScene(new RoomEnvironment(this.renderer), 0.04).texture;
+      pmrem.dispose();
+    }
+    this.hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b4a2e, 1.1 * this.lightScale.hemi);
     this.scene.add(this.hemi);
-    this.sun = new THREE.DirectionalLight(0xffffff, 1.7);
+    this.sun = new THREE.DirectionalLight(0xfff6e8, 1.7 * this.lightScale.sun);
     this.sun.position.set(-8, 18, 9);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
-    this.sun.shadow.bias = -0.0005;
+    this.sun.shadow.mapSize.set(NEW_LIGHT ? 4096 : 2048, NEW_LIGHT ? 4096 : 2048); // más nítidas en mapas grandes
+    this.sun.shadow.bias = -0.0004;
     this.sun.shadow.normalBias = 0.02;
-    this.sun.shadow.radius = 3;
+    this.sun.shadow.radius = NEW_LIGHT ? 4 : 3;
     this.scene.add(this.sun);
 
     if (FANCY) this.setupEffects();
@@ -75,6 +87,7 @@ export class Stage {
     composer.addPass(new RenderPass(this.scene, this.camera));
     this.finish = new ShaderPass(FinishShader);
     this.finish.uniforms.focus.value = TILT_FOCUS;
+    if (NEW_LIGHT) this.finish.uniforms.saturation.value = LIGHT.saturation;
     composer.addPass(this.finish);
     this.composer = composer;
   }
@@ -116,12 +129,22 @@ export class Stage {
     this.resize();
   }
 
+  /** Con la luz nueva, cuánto reflejan el entorno los materiales de estos objetos (los modelos traen 1: demasiado). */
+  tuneMaterials(root) {
+    if (!NEW_LIGHT) return;
+    root.traverse((o) => {
+      if (!o.isMesh) return;
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) if (m && 'envMapIntensity' in m && !m.userData.envTuned) { m.envMapIntensity = LIGHT.env; m.userData.envTuned = true; }
+    });
+  }
+
   /** Ambiente de la zona de la casa: color de fondo y luz. */
   setMood({ background, sky, ground, sun }) {
     this.scene.background = new THREE.Color(background);
     this.hemi.color.setHex(sky);
     this.hemi.groundColor.setHex(ground);
-    this.sun.intensity = sun;
+    this.hemi.intensity = 1.1 * this.lightScale.hemi;
+    this.sun.intensity = sun * this.lightScale.sun;
   }
 
   /**
