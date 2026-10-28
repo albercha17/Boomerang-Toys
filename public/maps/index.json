@@ -1,7 +1,7 @@
 [
   {
     "id": "mesa",
-    "name": "Encima de la mesa",
+    "name": "Mesa cocina",
     "theme": "cocina",
     "play": true,
     "baked": true

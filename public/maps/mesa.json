@@ -1,6 +1,6 @@
 {
   "id": "mesa",
-  "name": "Encima de la mesa",
+  "name": "Mesa cocina",
   "theme": "cocina",
   "play": true,
   "note": "Unidades del juego (1 = una casilla; los muñecos miden 1,5). x a la derecha, z hacia la cámara. Todo simétrico izquierda-derecha.",
@@ -21,84 +21,9 @@
       "z": -7.26,
       "rot": 20,
       "size": [
-        2.6,
-        2,
-        2.6
-      ],
-      "collider": "none",
-      "bush": true
-    },
-    {
-      "id": "repollo_1",
-      "model": "repollo",
-      "x": 14.98,
-      "y": 0,
-      "z": -7.26,
-      "rot": -20,
-      "size": [
-        2.6,
-        2,
-        2.6
-      ],
-      "collider": "none",
-      "bush": true
-    },
-    {
-      "id": "repollo_2",
-      "model": "repollo",
-      "x": -14.98,
-      "y": 0,
-      "z": 7.26,
-      "rot": 160,
-      "size": [
-        2.6,
-        2,
-        2.6
-      ],
-      "collider": "none",
-      "bush": true
-    },
-    {
-      "id": "repollo_3",
-      "model": "repollo",
-      "x": 14.98,
-      "y": 0,
-      "z": 7.26,
-      "rot": -160,
-      "size": [
-        2.6,
-        2,
-        2.6
-      ],
-      "collider": "none",
-      "bush": true
-    },
-    {
-      "id": "repollo_4",
-      "model": "repollo",
-      "x": -16.99,
-      "y": 0,
-      "z": 0,
-      "rot": 90,
-      "size": [
-        2.6,
-        2,
-        2.6
-      ],
-      "collider": "none",
-      "bush": true
-    },
-    {
-      "id": "repollo_5",
-      "model": "repollo",
-      "x": 16.99,
-      "y": 0,
-      "z": 0,
-      "rot": -90,
-      "size": [
-        2.6,
-        2,
-        2.6
+        5.08,
+        3.89,
+        5.08
       ],
       "collider": "none",
       "bush": true
@@ -106,150 +31,38 @@
     {
       "id": "leche_0",
       "model": "carton_leche",
-      "x": -8.49,
+      "x": 1,
       "y": 0,
-      "z": -7.59,
+      "z": -10.5,
       "rot": 12,
       "size": [
-        1.5,
-        3,
-        1.5
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "leche_1",
-      "model": "carton_leche",
-      "x": 8.49,
-      "y": 0,
-      "z": -7.59,
-      "rot": -12,
-      "size": [
-        1.5,
-        3,
-        1.5
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "leche_2",
-      "model": "carton_leche",
-      "x": -8.49,
-      "y": 0,
-      "z": 7.59,
-      "rot": 168,
-      "size": [
-        1.5,
-        3,
-        1.5
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "leche_3",
-      "model": "carton_leche",
-      "x": 8.49,
-      "y": 0,
-      "z": 7.59,
-      "rot": -168,
-      "size": [
-        1.5,
-        3,
-        1.5
+        3.11,
+        6.2,
+        3.11
       ],
       "collider": "box"
     },
     {
       "id": "frutero_a",
       "model": "frutero",
-      "x": 0,
+      "x": 14.5,
       "y": 0,
-      "z": -7.81,
+      "z": -9,
       "rot": 0,
       "size": [
-        2.8,
-        1.4,
-        2.8
+        6.99,
+        3.49,
+        6.99
       ],
       "collider": "cylinder"
-    },
-    {
-      "id": "frutero_b",
-      "model": "frutero",
-      "x": 0,
-      "y": 0,
-      "z": 7.81,
-      "rot": 180,
-      "size": [
-        2.8,
-        1.4,
-        2.8
-      ],
-      "collider": "cylinder"
-    },
-    {
-      "id": "sal_0",
-      "model": "salero_pimentero",
-      "x": -4.25,
-      "y": 0,
-      "z": -5.17,
-      "rot": 10,
-      "size": [
-        1.9,
-        1.9,
-        1.5
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "sal_1",
-      "model": "salero_pimentero",
-      "x": 4.25,
-      "y": 0,
-      "z": -5.17,
-      "rot": -10,
-      "size": [
-        1.9,
-        1.9,
-        1.5
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "sal_2",
-      "model": "salero_pimentero",
-      "x": -4.25,
-      "y": 0,
-      "z": 5.17,
-      "rot": 170,
-      "size": [
-        1.9,
-        1.9,
-        1.5
-      ],
-      "collider": "box"
-    },
-    {
-      "id": "sal_3",
-      "model": "salero_pimentero",
-      "x": 4.25,
-      "y": 0,
-      "z": 5.17,
-      "rot": -170,
-      "size": [
-        1.9,
-        1.9,
-        1.5
-      ],
-      "collider": "box"
     },
     {
       "id": "silla_0",
       "model": "silla",
-      "x": -10.62,
+      "x": -10.5,
       "y": -9,
-      "z": -19.25,
-      "rot": 0,
+      "z": -19.5,
+      "rot": 30,
       "size": [
         7,
         13,
@@ -260,9 +73,9 @@
     {
       "id": "silla_1",
       "model": "silla",
-      "x": 10.62,
+      "x": 7.5,
       "y": -9,
-      "z": -19.25,
+      "z": -19,
       "rot": 0,
       "size": [
         7,
@@ -302,10 +115,10 @@
     {
       "id": "silla_4",
       "model": "silla",
-      "x": -10.62,
+      "x": -7,
       "y": -9,
-      "z": 19.8,
-      "rot": 180,
+      "z": 17,
+      "rot": -180,
       "size": [
         7,
         13,
@@ -316,16 +129,255 @@
     {
       "id": "silla_5",
       "model": "silla",
-      "x": 10.62,
+      "x": 6.5,
       "y": -9,
-      "z": 19.8,
-      "rot": 180,
+      "z": 17,
+      "rot": -180,
       "size": [
         7,
         13,
         7
       ],
       "collider": "none"
+    },
+    {
+      "id": "frutero_1",
+      "model": "frutero",
+      "x": -14.5,
+      "y": 0.5,
+      "z": 9.99,
+      "rot": 80,
+      "size": [
+        6.99,
+        3.49,
+        6.99
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "strawberry_cake_1",
+      "model": "strawberry_cake",
+      "x": 14.5,
+      "y": -0.5,
+      "z": 8.5,
+      "rot": 110,
+      "size": [
+        8.78,
+        3.84,
+        8.78
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "repollo_1",
+      "model": "repollo",
+      "x": 0,
+      "y": 0,
+      "z": 9,
+      "rot": 20,
+      "size": [
+        5.08,
+        3.89,
+        5.08
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "carton_leche_1",
+      "model": "carton_leche",
+      "x": -2.5,
+      "y": 0,
+      "z": -9.5,
+      "rot": -20,
+      "size": [
+        3.11,
+        6.2,
+        3.11
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "highball_glass_1",
+      "model": "highball_glass",
+      "x": -8.5,
+      "y": 0,
+      "z": 6.5,
+      "rot": 0,
+      "size": [
+        1.99,
+        3.87,
+        2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "highball_glass_2",
+      "model": "highball_glass",
+      "x": 7.5,
+      "y": 0,
+      "z": 6.5,
+      "rot": 0,
+      "size": [
+        1.99,
+        3.87,
+        2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "plato_1",
+      "model": "plato",
+      "x": -6,
+      "y": 0.5,
+      "z": 10.5,
+      "rot": 0,
+      "size": [
+        5.7,
+        0.69,
+        5.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "plato_2",
+      "model": "plato",
+      "x": 6,
+      "y": 0.5,
+      "z": 11,
+      "rot": 0,
+      "size": [
+        5.7,
+        0.69,
+        5.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "plato_3",
+      "model": "plato",
+      "x": 15,
+      "y": 0.5,
+      "z": 0.9,
+      "rot": 0,
+      "size": [
+        5.7,
+        0.69,
+        5.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "highball_glass_3",
+      "model": "highball_glass",
+      "x": 11.5,
+      "y": 0,
+      "z": -2.7,
+      "rot": 0,
+      "size": [
+        1.99,
+        3.87,
+        2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "plato_4",
+      "model": "plato",
+      "x": 7,
+      "y": 0.5,
+      "z": -9.5,
+      "rot": 0,
+      "size": [
+        5.7,
+        0.69,
+        5.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "highball_glass_4",
+      "model": "highball_glass",
+      "x": 8.5,
+      "y": 0,
+      "z": -5.5,
+      "rot": 0,
+      "size": [
+        1.99,
+        3.87,
+        2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "plato_5",
+      "model": "plato",
+      "x": -8.5,
+      "y": 0.5,
+      "z": -9.5,
+      "rot": 0,
+      "size": [
+        5.7,
+        0.69,
+        5.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "highball_glass_5",
+      "model": "highball_glass",
+      "x": -10,
+      "y": 0,
+      "z": -6,
+      "rot": 0,
+      "size": [
+        1.99,
+        3.87,
+        2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "plato_6",
+      "model": "plato",
+      "x": -16,
+      "y": 0.5,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        5.7,
+        0.69,
+        5.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "highball_glass_6",
+      "model": "highball_glass",
+      "x": -13,
+      "y": 0,
+      "z": -3,
+      "rot": 0,
+      "size": [
+        1.99,
+        3.87,
+        2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "botes_1",
+      "model": "botes",
+      "x": 3.5,
+      "y": 0,
+      "z": 7,
+      "rot": 0,
+      "size": [
+        2.71,
+        2.53,
+        2.93
+      ],
+      "collider": "cylinder"
     }
   ],
   "movers": [
@@ -333,14 +385,14 @@
       "id": "rodillo",
       "model": "rodillo",
       "from": [
-        -12.74,
-        0
+        -9.5,
+        0.5
       ],
       "to": [
-        12.74,
-        0
+        8.98,
+        0.5
       ],
-      "length": 6.6,
+      "length": 8.8,
       "radius": 0.75,
       "periodMs": 7000,
       "pauseMs": 900
@@ -348,36 +400,36 @@
   ],
   "spawns": [
     [
-      -11.85,
-      -9.24
+      -12.5,
+      -10.5
     ],
     [
-      11.85,
-      9.24
+      18,
+      4
     ],
     [
-      -11.85,
-      9.24
+      -10,
+      11.5
     ],
     [
-      11.85,
-      -9.24
+      3.5,
+      -8.5
     ],
     [
-      -4.02,
-      -9.46
+      -1.5,
+      -6
     ],
     [
-      4.02,
-      9.46
+      1,
+      11.5
     ],
     [
-      -17.21,
-      -4.18
+      -17.5,
+      -4.5
     ],
     [
-      17.21,
-      4.18
+      -16.91,
+      4.52
     ]
   ]
 }

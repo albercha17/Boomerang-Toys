@@ -52,5 +52,35 @@
     "id": "vater",
     "name": "Váter",
     "source": "banera\\toilet 3d model.glb"
+  },
+  {
+    "id": "strawberry_cake",
+    "name": "strawberry cake",
+    "source": "strawberry cake 3d model.glb"
+  },
+  {
+    "id": "highball_glass",
+    "name": "highball glass",
+    "source": "highball glass 3d model.glb"
+  },
+  {
+    "id": "pianta_in_vaso",
+    "name": "pianta in vaso",
+    "source": "pianta in vaso 3d.glb"
+  },
+  {
+    "id": "plato",
+    "name": "plato",
+    "source": "plato 3d model.glb"
+  },
+  {
+    "id": "vaso_o",
+    "name": "vaso o",
+    "source": "vaso 3d modelo.glb"
+  },
+  {
+    "id": "vaso_de_cerveza_o",
+    "name": "vaso de cerveza o",
+    "source": "vaso de cerveza 3d modelo.glb"
   }
 ]
