@@ -5,11 +5,11 @@
   "play": true,
   "note": "Unidades del juego (1 = una casilla; los muñecos miden 1,5). x a la derecha, z hacia la cámara. Todo simétrico izquierda-derecha.",
   "table": {
-    "w": 38,
-    "d": 22,
-    "chamfer": 2.8,
-    "thickness": 0.7,
-    "height": 9
+    "w": 39,
+    "d": 27,
+    "chamfer": 1.4,
+    "thickness": 1.4,
+    "height": 14.5
   },
   "water": [],
   "objects": [

@@ -5,12 +5,5 @@
     "theme": "cocina",
     "play": true,
     "baked": true
-  },
-  {
-    "id": "banera",
-    "name": "La bañera",
-    "theme": "bano",
-    "play": true,
-    "baked": true
   }
 ]
