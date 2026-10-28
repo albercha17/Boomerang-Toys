@@ -40,5 +40,12 @@
     "theme": "salon",
     "play": false,
     "baked": false
+  },
+  {
+    "id": "fabrica",
+    "name": "Fábrica de juguetes",
+    "theme": "salon",
+    "play": true,
+    "baked": true
   }
 ]

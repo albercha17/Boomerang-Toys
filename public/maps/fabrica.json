@@ -1,0 +1,569 @@
+{
+  "id": "fabrica",
+  "name": "Fábrica de juguetes",
+  "theme": "salon",
+  "play": true,
+  "note": "Hueco de montaje en el centro con pasarela que se cae; cintas arriba hacia el centro; puertas abajo; trampolines a las esquinas de arriba; portales de lado a lado.",
+  "room": {
+    "w": 34,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.2,
+    "wallTile": 0.8,
+    "pitDepth": 5,
+    "pits": [
+      {
+        "x": 0,
+        "z": 0,
+        "w": 6,
+        "d": 5.6,
+        "round": 0.8
+      }
+    ],
+    "floor": "baldosas",
+    "walls": "baldosas"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "baul_i",
+      "model": "baul_juguetes",
+      "x": -14.6,
+      "y": 0,
+      "z": -9,
+      "rot": -20,
+      "size": [
+        2.8,
+        3.42,
+        2.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "baul_d",
+      "model": "baul_juguetes",
+      "x": 14.6,
+      "y": 0,
+      "z": -9,
+      "rot": 20,
+      "size": [
+        2.8,
+        3.42,
+        2.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "robot_i",
+      "model": "robot_juguete",
+      "x": -11.5,
+      "y": 0,
+      "z": -3.2,
+      "rot": 25,
+      "size": [
+        1.63,
+        2.8,
+        1.28
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "robot_d",
+      "model": "robot_juguete",
+      "x": 11.5,
+      "y": 0,
+      "z": -3.2,
+      "rot": -25,
+      "size": [
+        1.63,
+        2.8,
+        1.28
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cascanueces_i",
+      "model": "cascanueces",
+      "x": -11.5,
+      "y": 0,
+      "z": 3.4,
+      "rot": -20,
+      "size": [
+        1,
+        2.8,
+        0.73
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cascanueces_d",
+      "model": "cascanueces",
+      "x": 11.5,
+      "y": 0,
+      "z": 3.4,
+      "rot": 20,
+      "size": [
+        1,
+        2.8,
+        0.73
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "caballito_i",
+      "model": "caballito",
+      "x": -8.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": -90,
+      "size": [
+        1.01,
+        2.2,
+        2.56
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caballito_d",
+      "model": "caballito",
+      "x": 8.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 90,
+      "size": [
+        1.01,
+        2.2,
+        2.56
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "tambor_i",
+      "model": "tambor",
+      "x": -3,
+      "y": 0,
+      "z": 8.8,
+      "rot": 0,
+      "size": [
+        1.8,
+        0.74,
+        2.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "tambor_d",
+      "model": "tambor",
+      "x": 3,
+      "y": 0,
+      "z": 8.8,
+      "rot": 0,
+      "size": [
+        1.8,
+        0.74,
+        2.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "caja_sorpresa",
+      "model": "caja_sorpresa",
+      "x": 0,
+      "y": 0,
+      "z": 6.4,
+      "rot": 0,
+      "size": [
+        1.31,
+        2,
+        0.86
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "bloques_a_i",
+      "model": "bloques_construccion",
+      "x": -5.2,
+      "y": 0,
+      "z": -9.2,
+      "rot": -15,
+      "size": [
+        1.8,
+        1.1,
+        2.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "bloques_a_d",
+      "model": "bloques_construccion",
+      "x": 5.2,
+      "y": 0,
+      "z": -9.2,
+      "rot": 15,
+      "size": [
+        1.8,
+        1.1,
+        2.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "bloques_b_i",
+      "model": "bloques_madera",
+      "x": -15.2,
+      "y": 0,
+      "z": 1.2,
+      "rot": -90,
+      "size": [
+        1.8,
+        0.77,
+        0.9
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "bloques_b_d",
+      "model": "bloques_madera",
+      "x": 15.2,
+      "y": 0,
+      "z": 1.2,
+      "rot": 90,
+      "size": [
+        1.8,
+        0.77,
+        0.9
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "aros_i",
+      "model": "aros_apilables",
+      "x": -6.4,
+      "y": 0,
+      "z": 4.4,
+      "rot": 0,
+      "size": [
+        1.13,
+        1.6,
+        1.13
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "aros_d",
+      "model": "aros_apilables",
+      "x": 6.4,
+      "y": 0,
+      "z": 4.4,
+      "rot": 0,
+      "size": [
+        1.13,
+        1.6,
+        1.13
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cohete_i",
+      "model": "cohete",
+      "x": -6.8,
+      "y": 0,
+      "z": -3.6,
+      "rot": 0,
+      "size": [
+        1.49,
+        2.2,
+        1.49
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cohete_d",
+      "model": "cohete",
+      "x": 6.8,
+      "y": 0,
+      "z": -3.6,
+      "rot": 0,
+      "size": [
+        1.49,
+        2.2,
+        1.49
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "mono",
+      "model": "mono_platillos",
+      "x": 0,
+      "y": 0,
+      "z": -9.3,
+      "rot": 0,
+      "size": [
+        1.06,
+        2,
+        1.25
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canicas_i",
+      "model": "circuito_canicas",
+      "x": -2.8,
+      "y": 0,
+      "z": -9.4,
+      "rot": 0,
+      "size": [
+        2,
+        2.53,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canicas_d",
+      "model": "circuito_canicas",
+      "x": 2.8,
+      "y": 0,
+      "z": -9.4,
+      "rot": 0,
+      "size": [
+        2,
+        2.53,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "coche_i",
+      "model": "coche_juguete",
+      "x": -12.4,
+      "y": 0,
+      "z": -6.5,
+      "rot": -90,
+      "size": [
+        0.9,
+        0.81,
+        1.44
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "coche_d",
+      "model": "coche_juguete",
+      "x": 12.4,
+      "y": 0,
+      "z": -6.5,
+      "rot": 90,
+      "size": [
+        0.9,
+        0.81,
+        1.44
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "peonza_i",
+      "model": "peonza",
+      "x": -8.6,
+      "y": 0,
+      "z": -6.6,
+      "rot": 0,
+      "size": [
+        0.9,
+        1.01,
+        0.9
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "peonza_d",
+      "model": "peonza",
+      "x": 8.6,
+      "y": 0,
+      "z": -6.6,
+      "rot": 0,
+      "size": [
+        0.9,
+        1.01,
+        0.9
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "tren_i",
+      "model": "tren_madera",
+      "x": -9,
+      "y": 0,
+      "z": -10.6,
+      "rot": 0,
+      "size": [
+        4,
+        0.86,
+        0.38
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "tren_d",
+      "model": "tren_madera",
+      "x": 9,
+      "y": 0,
+      "z": -10.6,
+      "rot": 0,
+      "size": [
+        4,
+        0.86,
+        0.38
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "cinta_i",
+      "type": "conveyor",
+      "x": -9.5,
+      "z": -6.5,
+      "w": 8,
+      "d": 2.3,
+      "rot": 0,
+      "speed": 3.5
+    },
+    {
+      "id": "cinta_d",
+      "type": "conveyor",
+      "x": 9.5,
+      "z": -6.5,
+      "w": 8,
+      "d": 2.3,
+      "rot": 180,
+      "speed": 3.5
+    },
+    {
+      "id": "pasarela",
+      "type": "fragile",
+      "x": 0,
+      "z": 0,
+      "w": 7.4,
+      "d": 2.2,
+      "rot": 0,
+      "shakeMs": 650,
+      "respawnMs": 4500
+    },
+    {
+      "id": "puerta_i",
+      "type": "door",
+      "x": -5.6,
+      "z": 6.4,
+      "w": 3.6,
+      "d": 0.5,
+      "rot": 90,
+      "openMs": 2400,
+      "closedMs": 2000,
+      "offsetMs": 0,
+      "height": 2.4
+    },
+    {
+      "id": "puerta_d",
+      "type": "door",
+      "x": 5.6,
+      "z": 6.4,
+      "w": 3.6,
+      "d": 0.5,
+      "rot": 90,
+      "openMs": 2400,
+      "closedMs": 2000,
+      "offsetMs": 2200,
+      "height": 2.4
+    },
+    {
+      "id": "trampolin_i",
+      "type": "jump",
+      "x": -14.5,
+      "z": 8.4,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        -14.2,
+        -5.2
+      ],
+      "height": 4,
+      "durationMs": 850
+    },
+    {
+      "id": "trampolin_d",
+      "type": "jump",
+      "x": 14.5,
+      "z": 8.4,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        14.2,
+        -5.2
+      ],
+      "height": 4,
+      "durationMs": 850
+    },
+    {
+      "id": "portal_i",
+      "type": "portal",
+      "x": -15.4,
+      "z": -1.2,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "lados"
+    },
+    {
+      "id": "portal_d",
+      "type": "portal",
+      "x": 15.4,
+      "z": -1.2,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "lados"
+    }
+  ],
+  "spawns": [
+    [
+      -10,
+      1.4
+    ],
+    [
+      10,
+      1.4
+    ],
+    [
+      -3.4,
+      -3.8
+    ],
+    [
+      3.4,
+      -3.8
+    ],
+    [
+      -11,
+      8.4
+    ],
+    [
+      11,
+      8.4
+    ],
+    [
+      -3,
+      3.8
+    ],
+    [
+      3,
+      3.8
+    ]
+  ]
+}

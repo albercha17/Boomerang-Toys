@@ -232,5 +232,95 @@
     "id": "rosal",
     "name": "Rosal",
     "source": "barbie\\rosal.glb"
+  },
+  {
+    "id": "cascanueces",
+    "name": "Cascanueces",
+    "source": "fabrica\\cascanueces.glb"
+  },
+  {
+    "id": "mono_platillos",
+    "name": "Mono de platillos",
+    "source": "fabrica\\mono_platillos.glb"
+  },
+  {
+    "id": "aros_apilables",
+    "name": "Aros apilables",
+    "source": "fabrica\\aros_apilables.glb"
+  },
+  {
+    "id": "caballito",
+    "name": "Caballito balancín",
+    "source": "fabrica\\caballito.glb"
+  },
+  {
+    "id": "caja_sorpresa",
+    "name": "Caja sorpresa",
+    "source": "fabrica\\caja_sorpresa.glb"
+  },
+  {
+    "id": "circuito_canicas",
+    "name": "Circuito de canicas",
+    "source": "fabrica\\circuito_canicas.glb"
+  },
+  {
+    "id": "clasificador",
+    "name": "Clasificador de formas",
+    "source": "fabrica\\clasificador.glb"
+  },
+  {
+    "id": "coche_juguete",
+    "name": "Coche de juguete",
+    "source": "fabrica\\coche_juguete.glb"
+  },
+  {
+    "id": "cohete",
+    "name": "Cohete",
+    "source": "fabrica\\cohete.glb"
+  },
+  {
+    "id": "oso_peluche",
+    "name": "Oso de peluche",
+    "source": "fabrica\\oso_peluche.glb"
+  },
+  {
+    "id": "peonza",
+    "name": "Peonza",
+    "source": "fabrica\\peonza.glb"
+  },
+  {
+    "id": "robot_juguete",
+    "name": "Robot de juguete",
+    "source": "fabrica\\robot_juguete.glb"
+  },
+  {
+    "id": "tambor",
+    "name": "Tambor",
+    "source": "fabrica\\tambor.glb"
+  },
+  {
+    "id": "tren_madera",
+    "name": "Tren de madera",
+    "source": "fabrica\\tren_madera.glb"
+  },
+  {
+    "id": "xilofono",
+    "name": "Xilófono",
+    "source": "fabrica\\xilofono.glb"
+  },
+  {
+    "id": "baul_juguetes",
+    "name": "Baúl de juguetes",
+    "source": "fabrica\\baul_juguetes.glb"
+  },
+  {
+    "id": "bloques_construccion",
+    "name": "Bloques de construcción",
+    "source": "fabrica\\bloques_construccion.glb"
+  },
+  {
+    "id": "bloques_madera",
+    "name": "Bloques de madera",
+    "source": "fabrica\\bloques_madera.glb"
   }
 ]
