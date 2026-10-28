@@ -56,6 +56,73 @@ def material_imagen(nombre, ruta, escala=(1, 1)):
     return m
 
 
+def material_madera(nombre, tablones=6, largo_x=True):
+    """Madera de mesa por código: tablones anchos (a lo largo de x), veta suave y color miel."""
+    m = bpy.data.materials.new(nombre)
+    m.use_nodes = True
+    nt = m.node_tree
+    n = nt.nodes
+    bsdf = n["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = 0.45
+    coord = n.new("ShaderNodeTexCoord")
+    sep = n.new("ShaderNodeSeparateXYZ")
+    nt.links.new(coord.outputs["Object"], sep.inputs["Vector"])
+    # índice de tablón según y (Blender) -> cada tablón con su tono
+    tabla = n.new("ShaderNodeMath"); tabla.operation = "MULTIPLY"; tabla.inputs[1].default_value = tablones / D
+    nt.links.new(sep.outputs["Y"], tabla.inputs[0])
+    suelo_t = n.new("ShaderNodeMath"); suelo_t.operation = "FLOOR"
+    nt.links.new(tabla.outputs[0], suelo_t.inputs[0])
+    frac = n.new("ShaderNodeMath"); frac.operation = "FRACT"
+    nt.links.new(tabla.outputs[0], frac.inputs[0])
+    ruido_t = n.new("ShaderNodeTexWhiteNoise"); ruido_t.noise_dimensions = "1D"
+    nt.links.new(suelo_t.outputs[0], ruido_t.inputs["W"])
+    # veta: ondas a lo largo del tablón con algo de ruido
+    veta = n.new("ShaderNodeTexWave"); veta.wave_type = "BANDS"; veta.bands_direction = "Y"
+    veta.inputs["Scale"].default_value = 1.6
+    veta.inputs["Distortion"].default_value = 6
+    veta.inputs["Detail"].default_value = 3
+    nt.links.new(coord.outputs["Object"], veta.inputs["Vector"])
+    rampa = n.new("ShaderNodeValToRGB")
+    rampa.color_ramp.elements[0].color = (0.42, 0.21, 0.08, 1)
+    rampa.color_ramp.elements[1].color = (0.66, 0.38, 0.16, 1)
+    mezcla = n.new("ShaderNodeMath"); mezcla.operation = "MULTIPLY_ADD"
+    nt.links.new(veta.outputs["Fac"], mezcla.inputs[0]); mezcla.inputs[1].default_value = 0.35
+    nt.links.new(ruido_t.outputs["Value"], mezcla.inputs[2])
+    nt.links.new(mezcla.outputs[0], rampa.inputs["Fac"])
+    # juntas oscuras entre tablones
+    junta = n.new("ShaderNodeMath"); junta.operation = "LESS_THAN"; junta.inputs[1].default_value = 0.025
+    nt.links.new(frac.outputs[0], junta.inputs[0])
+    oscuro = n.new("ShaderNodeMix"); oscuro.data_type = "RGBA"
+    nt.links.new(junta.outputs[0], oscuro.inputs["Factor"])
+    nt.links.new(rampa.outputs["Color"], oscuro.inputs["A"])
+    oscuro.inputs["B"].default_value = (0.32, 0.17, 0.07, 1)
+    nt.links.new(oscuro.outputs["Result"], bsdf.inputs["Base Color"])
+    return m
+
+
+def material_baldosas(nombre, lado=1.6):
+    """Baldosas de cocina por código: blancas con algunas azul claro y junta gris."""
+    m = bpy.data.materials.new(nombre)
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = 0.25
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    ladrillo = nt.nodes.new("ShaderNodeTexBrick")
+    ladrillo.offset = 0
+    ladrillo.inputs["Scale"].default_value = 1 / lado
+    ladrillo.inputs["Brick Width"].default_value = 1
+    ladrillo.inputs["Row Height"].default_value = 1
+    ladrillo.inputs["Mortar Size"].default_value = 0.03
+    ladrillo.inputs["Color1"].default_value = (0.95, 0.95, 0.93, 1)
+    ladrillo.inputs["Color2"].default_value = (0.36, 0.58, 0.85, 1)
+    ladrillo.inputs["Mortar"].default_value = (0.7, 0.7, 0.72, 1)
+    ladrillo.inputs["Bias"].default_value = 0.7  # sobre todo blancas
+    nt.links.new(coord.outputs["Object"], ladrillo.inputs["Vector"])
+    nt.links.new(ladrillo.outputs["Color"], bsdf.inputs["Base Color"])
+    return m
+
+
 def material_color(nombre, rgb, rugosidad=0.5):
     m = bpy.data.materials.new(nombre)
     m.use_nodes = True
@@ -84,7 +151,7 @@ bm.to_mesh(malla)
 bm.free()
 tablero = bpy.data.objects.new("HORNEADO_tablero", malla)
 scene.collection.objects.link(tablero)
-madera = material_imagen("madera", SUELOS / "salon.jpg", (W / 7, D / 7))
+madera = material_madera("madera")
 tablero.data.materials.append(madera)
 bpy.context.view_layer.objects.active = tablero
 tablero.select_set(True)
@@ -109,12 +176,57 @@ suelo = bpy.context.active_object
 suelo.name = "HORNEADO_suelo"
 suelo.scale = (70, 50, 1)
 bpy.ops.object.transform_apply(scale=True)
-suelo.data.materials.append(material_imagen("baldosas", SUELOS / "cocina.jpg", (70 / 5, 50 / 5)))
+suelo.data.materials.append(material_baldosas("baldosas"))
 
 
 # --- objetos -----------------------------------------------------------------------
+CARAS_MAX = 12000  # los modelos de Tripo traen ~2 millones de caras: se reducen para el juego
+TEXTURA_MAX = 1024
+
+
+def aligerar(obj):
+    """Reduce la malla a CARAS_MAX caras y sus texturas a TEXTURA_MAX píxeles."""
+    caras = len(obj.data.polygons)
+    if caras > CARAS_MAX:
+        mod = obj.modifiers.new("aligerar", "DECIMATE")
+        mod.ratio = CARAS_MAX / caras
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+        print(f"  {obj.name}: {caras} -> {len(obj.data.polygons)} caras", flush=True)
+        bpy.ops.outliner.orphans_purge(do_recursive=True)  # libera la malla original (mucha memoria)
+    for slot in obj.material_slots:
+        if not slot.material or not slot.material.use_nodes:
+            continue
+        for nodo in slot.material.node_tree.nodes:
+            img = getattr(nodo, "image", None)
+            if img and max(img.size) > TEXTURA_MAX:
+                img.scale(TEXTURA_MAX, TEXTURA_MAX)
+
+
+CARGADOS = {}  # modelo -> objeto ya importado y aligerado (las demás copias comparten su malla)
+
+
 def importar(modelo, nombre):
-    """Importa el GLB del modelo y lo junta en un objeto vacío (pivote en la base, centrado). None si no existe."""
+    """Copia del modelo (pivote en la base, centrado): se importa y aligera una sola vez. None si no existe."""
+    if modelo not in CARGADOS:
+        CARGADOS[modelo] = importar_glb(modelo, f"_{modelo}")
+        if CARGADOS[modelo] is not None:
+            CARGADOS[modelo].hide_render = True  # el original no sale: solo sus copias
+    original = CARGADOS[modelo]
+    if original is None:
+        return None
+    copia = original.copy()  # comparte malla y materiales
+    copia.hide_render = False
+    copia.name = nombre
+    scene.collection.objects.link(copia)
+    copia.scale = (1, 1, 1)
+    copia.rotation_euler = (0, 0, 0)
+    copia.location = (0, 0, 0)
+    return copia
+
+
+def importar_glb(modelo, nombre):
+    """Importa el GLB del modelo, lo junta en un objeto y lo aligera. None si no existe."""
     ruta = MODELOS / f"{modelo}.glb"
     if not ruta.exists():
         return None
@@ -135,6 +247,12 @@ def importar(modelo, nombre):
             bpy.data.objects.remove(o, do_unlink=True)
     obj.parent = None
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    aligerar(obj)
+    # Corrección de cómo viene el modelo (p. ej. tumbado): "models": {"<modelo>": {"rotate": [x, y, z]}} en grados
+    giro = datos.get("models", {}).get(modelo, {}).get("rotate")
+    if giro:
+        from mathutils import Euler
+        obj.data.transform(Euler([math.radians(g) for g in giro]).to_matrix().to_4x4())
     # pivote abajo y en el centro
     pts = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
     centro = Vector((sum(p.x for p in pts) / 8, sum(p.y for p in pts) / 8, min(p.z for p in pts)))
@@ -181,13 +299,13 @@ for i, (x, z, rot) in enumerate(datos.get("background", {}).get("chairs", [])):
     silla = importar("silla", f"silla_{i}")
     if silla is None:
         silla = provisional({"size": [4, 9, 4]}, f"silla_{i}")
-    encajar(silla, [6, 11, 6])
+    encajar(silla, datos["background"].get("chairSize", [6, 11, 6]))
     silla.rotation_euler = (0, 0, math.radians(rot))
     silla.location = g2b(x, -ALTO, z)
 
 # --- luz: sol de ventana y cielo cálido (misma dirección que el sol del juego) ------------
 sol = bpy.data.lights.new("sol", type="SUN")
-sol.energy = 4.0
+sol.energy = 2.4
 sol.angle = math.radians(8)  # sombras suaves
 sol.color = (1.0, 0.95, 0.86)
 sol_obj = bpy.data.objects.new("sol", sol)
@@ -198,7 +316,7 @@ mundo = bpy.data.worlds.new("cielo")
 scene.world = mundo
 mundo.use_nodes = True
 mundo.node_tree.nodes["Background"].inputs["Color"].default_value = (0.95, 0.88, 0.78, 1)
-mundo.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.9
+mundo.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.42
 
 
 # --- horneado: la luz y las sombras de todo, en la textura del tablero y del suelo --------------
@@ -251,7 +369,7 @@ hornear(suelo, 512 if RAPIDO else 1024, "suelo_luz")
 
 # --- exportar ------------------------------------------------------------------------------------
 for o in list(scene.objects):
-    if o.type == "LIGHT":
+    if o.type == "LIGHT" or o.name.startswith("_"):  # luces y originales de los modelos (solo van sus copias)
         bpy.data.objects.remove(o, do_unlink=True)
 bpy.ops.export_scene.gltf(filepath=str(SALIDA / "escena.glb"), export_format="GLB", export_yup=True,
                           export_image_format="JPEG", export_apply=True)
@@ -260,7 +378,7 @@ print("escena exportada", SALIDA / "escena.glb", flush=True)
 # Modelos que se mueven (rodillo): por separado, normalizados (pivote centrado en la base)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 for m in datos.get("movers", []):
-    obj = importar(m["model"], m["model"])
+    obj = importar_glb(m["model"], m["model"])
     if obj is None:
         print("falta el modelo de", m["model"], flush=True)
         continue

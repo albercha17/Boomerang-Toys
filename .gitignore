@@ -3,3 +3,6 @@ npm-debug.log*
 .claude/
 herramientas/arte_bruto/
 __pycache__/
+
+# Modelos originales de Tripo (pesados); el juego usa la escena reducida de public/models/mapas
+herramientas/modelos_mapa/
