@@ -334,9 +334,11 @@ export function floorTexture(theme) {
   return canvasTexture(512, theme.floor);
 }
 
-/** Crea la malla de un juguete suelto de la zona y su forma física. */
-export function buildProp(theme, index) {
-  const type = theme.props[index % theme.props.length];
+export const hasPropType = (type) => Boolean(PROPS[type]);
+
+/** Crea la malla de un juguete suelto de la zona y su forma física (de un tipo concreto, si se pide). */
+export function buildProp(theme, index, forcedType = null) {
+  const type = forcedType ?? theme.props[index % theme.props.length];
   const kind = PROPS[type];
   const color = theme.blocks[(index * 3) % theme.blocks.length];
   const object = kind.build(color);

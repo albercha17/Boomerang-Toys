@@ -49,6 +49,9 @@ export function readArenaConfig(search = '') {
     density: clamp(number('densidad', preset.density), ARENA_LIMITS.density),
     symmetry: params.get('simetria') === 'no' ? 'none' : DEFAULTS.symmetry,
     rooms: params.get('habitacion') !== 'no',
+    // Mapas diseñados a mano (lo normal); /?mapas=aleatorios usa el generador; /?mapa_id=mesa fija uno
+    handmade: params.get('mapas') !== 'aleatorios',
+    mapId: params.get('mapa_id'),
     // Zona de la casa: /?zona=cocina (salon, cocina, patio, dormitorio, bano); si no, una al azar por mapa.
     theme: ['salon', 'cocina', 'patio', 'dormitorio', 'bano'].includes(params.get('zona')) ? params.get('zona') : null,
     wallChance: params.has('paredes') ? (params.get('paredes') === 'si' ? 1 : 0) : DEFAULTS.wallChance,

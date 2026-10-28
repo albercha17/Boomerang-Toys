@@ -3,6 +3,7 @@ import { CELL } from './generation/cells.js';
 import { THEMES, THEME_IDS, FURNITURE, TOY_COLORS, floorTexture, buildProp, buildDecor } from './themes.js';
 import { hasFurniture, placeFurniture } from '../render/furniture.js';
 import { FURNITURE_SCALE, MODEL_SIZE } from './generation/rooms.js';
+import { buildHandmade } from './HandmadeBuilder.js';
 import { toonMaterial, instancedOutline } from '../render/toon.js';
 import { ART } from '../render/art.js';
 
@@ -66,6 +67,7 @@ function buildLooseFurniture(prop, color) {
 }
 
 export function buildArena(stage, physics, layout, { meshPerChunk = false } = {}) {
+  if (layout.handmade) return buildHandmade(stage, physics, layout); // mapa diseñado a mano
   const { cols, rows, grid } = layout;
   const originX = -cols / 2;
   const originZ = -rows / 2;

@@ -139,6 +139,7 @@ export class BotBrain {
   /** No cruza la línea roja: cerca del borde (o fuera) vuelve hacia el centro. */
   stayInside(game, angle) {
     const me = this.character;
+    if (game.arena.handmade) return this.avoidHazards(game, angle);
     const { minX, maxX, minZ, maxZ } = game.arena.bounds;
     const margin = 1.2;
     const near = me.x < minX + margin || me.x > maxX - margin || me.z < minZ + margin || me.z > maxZ - margin;
@@ -147,6 +148,20 @@ export class BotBrain {
     const nz = me.z + Math.sin(angle) * margin;
     const leaving = nx < minX + 0.5 || nx > maxX - 0.5 || nz < minZ + 0.5 || nz > maxZ - 0.5;
     return leaving ? Math.atan2(-me.z, -me.x) : angle;
+  }
+
+  /** Mapas hechos a mano: no se tira al agua, al vacío ni delante del rodillo; busca el rumbo seguro más parecido. */
+  avoidHazards(game, angle) {
+    if (angle === null) return angle;
+    const me = this.character;
+    const arena = game.arena;
+    const danger = (x, z) => arena.hazardAt(x, z) !== 0
+      || arena.movers.some((m) => Math.abs(z - m.z) < m.halfLength + 0.6 && Math.abs(x - m.x) < 2.6);
+    const safe = (a) => [0.6, 1.2].every((d) => !danger(me.x + Math.cos(a) * d, me.z + Math.sin(a) * d));
+    for (const turn of [0, 0.6, -0.6, 1.2, -1.2, 1.9, -1.9, Math.PI]) {
+      if (safe(angle + turn)) return angle + turn;
+    }
+    return null; // rodeado de peligro: mejor quedarse quieto
   }
 
   /** Si lleva un rato queriendo andar sin avanzar (contra un bloque), cambia de rumbo. */

@@ -284,7 +284,8 @@ export class Character {
     this.warning.position.set(x, this.def.radius * 1.6, z);
 
     const blinking = now < this.invulnerableUntil && Math.floor(now / 90) % 2 === 1;
-    group.visible = this.alive && !blinking;
+    group.visible = this.alive && !blinking && !this.hidden; // en un matorral no se le ve
+    this.tag.visible = !this.hidden;
     this.aim.update(x, z, this.facing, this.alive && this.charging, this.charge);
   }
 

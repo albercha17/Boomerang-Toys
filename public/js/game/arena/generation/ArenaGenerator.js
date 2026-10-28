@@ -1,6 +1,7 @@
 import { createRandom, hashSeed } from './random.js';
 import { CELL, isSolid, STAMPS, PROP_TYPES } from './cells.js';
 import { ROOM_SETS, MODEL_SIZE, FURNITURE_SCALE } from './rooms.js';
+import { pickHandmade, parseHandmade } from '../maps/handmade.js';
 
 const ROOM_IDS = ['salon', 'cocina', 'patio', 'dormitorio', 'bano']; // mismo orden que arena/themes.js
 
@@ -20,6 +21,8 @@ const SPAWN_PROP_CLEARANCE = 2.5; // casillas libres de juguetes alrededor de ca
  * @returns {{ cols, rows, seed, chunkSize, grid: Uint8Array, chunks, spawnPoints, props, openCells, attempts }}
  */
 export function generateArena(config) {
+  // Mapas diseñados a mano (arena/maps/handmade.js): uno según la semilla, o el pedido con /?mapa_id=
+  if (config.handmade) return parseHandmade(pickHandmade(config.seed, config.mapId), config.seed);
   for (let attempt = 0; attempt < config.maxAttempts; attempt++) {
     const layout = tryGenerate(config, attempt);
     if (layout) return { ...layout, attempts: attempt + 1 };

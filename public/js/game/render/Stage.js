@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { HorizontalTiltShiftShader } from 'three/addons/shaders/HorizontalTiltShiftShader.js';
@@ -9,10 +8,10 @@ import { VerticalTiltShiftShader } from 'three/addons/shaders/VerticalTiltShiftS
 import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
 import { HueSaturationShader } from 'three/addons/shaders/HueSaturationShader.js';
 
-// Acabado de maqueta (oclusión ambiental, desenfoque de miniatura, viñeta); /?calidad=baja lo quita
+// Acabado de maqueta (desenfoque de miniatura en los bordes, color y viñeta); /?calidad=baja lo quita
 const FANCY = new URLSearchParams(location.search).get('calidad') !== 'baja';
-const TILT_FOCUS = 0.52; // altura de la pantalla que queda nítida (0 abajo, 1 arriba)
-const TILT_BLUR = 2.2; // fuerza del desenfoque hacia arriba y abajo
+const TILT_FOCUS = 0.5; // altura de la pantalla que queda nítida (0 abajo, 1 arriba)
+const TILT_BLUR = 0.7; // fuerza del desenfoque hacia arriba y abajo (suave: solo los bordes)
 
 const CAMERA_TILT = THREE.MathUtils.degToRad(60); // inclinación sobre el suelo, como en Boomerang Fu
 const HUD_ROOM = 0.6; // margen (en unidades) para que la barra superior no tape la arena
@@ -54,14 +53,10 @@ export class Stage {
     this.resize();
   }
 
-  /** Cadena de efectos: escena -> oclusión ambiental -> color -> desenfoque de miniatura -> viñeta -> salida. */
+  /** Cadena de efectos: escena -> color -> desenfoque de miniatura -> viñeta -> salida. */
   setupEffects() {
     const composer = new EffectComposer(this.renderer);
     composer.addPass(new RenderPass(this.scene, this.camera));
-    const ao = new GTAOPass(this.scene, this.camera, 1, 1);
-    ao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 12 });
-    ao.blendIntensity = 0.85;
-    composer.addPass(ao);
     const color = new ShaderPass(HueSaturationShader);
     color.uniforms.saturation.value = 0.12;
     composer.addPass(color);
@@ -77,7 +72,6 @@ export class Stage {
     composer.addPass(vignette);
     composer.addPass(new OutputPass());
     this.composer = composer;
-    this.ao = ao;
   }
 
   /** Ambiente de la zona de la casa: color de fondo y luz. */

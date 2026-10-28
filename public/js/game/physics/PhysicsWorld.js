@@ -55,6 +55,41 @@ export class PhysicsWorld {
     });
     ground.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
     this.world.addBody(ground);
+    this.ground = ground;
+  }
+
+  /** Altura del suelo de fondo (en los mapas con vacío, muy abajo: lo que cae del borde llega hasta allí). */
+  setGroundLevel(y) {
+    this.ground.position.y = y;
+  }
+
+  /** Losa de suelo (tablero de la mesa, suelo del baño): solo la pisan piezas y juguetes. */
+  addFloorBox(x, y, z, halfX, halfY, halfZ) {
+    const body = new CANNON.Body({
+      type: CANNON.Body.STATIC,
+      shape: new CANNON.Box(new CANNON.Vec3(halfX, halfY, halfZ)),
+      position: new CANNON.Vec3(x, y, z),
+      material: this.materials.floor,
+      collisionFilterGroup: GROUP.FLOOR,
+      collisionFilterMask: MASK.FLOOR,
+    });
+    body.kind = 'floor';
+    this.world.addBody(body);
+    return body;
+  }
+
+  /** Obstáculo que se mueve por su cuenta (rodillo): empuja y el búmerang rebota en él. */
+  addMover(halfX, halfY, halfZ) {
+    const body = new CANNON.Body({
+      type: CANNON.Body.KINEMATIC,
+      shape: new CANNON.Box(new CANNON.Vec3(halfX, halfY, halfZ)),
+      material: this.materials.wall,
+      collisionFilterGroup: GROUP.WALL,
+      collisionFilterMask: MASK.WALL,
+    });
+    body.kind = 'wall';
+    this.world.addBody(body);
+    return body;
   }
 
   step(dt) {

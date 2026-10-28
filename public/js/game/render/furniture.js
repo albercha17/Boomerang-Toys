@@ -10,7 +10,14 @@ const MODELS = {}; // nombre -> { scene, size }
 const loader = new GLTFLoader();
 const toonCache = new Map();
 
-const urlOf = (name) => (name.includes('_') ? `/models/patio/${name}.glb` : `/models/casa/${name}.glb`);
+// «carpeta/modelo» (p. ej. comida/cake) o, si no, casa o patio (los del kit de naturaleza llevan «_»)
+const urlOf = (name) => {
+  if (name.includes('/')) return `/models/${name}.glb`;
+  return name.includes('_') ? `/models/patio/${name}.glb` : `/models/casa/${name}.glb`;
+};
+
+/** Medidas del modelo cargado (ancho x, alto y, fondo z), o null. */
+export const furnitureSize = (name) => MODELS[name]?.size ?? null;
 
 /** Plástico de juguete brillante de un color (un material por color). */
 function plastic(hex) {
@@ -39,7 +46,10 @@ export async function loadFurniture(names) {
       const scene = gltf.scene;
       scene.traverse((o) => {
         if (!o.isMesh) return;
-        o.material = Array.isArray(o.material) ? o.material.map(toonOf) : toonOf(o.material);
+        const convert = (m) => (m.map
+          ? new THREE.MeshStandardMaterial({ map: m.map, color: m.color, roughness: 0.5, metalness: 0 }) // con textura (kit de comida)
+          : toonOf(m));
+        o.material = Array.isArray(o.material) ? o.material.map(convert) : convert(o.material);
         o.castShadow = true;
         o.receiveShadow = true;
         o.userData.shared = true; // no se libera al cambiar de arena

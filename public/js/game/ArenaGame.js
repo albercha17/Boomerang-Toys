@@ -83,11 +83,13 @@ export class ArenaGame {
       return false;
     });
     for (const weapon of [...this.weapons]) weapon.steer(dt);
+    if (!this.frozen) this.arena.update?.(now, dt); // lo que se mueve en el mapa (rodillo...)
 
     this.physics.step(dt);
 
     this.arena.sync();
-    this.checkBoundary(now);
+    if (this.arena.handmade) this.checkMapHazards(now);
+    else this.checkBoundary(now);
     for (const character of this.characters.values()) character.render(dt, now);
     for (const weapon of this.weapons) weapon.sync(dt);
     this.checkWeaponHits(now);
@@ -137,6 +139,50 @@ export class ArenaGame {
   /** Al empezar una partida o volver a la sala, nadie conserva power-ups. */
   clearAllAbilities() {
     for (const character of this.characters.values()) character.clearAbilities();
+  }
+
+  /**
+   * Mapas hechos a mano: caerse por el borde o al agua mata (las piezas caen), el rodillo aplasta,
+   * en los matorrales no se te ve, y el búmerang que cae al agua o al vacío vuelve a suelo firme.
+   */
+  checkMapHazards(now) {
+    const arena = this.arena;
+    for (const character of this.characters.values()) {
+      character.hidden = false;
+      if (!character.alive || this.frozen) continue;
+      const hazard = arena.hazardAt(character.x, character.z);
+      if (hazard) {
+        if (hazard === 2) this.effects.burst(character.x, 0.2, character.z, [0x4fc3f7, 0xffffff, 0xb3e5fc], 22, 0.9); // ¡chof!
+        this.kill(character, Math.random() * Math.PI * 2, now, { force: true });
+        continue;
+      }
+      for (const m of arena.movers) {
+        const r = character.def.radius;
+        if (Math.abs(character.x - m.x) < m.radius + r * 0.7 && Math.abs(character.z - m.z) < m.halfLength + r * 0.5) {
+          this.kill(character, m.x > m.lastX ? 0 : Math.PI, now, { force: true });
+          this.stage.shake(200, 0.35);
+          break;
+        }
+      }
+      if (!character.alive) continue;
+      const bush = arena.bushAt(character.x, character.z);
+      if (bush) {
+        character.hidden = !character.charging && !character.isLunging();
+        if (character.moving > 0.1) arena.rustle(bush, now);
+      }
+    }
+    for (const weapon of this.weapons) {
+      if (weapon.state !== WEAPON_STATE.GROUND || !arena.hazardAt(weapon.x, weapon.z)) continue;
+      const safe = this.nearestSafePoint(weapon.x, weapon.z);
+      weapon.body.position.set(safe.x, weapon.body.position.y, safe.z);
+      weapon.body.velocity.set(0, 0, 0);
+      this.effects.ring(safe.x, safe.z);
+    }
+  }
+
+  nearestSafePoint(x, z) {
+    const points = this.arena.freePoints.length ? this.arena.freePoints : this.arena.spawnPoints;
+    return points.reduce((best, p) => (Math.hypot(p.x - x, p.z - z) < Math.hypot(best.x - x, best.z - z) ? p : best), points[0]);
   }
 
   /** Línea roja: fuera de la zona hay 5 s para volver; después, se explota. */

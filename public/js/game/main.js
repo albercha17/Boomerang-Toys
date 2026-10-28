@@ -13,11 +13,16 @@ import { loadIaModels } from './entities/IaFigure.js';
 import { loadFurniture } from './render/furniture.js';
 import { FURNITURE_NAMES } from './arena/themes.js';
 import { ROOM_MODELS } from './arena/generation/rooms.js';
+import { HANDMADE_MAPS } from './arena/maps/handmade.js';
 
 const WALL_MODELS = ['wall', 'wallWindow', 'wallWindowSlide', 'fence_planks', 'tree_oak', 'tree_default'];
+// Modelos de los mapas hechos a mano (bloques, matorrales, sueltos y lo que se mueve)
+const MAP_MODELS = HANDMADE_MAPS.flatMap((m) => [...m.blocks, ...(m.props ?? []), m.bush, ...(m.movers ?? []).map((v) => v.model)])
+  .filter((name) => name && name !== 'patito');
+MAP_MODELS.push('chair', 'plant_bushDetailed');
 
 // Muñecos 3D animados, muebles de cada zona y suelos ilustrados; lo que falte se dibuja por código.
-await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture([...FURNITURE_NAMES, ...ROOM_MODELS, ...WALL_MODELS]), loadIaModels(Object.keys(TOYS))]);
+await Promise.all([loadArt(), loadModels(TOY_BASES), loadFurniture([...FURNITURE_NAMES, ...ROOM_MODELS, ...WALL_MODELS, ...MAP_MODELS]), loadIaModels(Object.keys(TOYS))]);
 
 // Puntos para ganar la partida: 10 por defecto, o /?puntos=3 para partidas cortas (1 a 50).
 const params = new URLSearchParams(location.search);
