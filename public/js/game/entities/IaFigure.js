@@ -37,6 +37,19 @@ const SETTINGS = {
     arms: { L: { minX: 0.27, minY: 0.5, maxY: 0.76, shoulder: [0.25, 0.62] }, R: { minX: 0.27, minY: 0.5, maxY: 0.76, shoulder: [-0.25, 0.62] } },
   },
   mago: { neck: 0.5, legTop: 0.18, armY: [0.18, 0.5] }, // cabezón con sombrero y túnica larga
+  // Personajes añadidos el 29 oct 2026 (medidos con la rejilla de frente)
+  buzz: { armAmp: 0.3, twistAmp: 0, arms: { L: { minX: 0.28, minY: 0.45, maxY: 0.8, shoulder: [0.27, 0.62] }, R: { minX: 0.28, minY: 0.45, maxY: 0.8, shoulder: [-0.27, 0.62] } } }, // brazos doblados hacia arriba
+  mario: { armAmp: 0.6, twistAmp: 0.5, neck: 0.6, legTop: 0.2, arms: { L: { minX: 0.3, minY: 0.25, maxY: 0.62, shoulder: [0.3, 0.6] }, R: { minX: 0.3, minY: 0.3, maxY: 0.62, shoulder: [-0.3, 0.6] } } },
+  stitch: { neck: 0.5, legTop: 0.15, arms: { L: { minX: 0.42, minY: 0.18, maxY: 0.5, shoulder: [0.4, 0.42] }, R: { minX: 0.42, minY: 0.18, maxY: 0.5, shoulder: [-0.4, 0.42] } } },
+  olaf: { rigid: true, legTop: 0.1 }, // se contonea entero, con sus brazos de rama tal cual
+  levi: { neck: 0.5, legTop: 0.15, armY: [0.15, 0.5] }, // cabezón; las espadas van con las manos
+  baloncesto: { neck: 0.82, legTop: 0.45, arms: { L: { minX: 0.22, minY: 0.65, maxY: 0.9, shoulder: [0.2, 0.78] }, R: { minX: 0.22, minY: 0.65, maxY: 0.9, shoulder: [-0.2, 0.78] } } }, // en cruz, proporciones de persona
+  acorazado: { neck: 0.5, legTop: 0.15, armY: [0.15, 0.5] },
+  dibujo: { neck: 0.6, legTop: 0.15, arms: { L: { minX: 0.22, minY: 0.38, maxY: 0.56, shoulder: [0.2, 0.47] }, R: { minX: 0.22, minY: 0.38, maxY: 0.56, shoulder: [-0.2, 0.47] } } }, // el plátano, en cruz
+  jengibre: { armAmp: 0.4, twistAmp: 0.3, neck: 0.62, legTop: 0.3, arms: { L: { minX: 0.22, minY: 0.5, maxY: 0.8, shoulder: [0.2, 0.58] }, R: { minX: 0.25, minY: 0.38, maxY: 0.65, shoulder: [-0.2, 0.55] } } },
+  calavera: { armAmp: 0.5, twistAmp: 0.2, neck: 0.55, legTop: 0.15, arms: { L: { minX: 0.22, minY: 0.28, maxY: 0.55, shoulder: [0.18, 0.45] }, R: { minX: 0.22, minY: 0.28, maxY: 0.55, shoulder: [-0.18, 0.45] } } }, // maracas en las manos
+  jesus: { neck: 0.6, legTop: 0.1, arms: { R: { minX: 0.25, minY: 0.35, maxY: 0.58, shoulder: [-0.2, 0.52] } } }, // túnica larga
+  cascanueces: { neck: 0.55 },
   astronauta: { // torso ancho: los brazos, por cajas (casi no se giran)
     arms: { L: { minX: 0.31, minY: 0.16, maxY: 0.52, shoulder: [0.29, 0.47], hang: 0.45 }, R: { minX: 0.31, minY: 0.16, maxY: 0.52, shoulder: [-0.29, 0.47], hang: 0.45 } },
   },
@@ -56,14 +69,17 @@ const STRIDE = 2.25; // radianes de zancada por unidad recorrida (a 5 unidades/s
 /** Carga los modelos que haya (public/models/ia/manifest.json, lo escribe herramientas/modelos_ia.py). */
 export async function loadIaModels(ids) {
   let available = [];
+  let rigged = [];
   try {
     const res = await fetch('/models/ia/manifest.json', { cache: 'no-cache' });
     if (res.ok) available = await res.json();
+    const rig = await fetch('/models/ia/rig/manifest.json', { cache: 'no-cache' }); // los que tienen esqueleto de Blender
+    if (rig.ok) rigged = await rig.json();
   } catch { /* sin modelos IA */ }
   await Promise.all(ids.filter((id) => available.includes(id) && !SOURCES[id]).map((id) => new Promise((resolve) => {
     loader.load(`/models/ia/${id}.glb`, (gltf) => {
       try { SOURCES[id] = split(gltf.scene, SETTINGS[id] ?? {}); } catch (error) { console.warn(`Modelo IA ${id}:`, error); }
-      if (!SOURCES[id] || /esqueleto=juego/.test(location.search)) { resolve(); return; }
+      if (!SOURCES[id] || !rigged.includes(id) || /esqueleto=juego/.test(location.search)) { resolve(); return; }
       // Con esqueleto y pesos de Blender (herramientas/blender/riggear_personaje.py), si está hecho
       loader.load(`/models/ia/rig/${id}.glb`, (rig) => {
         // Los pocos vértices que Blender deja sin peso irían al origen: van con la columna

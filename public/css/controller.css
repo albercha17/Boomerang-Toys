@@ -255,12 +255,12 @@ body {
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
 }
 .play-btn:disabled { background: #6b5a4c; color: #c8b8a6; box-shadow: none; }
-/* Móvil en horizontal (poca altura): tarjetas compactas para que quepan las 12 sin desplazar */
+/* Móvil en horizontal (poca altura): tarjetas compactas, muchas por fila (son casi 30 personajes) */
 @media (max-height: 460px) {
   .select-screen h1 { font-size: 17px; margin-bottom: 4px; }
-  .char-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .char-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
   .char-card { padding: 3px 4px; gap: 1px; border-width: 3px; border-radius: 12px; }
-  .char-art, .char-art img { width: 58px; height: 58px; }
+  .char-art, .char-art img { width: 52px; height: 52px; }
   .char-emoji { font-size: 36px; }
   .char-name { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .char-owner { font-size: 10px; }

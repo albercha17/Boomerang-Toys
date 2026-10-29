@@ -19,6 +19,7 @@ from mathutils import Vector
 args = sys.argv[sys.argv.index("--") + 1:]
 entrada, ruta_huesos, salida = args[0], args[1], args[2]
 VOXEL = "--vóxel" in args or "--voxel" in args
+TAM_VOXEL = float(args[args.index("--tam") + 1]) if "--tam" in args else 0.012  # --tam: vóxel más grande = copia más sencilla
 g2b = lambda p: Vector((p[0], -p[2], p[1]))  # noqa: E731
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -114,7 +115,7 @@ if sin_peso > total * 0.01:
     bpy.context.scene.collection.objects.link(copia)
     rem = copia.modifiers.new("voxel", "REMESH")
     rem.mode = "VOXEL"
-    rem.voxel_size = 0.012
+    rem.voxel_size = TAM_VOXEL
     bpy.context.view_layer.objects.active = copia
     bpy.ops.object.modifier_apply(modifier=rem.name)
     pesar(copia)
@@ -151,4 +152,8 @@ bpy.ops.object.select_all(action="SELECT")
 # Sin materiales: el juego le pone el del modelo original (misma textura y mismas UV), así pesa mucho menos
 bpy.ops.export_scene.gltf(filepath=salida, export_format="GLB", export_skins=True, export_animations=False, export_yup=True,
                           export_apply=False, export_materials="NONE")
+# Lista de los que tienen esqueleto (el juego solo pide esos)
+from pathlib import Path
+carpeta = Path(salida).parent
+(carpeta / "manifest.json").write_text(json.dumps(sorted(p.stem for p in carpeta.glob("*.glb"))), encoding="utf-8")
 print(f"ok {salida} · {total} vértices, {sin_peso} sin peso · pesos {metodo}")

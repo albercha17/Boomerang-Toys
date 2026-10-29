@@ -23,6 +23,22 @@
     { id: 'robot', name: 'Robot transformable', emoji: '🤖', description: 'Robot de juguete de piezas de colores.' },
     { id: 'astronauta', name: 'Astronauta', emoji: '🚀', description: 'Traje espacial blanco y azul, recién llegado de la Luna.' },
     { id: 'cristi', name: 'Cristi', emoji: '⭐', description: 'Melena rubia ondulada y chaqueta vaquera.' },
+    { id: 'woody', name: 'Woody', emoji: '🤠', description: 'Vaquero de trapo con sombrero y estrella de sheriff.' },
+    { id: 'buzz', name: 'Buzz', emoji: '🚀', description: 'Guardián espacial con alas y casco.' },
+    { id: 'mario', name: 'Mario', emoji: '🍄', description: 'Fontanero de gorra roja y bigote.' },
+    { id: 'stitch', name: 'Stitch', emoji: '👽', description: 'Bichito azul de orejas grandes. Travieso.' },
+    { id: 'olaf', name: 'Muñeco de nieve', emoji: '⛄', description: 'Le encantan los abrazos calentitos.' },
+    { id: 'ironman', name: 'Hombre de hierro', emoji: '🦾', description: 'Armadura gigante roja y dorada.' },
+    { id: 'arana', name: 'Hombre araña', emoji: '🕷️', description: 'Traje rojo y azul con telarañas.' },
+    { id: 'goku', name: 'Príncipe Z', emoji: '🐉', description: 'Pelo de punta y armadura de saiyan.' },
+    { id: 'levi', name: 'Capitán Levi', emoji: '🗡️', description: 'Capa verde y dos espadas.' },
+    { id: 'baloncesto', name: 'Baloncestista', emoji: '🏀', description: 'No suelta el balón ni para dormir.' },
+    { id: 'acorazado', name: 'Caballero oscuro', emoji: '🦇', description: 'Capa, máscara de orejas y armadura negra.' },
+    { id: 'dibujo', name: 'Plátano', emoji: '🍌', description: 'Plátano con chaleco y muchas ganas de pelea.' },
+    { id: 'jengibre', name: 'Galleta de jengibre', emoji: '🍪', description: 'Crujiente y con botones de caramelo.' },
+    { id: 'cascanueces', name: 'Cascanueces', emoji: '🥜', description: 'Soldado de madera de Navidad.' },
+    { id: 'calavera', name: 'Calavera mexicana', emoji: '💀', description: 'Catrina llena de flores y colores.' },
+    { id: 'jesus', name: 'Jesús', emoji: '✝️', description: 'Túnica larga y sandalias.' },
   ]);
 
   const BY_ID = Object.freeze(Object.fromEntries(CHARACTERS.map((c) => [c.id, c])));

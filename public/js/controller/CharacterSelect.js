@@ -33,11 +33,23 @@ export class CharacterSelect {
     this.loadPortraits();
   }
 
-  /** Los retratos se dibujan en 3D en el propio móvil, con los mismos muñecos (mientras, se ve un emoji). */
+  /**
+   * Retratos: los ya dibujados (public/models/ia/retratos, herramienta retratos.js) como imagen; los que falten se
+   * dibujan en 3D en el propio móvil con los mismos muñecos (mientras, se ve un emoji).
+   */
   async loadPortraits() {
+    let ready = [];
+    try {
+      const res = await fetch('/models/ia/retratos/manifest.json', { cache: 'no-cache' });
+      if (res.ok) ready = await res.json();
+    } catch { /* sin retratos guardados */ }
+    for (const id of ready) this.portraits[id] = `/models/ia/retratos/${id}.png`;
+    this.render();
+    const missing = CHARACTERS.map((c) => c.id).filter((id) => !ready.includes(id));
+    if (!missing.length) return;
     try {
       const { renderPortraits } = await import('/js/game/entities/portraits.js');
-      this.portraits = await renderPortraits(CHARACTERS.map((c) => c.id));
+      Object.assign(this.portraits, await renderPortraits(missing));
       this.render();
     } catch (error) {
       console.warn('Sin retratos 3D:', error);
