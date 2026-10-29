@@ -150,20 +150,6 @@
       "collider": "cylinder"
     },
     {
-      "id": "volcan",
-      "model": "volcan",
-      "x": -15,
-      "y": 0,
-      "z": -8.2,
-      "rot": 0,
-      "size": [
-        5.4,
-        3.52,
-        5.26
-      ],
-      "collider": "cylinder"
-    },
-    {
       "id": "afloramiento",
       "model": "afloramiento",
       "x": 15,
@@ -526,9 +512,9 @@
     {
       "id": "volcan_f",
       "model": "volcan",
-      "x": -9,
-      "y": 0,
-      "z": -19,
+      "x": -17.3,
+      "y": -0.5,
+      "z": -11.4,
       "rot": 0,
       "size": [
         13,
@@ -638,9 +624,9 @@
     {
       "id": "mangle_2",
       "model": "mangle",
-      "x": -21.5,
+      "x": -20.5,
       "y": 0,
-      "z": -9,
+      "z": -0.4,
       "rot": 60,
       "size": [
         3.83,
@@ -666,7 +652,7 @@
     {
       "id": "palmera_2",
       "model": "palmera",
-      "x": -9.5,
+      "x": -8.6,
       "y": 0,
       "z": -13.5,
       "rot": -30,
