@@ -16,6 +16,19 @@ export function moverHits(m, x, z, r) {
   return Math.abs(along) < m.radius + r * 0.7 && Math.abs(across) < m.halfLength + r * 0.5;
 }
 
+/**
+ * ¿Aplasta el rodillo a quien está en (x, z)? Si lo pilla de lleno, o si lo toca mientras avanza hacia él (la física
+ * lo empuja nada más tocarlo, así que sin esto un rodillo fino lo arrastraría en vez de aplastarlo).
+ */
+export function moverCrushes(m, x, z, r) {
+  if (moverHits(m, x, z, r)) return true;
+  const { along, across } = moverLocal(m, x, z);
+  if (Math.abs(across) >= m.halfLength + r * 0.5) return false;
+  const a = m.angle ?? 0;
+  const step = (m.x - (m.lastX ?? m.x)) * Math.cos(a) + (m.z - (m.lastZ ?? m.z)) * Math.sin(a); // lo que avanzó en su sentido
+  return Math.abs(step) > 1e-4 && Math.sign(along) === Math.sign(step) && Math.abs(along) < m.radius + r + 0.12;
+}
+
 /** ¿Está el punto cerca de donde pasa el rodillo ahora mismo? (para que los bots no se metan delante) */
 export function moverNear(m, x, z, alongMargin, acrossMargin) {
   const { along, across } = moverLocal(m, x, z);

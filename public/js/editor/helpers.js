@@ -129,7 +129,7 @@ export class EditorHelpers {
 
     // Agua y huecos
     data.water.forEach((w, index) => {
-      const shape = outline(w, (w.y ?? 0) + 0.04, 0x4fc3f7);
+      const shape = outline(w, (w.y ?? 0) + 0.04, w.lava ? 0xff5a1a : 0x4fc3f7);
       shape.userData.pick = { kind: 'water', index };
       shape.children.forEach((c) => { c.userData.pick = shape.userData.pick; });
       this.group.add(shape);

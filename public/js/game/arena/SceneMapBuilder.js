@@ -4,6 +4,7 @@ import { THEMES } from './themes.js';
 import { buildPitLiners, buildProceduralBase, roundedPath, tableShape } from './proceduralBase.js';
 import { moverLocal, moverProgress } from './movers.js';
 import { buildDevices } from './devices.js';
+import { buildAmbient } from './ambient.js';
 
 /**
  * Mapas descritos en public/maps/<id>.json (formato en shared/mapFormat.js; se editan en /editor).
@@ -18,6 +19,39 @@ const loader = new GLTFLoader();
 const CACHE = {}; // id -> { data, base: Object3D | null, baseKey }
 const MODELS = {}; // modelo -> { scene (pivote abajo en el centro), size: Vector3 } | null si no existe
 let INDEX = []; // [{ id, name, theme, play }]
+
+/** Textura de lava (una vez): manchas incandescentes sobre costra oscura; se repite y se desplaza despacio. */
+let LAVA_TEXTURE = null;
+function lavaTexture() {
+  if (LAVA_TEXTURE) return LAVA_TEXTURE;
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#ff5a12';
+  g.fillRect(0, 0, size, size);
+  let seed = 7;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const blob = (x, y, r, inner, outer) => {
+    // Se pinta también desplazada para que la textura se repita sin costuras
+    for (const dx of [-size, 0, size]) for (const dy of [-size, 0, size]) {
+      const grad = g.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, r);
+      grad.addColorStop(0, inner);
+      grad.addColorStop(1, outer);
+      g.fillStyle = grad;
+      g.beginPath();
+      g.arc(x + dx, y + dy, r, 0, Math.PI * 2);
+      g.fill();
+    }
+  };
+  for (let i = 0; i < 26; i++) blob(rand() * size, rand() * size, 18 + rand() * 34, 'rgba(70,14,6,0.95)', 'rgba(120,24,6,0)'); // costra
+  for (let i = 0; i < 30; i++) blob(rand() * size, rand() * size, 8 + rand() * 22, 'rgba(255,236,120,1)', 'rgba(255,140,20,0)'); // lo que brilla
+  LAVA_TEXTURE = new THREE.CanvasTexture(canvas);
+  LAVA_TEXTURE.wrapS = LAVA_TEXTURE.wrapT = THREE.RepeatWrapping;
+  LAVA_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+  LAVA_TEXTURE.repeat.set(0.22, 0.22);
+  return LAVA_TEXTURE;
+}
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: 'no-cache' });
@@ -223,11 +257,13 @@ export function buildSceneMap(stage, physics, layout) {
     owned.push(...buildProceduralBase(root, data));
   }
 
-  // Agua (bañera): superficie azul que se mece un poco
+  // Agua (bañera): superficie azul que se mece un poco; la lava brilla, se desplaza y palpita
   const waterMeshes = waters.map((w) => {
     const shape = new THREE.Shape(roundedPath({ ...w, x: 0, z: 0 }, THREE.Shape).getPoints(10));
-    const mesh = new THREE.Mesh(own(new THREE.ShapeGeometry(shape)),
-      own(new THREE.MeshStandardMaterial({ color: 0x5ec8f0, roughness: 0.08, metalness: 0.1, transparent: true, opacity: 0.72 })));
+    const material = w.lava
+      ? new THREE.MeshBasicMaterial({ map: lavaTexture(), color: 0xffffff })
+      : new THREE.MeshStandardMaterial({ color: 0x5ec8f0, roughness: 0.08, metalness: 0.1, transparent: true, opacity: 0.72 });
+    const mesh = new THREE.Mesh(own(new THREE.ShapeGeometry(shape)), own(material));
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.set(w.x, w.y ?? -0.3, w.z);
     mesh.receiveShadow = true;
@@ -313,6 +349,7 @@ export function buildSceneMap(stage, physics, layout) {
   // Artefactos: cintas, puertas, pasarelas que se caen, trampolines y portales
   const devices = buildDevices(root, physics, data.devices ?? [], own);
   for (const d of devices.list) handles.devices.set(d.id, d.group);
+  const ambient = buildAmbient(root, data, own); // humo del volcán y burbujas de la lava
 
   stage.tuneMaterials(root); // con la luz nueva, que los modelos no reflejen tanto el entorno
   stage.setMood(theme);
@@ -352,10 +389,11 @@ export function buildSceneMap(stage, physics, layout) {
     props,
     fallDepth: -t.height, // el suelo de la cocina, donde se estrella quien cae de la mesa
 
-    /** 0 suelo, 1 vacío (te caes), 2 agua (te ahogas). */
+    /** 0 suelo, 1 vacío (te caes), 2 agua (te ahogas), 3 lava (te quemas). */
     hazardAt(x, z) {
       if (devices.solidAt(x, z)) return 0; // pasarela entera: se pisa aunque debajo no haya suelo
-      if (waters.some((w) => inRounded(w, x, z))) return 2;
+      const pool = waters.find((w) => inRounded(w, x, z));
+      if (pool) return pool.lava ? 3 : 2;
       // Hueco sin agua: te caes (con agua, como la bañera, el borde se pisa y lo que ahoga es el agua)
       if ((room?.pits ?? []).some((p) => inRounded(p, x, z) && !waters.some((w) => inRect(p, w.x, w.z)))) return 1;
       return onArea(x, z) ? 0 : 1;
@@ -371,6 +409,7 @@ export function buildSceneMap(stage, physics, layout) {
 
     update(now, dt) {
       devices.update(now, dt);
+      ambient.update(now);
       for (const m of movers) {
         const k = moverProgress(m, now);
         m.forward = k >= m.progress;
@@ -388,6 +427,11 @@ export function buildSceneMap(stage, physics, layout) {
         b.object.rotation.z = now < b.shakeUntil ? Math.sin(now / 30) * 0.06 : b.object.rotation.z * 0.8;
       }
       waterMeshes.forEach((m, i) => { m.position.y = (waters[i].y ?? -0.3) + Math.sin(now / 700 + i) * 0.02; });
+      if (LAVA_TEXTURE && waters.some((w) => w.lava)) {
+        LAVA_TEXTURE.offset.set(now / 90000, now / 140000);
+        const glow = 0.86 + Math.sin(now / 520) * 0.14;
+        waterMeshes.forEach((m, i) => { if (waters[i].lava) m.material.color.setScalar(glow); });
+      }
     },
 
     sync() {

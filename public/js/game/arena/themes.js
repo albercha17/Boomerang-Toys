@@ -156,6 +156,13 @@ export const THEMES = Object.freeze({
     blocks: [0xff5fa2, 0xffb3d9, 0xc77dff, 0x80ffdb, 0xffd166, 0xffffff],
     props: ['cojin'],
   },
+  selva: {
+    id: 'selva', name: 'Selva azteca',
+    background: 0x9fd8b8,
+    sky: 0xf2fff0, ground: 0x3f7a3a, sun: 1.8,
+    blocks: [0x2d6a4f, 0x95d5b2, 0xe76f51, 0xf4a261, 0xe9c46a, 0x264653],
+    props: ['naranja'],
+  },
   bano: {
     id: 'bano', name: 'Baño',
     background: 0xbfe3e8,

@@ -2,7 +2,7 @@ import { PhysicsWorld } from './physics/PhysicsWorld.js';
 import { generateArena, nextMapConfig } from './arena/maps/handmade.js';
 import { buildHandmade } from './arena/HandmadeBuilder.js';
 import { buildSceneMap } from './arena/SceneMapBuilder.js';
-import { moverHits, moverPushAngle } from './arena/movers.js';
+import { moverCrushes, moverPushAngle } from './arena/movers.js';
 
 /** Mapa con escena horneada (Blender) o dibujado en texto. */
 const buildArena = (stage, physics, layout) => (layout.sceneMap ? buildSceneMap : buildHandmade)(stage, physics, layout);
@@ -177,7 +177,7 @@ export class ArenaGame {
       }
       for (const m of arena.movers) {
         const r = character.def.radius;
-        if (moverHits(m, character.x, character.z, r)) {
+        if (moverCrushes(m, character.x, character.z, r)) {
           this.kill(character, moverPushAngle(m), now, { force: true });
           this.stage.shake(200, 0.35);
           break;
@@ -199,15 +199,17 @@ export class ArenaGame {
     }
   }
 
-  /** Se sale de la mesa o cae al agua: sigue con su impulso, sin control, y la gravedad hace el resto. */
+  /** Se sale de la mesa o cae al agua (o a la lava): sigue con su impulso, sin control, y la gravedad hace el resto. */
   startFall(character, hazard) {
     const v = character.body.velocity;
-    const water = hazard === 2;
-    character.falling = { y: 0, vy: water ? -0.4 : 1.4, vx: v.x * 0.9, vz: v.z * 0.9, spin: 0, water };
+    const lava = hazard === 3;
+    const water = hazard === 2 || lava;
+    character.falling = { y: 0, vy: water ? -0.4 : 1.4, vx: v.x * 0.9, vz: v.z * 0.9, spin: 0, water, lava };
     character.charging = false;
     character.lunge = null;
     this.physics.remove(character.body);
-    if (water) this.effects.burst(character.x, 0.2, character.z, [0x4fc3f7, 0xffffff, 0xb3e5fc], 26, 1); // ¡chof!
+    if (lava) this.effects.burst(character.x, 0.3, character.z, [0xff3d00, 0xffd000, 0xff8a00, 0x3a3a3a], 34, 1.2); // ¡fsss!
+    else if (water) this.effects.burst(character.x, 0.2, character.z, [0x4fc3f7, 0xffffff, 0xb3e5fc], 26, 1); // ¡chof!
   }
 
   /** Cayendo: gravedad y vueltas; al llegar al suelo de abajo explota (en el agua, se hunde y se ahoga). */
@@ -225,7 +227,9 @@ export class ArenaGame {
     const bottom = f.water ? -0.9 : (this.arena.fallDepth ?? -6) + 0.3;
     if (f.y > bottom) return;
     const { x, z } = character;
-    if (f.water) {
+    if (f.lava) {
+      this.effects.burst(x, 0, z, [0x555555, 0x888888, 0xff6a00], 22, 0.9); // humo
+    } else if (f.water) {
       this.effects.burst(x, -0.1, z, [0x4fc3f7, 0xffffff], 18, 0.6);
     } else {
       this.effects.burst(x, f.y + 0.6, z, [0xff4d00, 0xffd000, 0xffffff, 0x2a1d14], 44, 1.3); // ¡bum! contra el suelo

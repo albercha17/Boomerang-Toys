@@ -322,5 +322,140 @@
     "id": "bloques_madera",
     "name": "Bloques de madera",
     "source": "fabrica\\bloques_madera.glb"
+  },
+  {
+    "id": "afloramiento",
+    "name": "Afloramiento rocoso",
+    "source": "selva\\afloramiento.glb"
+  },
+  {
+    "id": "altar_antiguo",
+    "name": "Altar antiguo",
+    "source": "selva\\altar_antiguo.glb"
+  },
+  {
+    "id": "altar_piedra",
+    "name": "Altar de piedra",
+    "source": "selva\\altar_piedra.glb"
+  },
+  {
+    "id": "antorcha",
+    "name": "Antorcha",
+    "source": "selva\\antorcha.glb"
+  },
+  {
+    "id": "arbol_jungla",
+    "name": "Árbol de la jungla",
+    "source": "selva\\arbol_jungla.glb"
+  },
+  {
+    "id": "arbusto",
+    "name": "Arbusto",
+    "source": "selva\\arbusto.glb"
+  },
+  {
+    "id": "arbusto_bayas",
+    "name": "Arbusto de bayas",
+    "source": "selva\\arbusto_bayas.glb"
+  },
+  {
+    "id": "arco_roca",
+    "name": "Arco de roca",
+    "source": "selva\\arco_roca.glb"
+  },
+  {
+    "id": "bambu",
+    "name": "Bambú",
+    "source": "selva\\bambu.glb"
+  },
+  {
+    "id": "calaveras",
+    "name": "Montón de calaveras",
+    "source": "selva\\calaveras.glb"
+  },
+  {
+    "id": "calendario",
+    "name": "Calendario azteca",
+    "source": "selva\\calendario.glb"
+  },
+  {
+    "id": "estela_piedra",
+    "name": "Estela de piedra",
+    "source": "selva\\estela_piedra.glb"
+  },
+  {
+    "id": "golem_piedra",
+    "name": "Gólem de piedra",
+    "source": "selva\\golem_piedra.glb"
+  },
+  {
+    "id": "helecho",
+    "name": "Helecho",
+    "source": "selva\\helecho.glb"
+  },
+  {
+    "id": "idolo_dorado",
+    "name": "Ídolo dorado",
+    "source": "selva\\idolo_dorado.glb"
+  },
+  {
+    "id": "mangle",
+    "name": "Mangle",
+    "source": "selva\\mangle.glb"
+  },
+  {
+    "id": "mascara",
+    "name": "Máscara maya",
+    "source": "selva\\mascara.glb"
+  },
+  {
+    "id": "piedras_pasaderas",
+    "name": "Piedras pasaderas",
+    "source": "selva\\piedras_pasaderas.glb"
+  },
+  {
+    "id": "piramide",
+    "name": "Pirámide maya",
+    "source": "selva\\piramide.glb"
+  },
+  {
+    "id": "rocas_grandes",
+    "name": "Rocas grandes",
+    "source": "selva\\rocas_grandes.glb"
+  },
+  {
+    "id": "roca_lava",
+    "name": "Roca de lava",
+    "source": "selva\\roca_lava.glb"
+  },
+  {
+    "id": "tocon",
+    "name": "Tocón",
+    "source": "selva\\tocon.glb"
+  },
+  {
+    "id": "totem",
+    "name": "Tótem",
+    "source": "selva\\totem.glb"
+  },
+  {
+    "id": "tronco_caido",
+    "name": "Tronco caído",
+    "source": "selva\\tronco_caido.glb"
+  },
+  {
+    "id": "tronco_setas",
+    "name": "Tronco con setas",
+    "source": "selva\\tronco_setas.glb"
+  },
+  {
+    "id": "trono",
+    "name": "Trono azteca",
+    "source": "selva\\trono.glb"
+  },
+  {
+    "id": "volcan",
+    "name": "Volcán",
+    "source": "selva\\volcan.glb"
   }
 ]

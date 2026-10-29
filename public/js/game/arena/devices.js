@@ -65,6 +65,30 @@ function plankTexture() {
   return t;
 }
 
+/** Bloques de piedra con musgo (pasarelas y puertas con style 'piedra', para la selva). */
+function stoneTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#4a463e';
+  g.fillRect(0, 0, 128, 128);
+  const tones = ['#7d776a', '#6f6a5e', '#857f70', '#767064'];
+  let k = 0;
+  for (let row = 0; row < 4; row++) {
+    const shift = row % 2 ? 32 : 0;
+    for (let x = -32; x < 128; x += 64) {
+      g.fillStyle = tones[k++ % tones.length];
+      g.fillRect(x + shift + 2, row * 32 + 2, 60, 28);
+    }
+  }
+  g.fillStyle = 'rgba(96, 150, 70, 0.55)'; // musgo
+  for (const [x, y, r] of [[20, 30, 9], [90, 64, 12], [60, 110, 8], [110, 10, 7]]) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+  const t = new THREE.CanvasTexture(canvas);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
 const PORTAL_COLORS = [0x9b5de5, 0x00b4c6, 0xff7f11, 0x2bb673, 0xe63946];
 
 export function buildDevices(root, physics, list, own, models = {}) {
@@ -92,23 +116,34 @@ export function buildDevices(root, physics, list, own, models = {}) {
       const h = def.height ?? 2.6;
       dev.panel = new THREE.Group();
       dev.group.add(dev.panel);
-      const slab = new THREE.Mesh(own(new THREE.BoxGeometry(def.w, h, def.d)), own(new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.45 })));
+      const stone = def.style === 'piedra';
+      let slabMaterial;
+      if (stone) {
+        const tex = own(stoneTexture());
+        tex.repeat.set(def.w / 2, h / 2);
+        slabMaterial = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 });
+      } else {
+        slabMaterial = new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.45 });
+      }
+      const slab = new THREE.Mesh(own(new THREE.BoxGeometry(def.w, h, def.d)), own(slabMaterial));
       slab.position.y = h / 2;
       slab.castShadow = true;
       dev.panel.add(slab);
-      for (let k = -1; k <= 1; k += 2) { // franjas amarillas de aviso
-        const stripe = new THREE.Mesh(own(new THREE.BoxGeometry(def.w * 1.01, 0.18, def.d * 1.02)), own(new THREE.MeshStandardMaterial({ color: 0xffd166, roughness: 0.4 })));
+      for (let k = -1; k <= 1; k += 2) { // franjas amarillas de aviso (en piedra, cenefas talladas)
+        const stripe = new THREE.Mesh(own(new THREE.BoxGeometry(def.w * 1.01, 0.18, def.d * 1.02)),
+          own(new THREE.MeshStandardMaterial({ color: stone ? 0x2a9d8f : 0xffd166, roughness: stone ? 0.7 : 0.4 })));
         stripe.position.y = h / 2 + k * h * 0.28;
         dev.panel.add(stripe);
       }
       for (const side of [-1, 1]) { // postes
-        const post = mesh(new THREE.BoxGeometry(0.3, h + 0.3, def.d + 0.25), new THREE.MeshStandardMaterial({ color: 0x5c6b7a, roughness: 0.5, metalness: 0.4 }));
+        const post = mesh(new THREE.BoxGeometry(0.3, h + 0.3, def.d + 0.25), new THREE.MeshStandardMaterial(stone
+          ? { color: 0x7d7768, roughness: 0.95 } : { color: 0x5c6b7a, roughness: 0.5, metalness: 0.4 }));
         post.position.set(side * (def.w / 2 + 0.15), (h + 0.3) / 2, 0);
       }
       dev.height = h;
       dev.open = 0; // 0 cerrada, 1 abierta (bajo el suelo)
     } else if (def.type === 'fragile') {
-      const tex = own(plankTexture());
+      const tex = own(def.style === 'piedra' ? stoneTexture() : plankTexture());
       tex.repeat.set(def.w / 2, def.d / 2);
       dev.planks = new THREE.Group();
       dev.group.add(dev.planks);

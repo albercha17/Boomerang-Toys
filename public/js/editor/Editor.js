@@ -14,7 +14,7 @@ const { normalizeMap, emptyMap, ID_PATTERN, THEMES } = window.MapFormat;
 const DEG = Math.PI / 180;
 const r2 = (v) => Math.round(v * 100) / 100;
 const normDeg = (d) => r2(((((d + 180) % 360) + 360) % 360) - 180);
-const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie' };
+const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca' };
 const FLOOR_NAMES = { baldosas: 'Baldosas', rosa: 'Baldosas rosas', arena: 'Arena (desierto)', hierba: 'Hierba' };
 const WALL_NAMES = { baldosas: 'Alicatadas', ninguna: 'Ninguna (al aire libre)' };
 const COLLIDERS = { box: 'Caja', cylinder: 'Cilindro', none: 'Ninguno (se atraviesa)' };
@@ -780,8 +780,9 @@ export class Editor {
       form.hint('Donde salen los jugadores (y donde reaparecen).');
       form.double('Posición x z', it, 0.5, (v) => (d) => { d.spawns[sel.index] = v; });
     } else if (sel.kind === 'water') {
-      form.title(`Agua ${sel.index + 1}`);
-      form.hint('Quien cae dentro se ahoga. En un hueco, ponla algo por debajo del suelo (altura negativa).');
+      form.title(`${it.lava ? 'Lava' : 'Agua'} ${sel.index + 1}`);
+      form.hint('Quien cae dentro se ahoga (o se quema, si es lava). En un hueco, ponla algo por debajo del suelo (altura negativa).');
+      form.check('Es lava', Boolean(it.lava), (v) => () => { const w = this.item(sel); if (v) w.lava = true; else delete w.lava; });
       form.double('Centro x z', [it.x, it.z], 0.5, (v) => () => { Object.assign(this.item(sel), { x: v[0], z: v[1] }); });
       form.double('Ancho y fondo', [it.w, it.d], 0.5, (v) => () => { Object.assign(this.item(sel), { w: Math.max(0.5, v[0]), d: Math.max(0.5, v[1]) }); });
       form.number('Esquinas (radio)', it.round ?? 0, 0.2, (v) => () => { this.item(sel).round = Math.max(0, v); });
@@ -807,6 +808,10 @@ export class Editor {
       form.double('Largo y ancho', [it.w, it.d], 0.2, (v) => set({ w: Math.max(0.3, v[0]), d: Math.max(0.3, v[1]) }));
       form.number('Giro (°)', it.rot ?? 0, 15, (v) => set({ rot: normDeg(v) }));
       if (it.type === 'conveyor') form.number('Velocidad', it.speed, 0.5, (v) => set({ speed: v }), 'Casillas por segundo (negativo: al revés)');
+      if (it.type === 'door' || it.type === 'fragile') {
+        form.select('Aspecto', it.style ?? 'normal', { normal: it.type === 'door' ? 'Roja de fábrica' : 'Tablas', piedra: 'Piedra con musgo' },
+          (v) => set({ style: v === 'piedra' ? 'piedra' : undefined }));
+      }
       if (it.type === 'door') {
         form.number('Cerrada (s)', it.closedMs / 1000, 0.5, (v) => set({ closedMs: Math.max(200, Math.round(v * 1000)) }));
         form.number('Abierta (s)', it.openMs / 1000, 0.5, (v) => set({ openMs: Math.max(200, Math.round(v * 1000)) }));
@@ -864,7 +869,7 @@ export class Editor {
     const others = form.list('Rodillos, apariciones, agua y huecos');
     for (const m of d.movers) others.item(`Rodillo · ${m.id}`, () => this.select({ kind: 'mover', id: m.id }));
     d.spawns.forEach((s, i) => others.item(`Aparición ${i + 1}`, () => this.select({ kind: 'spawn', index: i })));
-    d.water.forEach((w, i) => others.item(`Agua ${i + 1}`, () => this.select({ kind: 'water', index: i })));
+    d.water.forEach((w, i) => others.item(`${w.lava ? 'Lava' : 'Agua'} ${i + 1}`,() => this.select({ kind: 'water', index: i })));
     (d.room?.pits ?? []).forEach((p, i) => others.item(`Hueco ${i + 1}`, () => this.select({ kind: 'pit', index: i })));
   }
 

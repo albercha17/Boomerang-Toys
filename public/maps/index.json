@@ -47,5 +47,12 @@
     "theme": "salon",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "selva",
+    "name": "Selva azteca",
+    "theme": "selva",
+    "play": true,
+    "baked": true
   }
 ]

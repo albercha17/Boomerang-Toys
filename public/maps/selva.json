@@ -1,0 +1,965 @@
+{
+  "id": "selva",
+  "name": "Selva azteca",
+  "theme": "selva",
+  "play": true,
+  "note": "Pirámide en el centro; dos ríos de lava con pasarelas de piedra que se caen; troncos que ruedan por delante y por detrás; trampolines por encima de la lava y portales entre esquinas. Volcán al fondo.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [
+      {
+        "x": -9,
+        "z": -3,
+        "w": 3,
+        "d": 10,
+        "round": 0.9
+      },
+      {
+        "x": 9,
+        "z": 3,
+        "w": 3,
+        "d": 10,
+        "round": 0.9
+      }
+    ],
+    "floor": "hierba",
+    "walls": "ninguna"
+  },
+  "water": [
+    {
+      "x": -9,
+      "z": -3,
+      "w": 3,
+      "d": 10,
+      "y": -0.3,
+      "round": 0.9,
+      "lava": true
+    },
+    {
+      "x": 9,
+      "z": 3,
+      "w": 3,
+      "d": 10,
+      "y": -0.3,
+      "round": 0.9,
+      "lava": true
+    }
+  ],
+  "objects": [
+    {
+      "id": "piramide",
+      "model": "piramide",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        6.2,
+        3.29,
+        6.2
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "antorcha_a",
+      "model": "antorcha",
+      "x": 2.3,
+      "y": 0,
+      "z": 3.9,
+      "rot": 0,
+      "size": [
+        0.52,
+        1.9,
+        0.52
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "antorcha_b",
+      "model": "antorcha",
+      "x": -2.3,
+      "y": 0,
+      "z": -3.9,
+      "rot": 180,
+      "size": [
+        0.52,
+        1.9,
+        0.52
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "antorcha2_a",
+      "model": "antorcha",
+      "x": -2.3,
+      "y": 0,
+      "z": 3.9,
+      "rot": 0,
+      "size": [
+        0.52,
+        1.9,
+        0.52
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "antorcha2_b",
+      "model": "antorcha",
+      "x": 2.3,
+      "y": 0,
+      "z": -3.9,
+      "rot": 180,
+      "size": [
+        0.52,
+        1.9,
+        0.52
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "totem_a",
+      "model": "totem",
+      "x": 4.6,
+      "y": 0,
+      "z": 3.4,
+      "rot": 0,
+      "size": [
+        1.08,
+        2.4,
+        1.22
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "totem_b",
+      "model": "totem",
+      "x": -4.6,
+      "y": 0,
+      "z": -3.4,
+      "rot": 180,
+      "size": [
+        1.08,
+        2.4,
+        1.22
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "volcan",
+      "model": "volcan",
+      "x": -15,
+      "y": 0,
+      "z": -8.2,
+      "rot": 0,
+      "size": [
+        5.4,
+        3.52,
+        5.26
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "afloramiento",
+      "model": "afloramiento",
+      "x": 15,
+      "y": 0,
+      "z": 8.2,
+      "rot": 180,
+      "size": [
+        5,
+        2.96,
+        4.1
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "mascara_a",
+      "model": "mascara",
+      "x": -13.2,
+      "y": 0,
+      "z": 4.2,
+      "rot": 30,
+      "size": [
+        2.32,
+        2.2,
+        2.13
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "mascara_b",
+      "model": "mascara",
+      "x": 13.2,
+      "y": 0,
+      "z": -4.2,
+      "rot": 210,
+      "size": [
+        2.32,
+        2.2,
+        2.13
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "trono_a",
+      "model": "trono",
+      "x": -11.2,
+      "y": 0,
+      "z": 7.4,
+      "rot": 60,
+      "size": [
+        1.55,
+        2.1,
+        1.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "trono_b",
+      "model": "trono",
+      "x": 11.2,
+      "y": 0,
+      "z": -7.4,
+      "rot": 240,
+      "size": [
+        1.55,
+        2.1,
+        1.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "golem_a",
+      "model": "golem_piedra",
+      "x": -14.4,
+      "y": 0,
+      "z": 0.6,
+      "rot": 90,
+      "size": [
+        2.3,
+        2.6,
+        0.87
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "golem_b",
+      "model": "golem_piedra",
+      "x": 14.4,
+      "y": 0,
+      "z": -0.6,
+      "rot": 270,
+      "size": [
+        2.3,
+        2.6,
+        0.87
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "estela_a",
+      "model": "estela_piedra",
+      "x": -5.6,
+      "y": 0,
+      "z": 5.2,
+      "rot": 10,
+      "size": [
+        1.16,
+        1.7,
+        0.7
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "estela_b",
+      "model": "estela_piedra",
+      "x": 5.6,
+      "y": 0,
+      "z": -5.2,
+      "rot": 190,
+      "size": [
+        1.16,
+        1.7,
+        0.7
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "rocas_a",
+      "model": "rocas_grandes",
+      "x": -12,
+      "y": 0,
+      "z": 9.4,
+      "rot": 0,
+      "size": [
+        3.4,
+        1.13,
+        1.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "rocas_b",
+      "model": "rocas_grandes",
+      "x": 12,
+      "y": 0,
+      "z": -9.4,
+      "rot": 180,
+      "size": [
+        3.4,
+        1.13,
+        1.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "helecho_a",
+      "model": "helecho",
+      "x": -1.8,
+      "y": 0,
+      "z": -5.2,
+      "rot": 0,
+      "size": [
+        2.2,
+        1.25,
+        2.08
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "helecho_b",
+      "model": "helecho",
+      "x": 1.8,
+      "y": 0,
+      "z": 5.2,
+      "rot": 180,
+      "size": [
+        2.2,
+        1.25,
+        2.08
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "bambu_a",
+      "model": "bambu",
+      "x": -9,
+      "y": 0,
+      "z": 6.4,
+      "rot": 0,
+      "size": [
+        1.35,
+        2.6,
+        1.39
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "bambu_b",
+      "model": "bambu",
+      "x": 9,
+      "y": 0,
+      "z": -6.4,
+      "rot": 180,
+      "size": [
+        1.35,
+        2.6,
+        1.39
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "arbusto_a",
+      "model": "arbusto",
+      "x": 16.2,
+      "y": 0,
+      "z": -4,
+      "rot": 0,
+      "size": [
+        2,
+        1.64,
+        1.89
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "arbusto_b",
+      "model": "arbusto",
+      "x": -16.2,
+      "y": 0,
+      "z": 4,
+      "rot": 180,
+      "size": [
+        2,
+        1.64,
+        1.89
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "calaveras_a",
+      "model": "calaveras",
+      "x": -6.4,
+      "y": 0,
+      "z": 2.8,
+      "rot": 0,
+      "size": [
+        0.9,
+        0.86,
+        0.83
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "calaveras_b",
+      "model": "calaveras",
+      "x": 6.4,
+      "y": 0,
+      "z": -2.8,
+      "rot": 180,
+      "size": [
+        0.9,
+        0.86,
+        0.83
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "idolo_a",
+      "model": "idolo_dorado",
+      "x": 6.6,
+      "y": 0,
+      "z": -1.6,
+      "rot": 0,
+      "size": [
+        0.53,
+        0.9,
+        0.53
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "idolo_b",
+      "model": "idolo_dorado",
+      "x": -6.6,
+      "y": 0,
+      "z": 1.6,
+      "rot": 180,
+      "size": [
+        0.53,
+        0.9,
+        0.53
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "camino_a",
+      "model": "piedras_pasaderas",
+      "x": -5.8,
+      "y": 0,
+      "z": -4.4,
+      "rot": 0,
+      "size": [
+        2.4,
+        0.13,
+        0.77
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "camino_b",
+      "model": "piedras_pasaderas",
+      "x": 5.8,
+      "y": 0,
+      "z": 4.4,
+      "rot": 180,
+      "size": [
+        2.4,
+        0.13,
+        0.77
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "camino2_a",
+      "model": "piedras_pasaderas",
+      "x": -12.6,
+      "y": 0,
+      "z": -4.4,
+      "rot": 0,
+      "size": [
+        2.4,
+        0.13,
+        0.77
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "camino2_b",
+      "model": "piedras_pasaderas",
+      "x": 12.6,
+      "y": 0,
+      "z": 4.4,
+      "rot": 180,
+      "size": [
+        2.4,
+        0.13,
+        0.77
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "volcan_f",
+      "model": "volcan",
+      "x": -9,
+      "y": 0,
+      "z": -19,
+      "rot": 0,
+      "size": [
+        13,
+        8.48,
+        12.67
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "roca_lava_f",
+      "model": "roca_lava",
+      "x": -19.6,
+      "y": 0,
+      "z": -9.5,
+      "rot": 30,
+      "size": [
+        2.4,
+        1.29,
+        1.94
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "calendario",
+      "model": "calendario",
+      "x": 0,
+      "y": 0,
+      "z": -12,
+      "rot": 0,
+      "size": [
+        2.4,
+        2.4,
+        0.29
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_1",
+      "model": "arbol_jungla",
+      "x": -16,
+      "y": 0,
+      "z": -15,
+      "rot": 0,
+      "size": [
+        6.19,
+        8,
+        5.64
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_2",
+      "model": "arbol_jungla",
+      "x": 12,
+      "y": 0,
+      "z": -16,
+      "rot": 40,
+      "size": [
+        6.96,
+        9,
+        6.34
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_3",
+      "model": "arbol_jungla",
+      "x": 23,
+      "y": 0,
+      "z": 2,
+      "rot": 120,
+      "size": [
+        6.19,
+        8,
+        5.64
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_4",
+      "model": "arbol_jungla",
+      "x": -23,
+      "y": 0,
+      "z": 3,
+      "rot": 200,
+      "size": [
+        6.19,
+        8,
+        5.64
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "mangle_1",
+      "model": "mangle",
+      "x": 20,
+      "y": 0,
+      "z": -13,
+      "rot": 0,
+      "size": [
+        4.22,
+        5.5,
+        4.1
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "mangle_2",
+      "model": "mangle",
+      "x": -21.5,
+      "y": 0,
+      "z": -9,
+      "rot": 60,
+      "size": [
+        3.83,
+        5,
+        3.73
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "palmera_1",
+      "model": "palmera",
+      "x": 5,
+      "y": 0,
+      "z": -14,
+      "rot": 20,
+      "size": [
+        4.37,
+        6,
+        3.6
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "palmera_2",
+      "model": "palmera",
+      "x": -9.5,
+      "y": 0,
+      "z": -13.5,
+      "rot": -30,
+      "size": [
+        4.01,
+        5.5,
+        3.3
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "palmera_3",
+      "model": "palmera",
+      "x": 21,
+      "y": 0,
+      "z": 10,
+      "rot": 0,
+      "size": [
+        4.01,
+        5.5,
+        3.3
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "palmera_4",
+      "model": "palmera",
+      "x": -21,
+      "y": 0,
+      "z": 11,
+      "rot": 90,
+      "size": [
+        4.01,
+        5.5,
+        3.3
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "afloramiento_f",
+      "model": "afloramiento",
+      "x": 17.5,
+      "y": 0,
+      "z": -16,
+      "rot": 0,
+      "size": [
+        5.91,
+        3.5,
+        4.85
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arco",
+      "model": "arco_roca",
+      "x": 7,
+      "y": 0,
+      "z": -19,
+      "rot": 0,
+      "size": [
+        5.68,
+        4.4,
+        2.03
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "tocon",
+      "model": "tocon",
+      "x": -3,
+      "y": 0,
+      "z": -13,
+      "rot": 0,
+      "size": [
+        1.78,
+        0.8,
+        1.63
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "bayas_1",
+      "model": "arbusto_bayas",
+      "x": -5,
+      "y": 0,
+      "z": -12.4,
+      "rot": 0,
+      "size": [
+        1.21,
+        1.2,
+        1.21
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "bayas_2",
+      "model": "arbusto_bayas",
+      "x": 14,
+      "y": 0,
+      "z": -12.5,
+      "rot": 0,
+      "size": [
+        1.31,
+        1.3,
+        1.31
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "bambu_f",
+      "model": "bambu",
+      "x": -13.5,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.35,
+        2.6,
+        1.39
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "helecho_f",
+      "model": "helecho",
+      "x": 9.5,
+      "y": 0,
+      "z": -12.3,
+      "rot": 0,
+      "size": [
+        1.94,
+        1.1,
+        1.83
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "altar",
+      "model": "altar_antiguo",
+      "x": -19.5,
+      "y": 0,
+      "z": -3,
+      "rot": 90,
+      "size": [
+        2.16,
+        1.5,
+        1.27
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [
+    {
+      "id": "tronco_atras",
+      "model": "tronco_caido",
+      "from": [
+        -5.8,
+        -8.6
+      ],
+      "to": [
+        5.8,
+        -8.6
+      ],
+      "length": 3.6,
+      "radius": 0.42,
+      "periodMs": 6500,
+      "pauseMs": 900
+    },
+    {
+      "id": "tronco_delante",
+      "model": "tronco_caido",
+      "from": [
+        5.8,
+        8.6
+      ],
+      "to": [
+        -5.8,
+        8.6
+      ],
+      "length": 3.6,
+      "radius": 0.42,
+      "periodMs": 6500,
+      "pauseMs": 900
+    }
+  ],
+  "devices": [
+    {
+      "id": "puente_i",
+      "type": "fragile",
+      "x": -9,
+      "z": -4.4,
+      "w": 4.4,
+      "d": 2,
+      "rot": 0,
+      "shakeMs": 600,
+      "respawnMs": 4500,
+      "style": "piedra"
+    },
+    {
+      "id": "puente_d",
+      "type": "fragile",
+      "x": 9,
+      "z": 4.4,
+      "w": 4.4,
+      "d": 2,
+      "rot": 0,
+      "shakeMs": 600,
+      "respawnMs": 4500,
+      "style": "piedra"
+    },
+    {
+      "id": "trampolin_i",
+      "type": "jump",
+      "x": -15.8,
+      "z": -3.6,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        -4.8,
+        -5.4
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "trampolin_d",
+      "type": "jump",
+      "x": 15.8,
+      "z": 3.6,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        4.8,
+        5.4
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "portal_i",
+      "type": "portal",
+      "x": -15.6,
+      "z": 8.8,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "esquinas"
+    },
+    {
+      "id": "portal_d",
+      "type": "portal",
+      "x": 15.6,
+      "z": -8.8,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "esquinas"
+    }
+  ],
+  "spawns": [
+    [
+      -15.4,
+      6.6
+    ],
+    [
+      15.4,
+      -6.6
+    ],
+    [
+      -5.6,
+      -0.8
+    ],
+    [
+      5.6,
+      0.8
+    ],
+    [
+      -9,
+      -9.8
+    ],
+    [
+      9,
+      9.8
+    ],
+    [
+      -3.4,
+      5.4
+    ],
+    [
+      3.4,
+      -5.4
+    ]
+  ]
+}

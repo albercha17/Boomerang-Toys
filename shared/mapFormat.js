@@ -6,14 +6,15 @@
  *     table: { w, d, chamfer, thickness, height }    mesa: salirse = caer (height = altura hasta el suelo)
  *     room:  { w, d, wallHeight, tile, wallTile, pitDepth, pits: [{ x, z, w, d, round }],   o habitación
  *              floor: 'baldosas' | 'rosa' | 'arena' | 'hierba', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base)
- *     water: [{ x, z, w, d, y, round }]              agua: caer dentro = ahogarse
+ *     water: [{ x, z, w, d, y, round, lava }]        agua: caer dentro = ahogarse (lava: true = te quemas)
  *     objects: [{ id, model, x, y, z, rot, tilt: [x, z], size: [w, h, d], stretch: [x, y, z],
  *                 collider: 'box' | 'cylinder' | 'none', bush, loose }]
  *       size = caja en la que se encaja el modelo (sin deformarlo); stretch lo estira por ejes;
  *       rot = giro en grados sobre el eje vertical; tilt = inclinación en x y z; bush = esconde; loose = se empuja
  *     movers: [{ id, model, from: [x, z], to: [x, z], length, radius, periodMs, pauseMs }]   rodillos que aplastan
  *     devices: [{ id, type, x, z, w, d, rot, ... }]   artefactos (ver public/js/game/arena/devices.js):
- *       conveyor { speed } · door { openMs, closedMs, offsetMs, height } · fragile { shakeMs, respawnMs }
+ *       conveyor { speed } · door { openMs, closedMs, offsetMs, height, style } · fragile { shakeMs, respawnMs, style }
+ *       (style: 'piedra' = de piedra con musgo; sin style, la puerta roja y la pasarela de tablas)
  *       jump { target: [x, z], height, durationMs } · portal { link } (dos portales con el mismo link)
  *     spawns: [[x, z], ...] }
  */
@@ -25,7 +26,7 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva'];
   const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba'];
   const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
@@ -50,7 +51,8 @@
       const t = data.table ?? {};
       out.table = { w: num(t.w, 34), d: num(t.d, 20), chamfer: num(t.chamfer, 2.6), thickness: num(t.thickness, 0.7), height: num(t.height, 9) };
     }
-    out.water = (data.water ?? []).map((w) => ({ x: num(w.x), z: num(w.z), w: num(w.w, 4), d: num(w.d, 4), y: num(w.y, -0.35), round: num(w.round) }));
+    out.water = (data.water ?? []).map((w) => ({ x: num(w.x), z: num(w.z), w: num(w.w, 4), d: num(w.d, 4), y: num(w.y, -0.35), round: num(w.round),
+      ...(w.lava ? { lava: true } : {}) }));
 
     const used = new Set();
     const uniqueId = (base) => {
@@ -95,6 +97,7 @@
       if (d.type === 'fragile') Object.assign(dev, { shakeMs: Math.round(num(d.shakeMs, 600)), respawnMs: Math.round(num(d.respawnMs, 5000)) });
       if (d.type === 'jump') Object.assign(dev, { target: (d.target ?? [d.x + 6, d.z]).slice(0, 2).map(round), height: round(num(d.height, 3.5)), durationMs: Math.round(num(d.durationMs, 800)) });
       if (d.type === 'portal') dev.link = String(d.link ?? 'a').slice(0, 20);
+      if ((d.type === 'door' || d.type === 'fragile') && d.style === 'piedra') dev.style = 'piedra';
       return dev;
     });
     out.spawns = (data.spawns ?? []).map(([x, z]) => [round(x), round(z)]);
