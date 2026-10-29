@@ -16,6 +16,12 @@ args = sys.argv[sys.argv.index("--") + 1:]
 QUITAR_ARRIBA = float(args[args.index("--quitar-arriba") + 1]) if "--quitar-arriba" in args else None
 if "--quitar-arriba" in args:
     del args[args.index("--quitar-arriba"):args.index("--quitar-arriba") + 2]
+SOLO_PRINCIPAL = "--solo-principal" in args  # quita copias o piezas sueltas fuera de la figura
+QUITAR_DERECHA = float(args[args.index("--quitar-derecha") + 1]) if "--quitar-derecha" in args else None  # fracción del ancho
+if QUITAR_DERECHA is not None:
+    del args[args.index("--quitar-derecha"):args.index("--quitar-derecha") + 2]
+if SOLO_PRINCIPAL:
+    args.remove("--solo-principal")
 entrada, salida = args[0], args[1]
 CARAS = int(args[2]) if len(args) > 2 else 15000
 
@@ -43,6 +49,50 @@ for o in list(bpy.data.objects):
     if o != obj:
         bpy.data.objects.remove(o, do_unlink=True)
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+if SOLO_PRINCIPAL:
+    # Solo la figura principal: fuera las piezas sueltas que quedan fuera de la caja de la pieza más grande (copias
+    # pequeñas al lado, como una hoja de vistas)
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    sin_visitar = set(bm.verts)
+    islas = []
+    while sin_visitar:
+        pila = [sin_visitar.pop()]
+        isla = []
+        while pila:
+            v = pila.pop()
+            isla.append(v)
+            for e in v.link_edges:
+                o = e.other_vert(v)
+                if o in sin_visitar:
+                    sin_visitar.discard(o)
+                    pila.append(o)
+        islas.append(isla)
+    def tamano(isla):  # la más grande en el espacio (no la de más vértices)
+        return sum((max(v.co[k] for v in isla) - min(v.co[k] for v in isla)) ** 2 for k in range(3))
+
+    borrar = []
+    if QUITAR_DERECHA is not None:  # las copias están a un lado: fuera las piezas con el centro pasada esa fracción del ancho
+        x0 = min(v.co.x for v in bm.verts)
+        x1 = max(v.co.x for v in bm.verts)
+        for isla in islas:
+            if sum(v.co.x for v in isla) / len(isla) > x0 + (x1 - x0) * QUITAR_DERECHA:
+                borrar.extend(isla)
+    else:
+        mayor = max(islas, key=tamano)
+        lo = [min(v.co[k] for v in mayor) for k in range(3)]
+        hi = [max(v.co[k] for v in mayor) for k in range(3)]
+        margen = [(hi[k] - lo[k]) * 0.15 for k in range(3)]
+        for isla in islas:
+            c = [sum(v.co[k] for v in isla) / len(isla) for k in range(3)]
+            if any(c[k] < lo[k] - margen[k] or c[k] > hi[k] + margen[k] for k in range(3)):
+                borrar.extend(isla)
+    bmesh.ops.delete(bm, geom=borrar, context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+    print(f"solo la figura principal: quitados {len(borrar)} vértices", flush=True)
 
 if QUITAR_ARRIBA is not None:
     # Piezas sueltas que empiezan muy arriba (flotando sobre la cabeza): fuera

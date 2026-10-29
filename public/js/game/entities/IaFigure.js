@@ -49,6 +49,8 @@ const SETTINGS = {
   calavera: { armAmp: 0.5, twistAmp: 0.2, neck: 0.55, legTop: 0.15, arms: { L: { minX: 0.22, minY: 0.28, maxY: 0.55, shoulder: [0.18, 0.45] }, R: { minX: 0.22, minY: 0.28, maxY: 0.55, shoulder: [-0.18, 0.45] } } }, // maracas en las manos
   jesus: { neck: 0.6, legTop: 0.1, arms: { R: { minX: 0.25, minY: 0.35, maxY: 0.58, shoulder: [-0.2, 0.52] } } }, // túnica larga
   cascanueces: { neck: 0.55 },
+  alber: { neck: 0.5, legTop: 0.16, armY: [0.2, 0.5], armAmp: 0.4, twistAmp: 0.4 }, // cabezón, manos en los bolsillos
+  angy: { neck: 0.52, legTop: 0.18, armY: [0.22, 0.48], armAmp: 0.3, twistAmp: 0.2 }, // melena larga sobre los brazos
   astronauta: { // torso ancho: los brazos, por cajas (casi no se giran)
     arms: { L: { minX: 0.31, minY: 0.16, maxY: 0.52, shoulder: [0.29, 0.47], hang: 0.45 }, R: { minX: 0.31, minY: 0.16, maxY: 0.52, shoulder: [-0.29, 0.47], hang: 0.45 } },
   },

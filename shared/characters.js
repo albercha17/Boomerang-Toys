@@ -36,6 +36,8 @@
     { id: 'cascanueces', name: 'Cascanueces', emoji: '🥜', description: 'Soldado de madera de Navidad.' },
     { id: 'calavera', name: 'Calavera mexicana', emoji: '💀', description: 'Catrina llena de flores y colores.' },
     { id: 'jesus', name: 'Jesús', emoji: '✝️', description: 'Túnica larga y sandalias.' },
+    { id: 'alber', name: 'Alber', emoji: '😎', description: 'El jefe de la casa.' },
+    { id: 'angy', name: 'Angy', emoji: '💖', description: 'Nadie la pilla.' },
   ]);
 
   const BY_ID = Object.freeze(Object.fromEntries(CHARACTERS.map((c) => [c.id, c])));
