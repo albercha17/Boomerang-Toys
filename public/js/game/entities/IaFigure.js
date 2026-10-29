@@ -25,18 +25,21 @@ const HEIGHT = 1.5;
 // `armY`: alturas (fracción) entre las que están los brazos colgando (por defecto de 0,3 al cuello; Cristi los
 // tiene bajo la melena, que si no se tomaría por brazos).
 // `armAmp`, `twistAmp`: cuánto mueve los brazos y gira el pecho con esqueleto (1 = normal; menos si se deforma).
+// `neck`, `legTop`: alturas (fracción) del cuello y de la cadera si no son las de siempre (0,56 y 0,24).
 // Se miden con la foto de frente con rejilla (herramienta de pruebas frente_foto.js + frente_rejilla.py).
 const SETTINGS = {
   soldado: { yaw: -Math.PI / 2, armsStill: true, legsAxis: 'z', legSwing: 0.5 },
   bichito: { legSwing: 0.55, armsStill: true }, // sus «brazos» son los costados del cuerpo redondo
   dino: { legSwing: 0.6, armsStill: true },
   robot: { legSwing: 0.45, armAmp: 0.4, twistAmp: 0 }, // hombreras grandes: brazos cortos de movimiento, sin girar el pecho
-  payaso: {
-    arms: { L: { minX: 0.21, minY: 0.5, maxY: 0.95, shoulder: [0.2, 0.56] }, R: { minX: 0.21, minY: 0.5, maxY: 0.95, shoulder: [-0.2, 0.56] } },
-  },
-  vaquero: { arms: { L: { minX: 0.13, minY: 0.5, maxY: 0.76, shoulder: [0.13, 0.56] } } },
   cristi: { armY: [0.15, 0.47], armAmp: 0.3, twistAmp: 0.15 }, // la melena va pegada a brazos y pecho
-  capsula: { arms: { L: { minX: 0.19, minY: 0.45, maxY: 1.01, shoulder: [0.2, 0.5], hang: 0.75 } } }, // cuerpo ancho: más abierto
+  vikingo: { // viene con los brazos en cruz
+    arms: { L: { minX: 0.27, minY: 0.5, maxY: 0.76, shoulder: [0.25, 0.62] }, R: { minX: 0.27, minY: 0.5, maxY: 0.76, shoulder: [-0.25, 0.62] } },
+  },
+  mago: { neck: 0.5, legTop: 0.18, armY: [0.18, 0.5] }, // cabezón con sombrero y túnica larga
+  astronauta: { // torso ancho: los brazos, por cajas (casi no se giran)
+    arms: { L: { minX: 0.31, minY: 0.16, maxY: 0.52, shoulder: [0.29, 0.47], hang: 0.45 }, R: { minX: 0.31, minY: 0.16, maxY: 0.52, shoulder: [-0.29, 0.47], hang: 0.45 } },
+  },
 };
 const SOURCES = {}; // id -> { pieces: [{ kind, side, geometry, pivot }], material, size }
 const loader = new GLTFLoader();
@@ -120,6 +123,8 @@ function restArm(geometry, side, hang = HANG) {
 
 /** Une las mallas del modelo y reparte sus triángulos en las 6 piezas. */
 function split(scene, settings) {
+  const neck = settings.neck ?? NECK; // alturas (fracción) del cuello y de la cadera
+  const legTop = settings.legTop ?? LEG_TOP;
   scene.updateMatrixWorld(true);
   const meshes = [];
   scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
@@ -148,13 +153,13 @@ function split(scene, settings) {
     const side = x < 0 ? 'R' : 'L';
     const box = armBoxes[side];
     if (box && Math.abs(xu) >= box.minX && y >= box.minY && y <= box.maxY) return `arm${side}`;
-    if (y > NECK) return 'head';
-    if (y < LEG_TOP) return (settings.legsAxis === 'z' ? z < 0 : x < 0) ? 'legR' : 'legL';
+    if (y > neck) return 'head';
+    if (y < legTop) return (settings.legsAxis === 'z' ? z < 0 : x < 0) ? 'legR' : 'legL';
     if (!settings.armsStill && Math.abs(x) > ARM_X && y > armY[0] && y < armY[1] && z > -0.15) return x < 0 ? 'armR' : 'armL';
     return 'torso';
   };
   const skinGeometry = geometry.clone();
-  const skin = buildSkin(skinGeometry, { H, W, D, legTop: LEG_TOP, neck: NECK, armX: ARM_X, armBoxes, hang: HANG, regionOf });
+  const skin = buildSkin(skinGeometry, { H, W, D, legTop: legTop, neck: neck, armX: ARM_X, armBoxes, hang: HANG, regionOf });
   skinGeometry.computeBoundingSphere();
 
   const pos = geometry.attributes.position;
@@ -168,25 +173,25 @@ function split(scene, settings) {
     const box = armBoxes[side];
     let part;
     if (box && Math.abs(xu) >= box.minX && y >= box.minY && y <= box.maxY) part = `arm${side}`; // brazo levantado
-    else if (y > NECK) part = 'head';
-    else if (y < LEG_TOP) part = (settings.legsAxis === 'z' ? z < 0 : x < 0) ? 'legR' : 'legL'; // mira a +z: su derecha es -x
+    else if (y > neck) part = 'head';
+    else if (y < legTop) part = (settings.legsAxis === 'z' ? z < 0 : x < 0) ? 'legR' : 'legL'; // mira a +z: su derecha es -x
     else if (Math.abs(x) > ARM_X && y > armY[0] && y < armY[1] && z > -0.15) part = x < 0 ? 'armR' : 'armL'; // sin el pelo de detrás
     else part = 'torso';
     groups[part].push(i);
     // Costura: el arranque de brazos y piernas y la base del cuello se quedan también en el cuerpo, para que al
     // moverse no se abra un agujero donde estaban pegados
     const seam = (part.startsWith('arm') && (box ? Math.abs(xu) <= box.minX + SEAM_ARM * W && y <= box.shoulder[1] + 0.05 : Math.abs(x) <= ARM_X + SEAM_ARM))
-      || (part.startsWith('leg') && y >= LEG_TOP - SEAM_LEG)
-      || (part === 'head' && y <= NECK + SEAM_NECK);
+      || (part.startsWith('leg') && y >= legTop - SEAM_LEG)
+      || (part === 'head' && y <= neck + SEAM_NECK);
     if (seam) groups.torso.push(i);
   }
 
   const pivots = {
-    head: [0, NECK * H, 0], torso: [0, LEG_TOP * H, 0],
-    armL: [ARM_X * W, (NECK - 0.03) * H, 0], armR: [-ARM_X * W, (NECK - 0.03) * H, 0],
-    legL: [0.1 * W, LEG_TOP * H, 0], legR: [-0.1 * W, LEG_TOP * H, 0],
+    head: [0, neck * H, 0], torso: [0, legTop * H, 0],
+    armL: [ARM_X * W, (neck - 0.03) * H, 0], armR: [-ARM_X * W, (neck - 0.03) * H, 0],
+    legL: [0.1 * W, legTop * H, 0], legR: [-0.1 * W, legTop * H, 0],
   };
-  if (settings.legsAxis === 'z') { pivots.legL = [0, LEG_TOP * H, 0.1 * D]; pivots.legR = [0, LEG_TOP * H, -0.1 * D]; }
+  if (settings.legsAxis === 'z') { pivots.legL = [0, legTop * H, 0.1 * D]; pivots.legR = [0, legTop * H, -0.1 * D]; }
   for (const [side, box] of Object.entries(armBoxes)) if (box.shoulder) pivots[`arm${side}`] = [box.shoulder[0], box.shoulder[1] * H, 0];
   const kinds = { head: 'head', torso: 'torso', armL: 'arm', armR: 'arm', legL: 'leg', legR: 'leg' };
   const pieces = [];

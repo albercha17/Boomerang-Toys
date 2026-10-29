@@ -17,6 +17,16 @@ CARAS = int(args[2]) if len(args) > 2 else 15000
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=entrada)
 mallas = [o for o in bpy.data.objects if o.type == "MESH"]
+# Fuera las mallas diminutas que a veces traen (una esfera suelta) y el esqueleto que traiga: el juego pone el suyo
+mayor = max(len(o.data.polygons) for o in mallas)
+mallas = sorted([o for o in mallas if len(o.data.polygons) >= mayor * 0.01], key=lambda o: -len(o.data.polygons))
+for o in mallas:
+    for mod in list(o.modifiers):
+        if mod.type == "ARMATURE":
+            o.modifiers.remove(mod)
+    matriz = o.matrix_world.copy()
+    o.parent = None
+    o.matrix_world = matriz
 for o in bpy.data.objects:
     o.select_set(o in mallas)
 bpy.context.view_layer.objects.active = mallas[0]

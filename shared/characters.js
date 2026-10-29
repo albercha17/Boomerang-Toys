@@ -15,13 +15,13 @@
     { id: 'muneca', name: 'Muñeca fashion', emoji: '👗', description: 'Melena rubia, vestido rosa de lunares y lazo.' },
     { id: 'barbie', name: 'Muñeca Pop', emoji: '💃', description: 'Siempre a la última moda.' },
     { id: 'peluche', name: 'Peluche azul', emoji: '🧸', description: 'Blandito, achuchable y peligroso con el búmerang.' },
-    { id: 'payaso', name: 'Payaso', emoji: '🤡', description: 'Juguete de feria con nariz roja.' },
-    { id: 'vaquero', name: 'Vaquero', emoji: '🤠', description: 'El más rápido del Oeste.' },
+    { id: 'mago', name: 'Mago', emoji: '🧙', description: 'Magito de sombrero morado y calcetines de rayas.' },
+    { id: 'vikingo', name: 'Vikingo', emoji: '🪓', description: 'Bajito, barbudo y con casco de cuernos.' },
     { id: 'dino', name: 'Dinosaurio', emoji: '🦖', description: 'Dinosaurio de juguete verde.' },
     { id: 'bichito', name: 'Bichito amarillo', emoji: '👓', description: 'Amarillo, con gafas y peto vaquero.' },
     { id: 'soldado', name: 'Soldadito', emoji: '🪖', description: 'Soldadito de juguete en posición de firmes.' },
     { id: 'robot', name: 'Robot transformable', emoji: '🤖', description: 'Robot de juguete de piezas de colores.' },
-    { id: 'capsula', name: 'Cápsula', emoji: '💊', description: 'Cápsula roja y blanca con zapatillas, siempre saludando.' },
+    { id: 'astronauta', name: 'Astronauta', emoji: '🚀', description: 'Traje espacial blanco y azul, recién llegado de la Luna.' },
     { id: 'cristi', name: 'Cristi', emoji: '⭐', description: 'Melena rubia ondulada y chaqueta vaquera.' },
   ]);
 

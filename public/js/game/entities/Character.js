@@ -17,7 +17,7 @@ const ICE_GEOMETRY = new THREE.BoxGeometry(1, 1, 1);
 const ACCELERATION = 16; // 1/s: lo rápido que alcanza la velocidad del joystick (arranque y frenada suaves, no de golpe)
 
 /** Etiqueta "J1" flotando sobre la cabeza, con los iconos de sus habilidades debajo. */
-function createTag(color) {
+export function createTag(color) {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 112;
