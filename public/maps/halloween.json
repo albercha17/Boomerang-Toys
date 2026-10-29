@@ -92,7 +92,7 @@
       "id": "lapida_0",
       "model": "lapida",
       "x": -8,
-      "y": 0,
+      "y": -0.3,
       "z": -6.25,
       "rot": 0,
       "size": [
@@ -106,7 +106,7 @@
       "id": "lapida_1",
       "model": "lapida",
       "x": 8,
-      "y": 0,
+      "y": -0.3,
       "z": -6.25,
       "rot": 0,
       "size": [
@@ -120,7 +120,7 @@
       "id": "lapida_2",
       "model": "lapida",
       "x": -8,
-      "y": 0,
+      "y": -0.3,
       "z": 6.25,
       "rot": 0,
       "size": [
@@ -134,7 +134,7 @@
       "id": "lapida_3",
       "model": "lapida",
       "x": 8,
-      "y": 0,
+      "y": -0.3,
       "z": 6.25,
       "rot": 0,
       "size": [
@@ -176,7 +176,7 @@
       "id": "espantapajaros_a",
       "model": "espantapajaros",
       "x": -12.4,
-      "y": 0,
+      "y": -0.1,
       "z": -6.6,
       "rot": 20,
       "size": [
@@ -190,7 +190,7 @@
       "id": "espantapajaros_b",
       "model": "espantapajaros",
       "x": 12.4,
-      "y": 0,
+      "y": -0.1,
       "z": 6.6,
       "rot": 200,
       "size": [
@@ -204,7 +204,7 @@
       "id": "farola_a",
       "model": "farola_tenebrosa",
       "x": -4.6,
-      "y": 0,
+      "y": -0.1,
       "z": -6.8,
       "rot": 0,
       "size": [
@@ -217,10 +217,10 @@
     {
       "id": "farola_b",
       "model": "farola_tenebrosa",
-      "x": 4.6,
-      "y": 0,
+      "x": 4.5,
+      "y": -0.1,
       "z": 6.8,
-      "rot": 180,
+      "rot": -180,
       "size": [
         1.36,
         2.8,
@@ -316,7 +316,7 @@
       "id": "lapida_s1_a",
       "model": "lapida",
       "x": -15.6,
-      "y": 0,
+      "y": -0.3,
       "z": -5.2,
       "rot": 10,
       "size": [
@@ -330,7 +330,7 @@
       "id": "lapida_s1_b",
       "model": "lapida",
       "x": 15.6,
-      "y": 0,
+      "y": -0.2,
       "z": 5.2,
       "rot": 190,
       "size": [
@@ -344,7 +344,7 @@
       "id": "lapida_s2_a",
       "model": "lapida",
       "x": -4.6,
-      "y": 0,
+      "y": -0.3,
       "z": 7,
       "rot": -15,
       "size": [
@@ -372,7 +372,7 @@
       "id": "lapida_s3_a",
       "model": "lapida",
       "x": -2.8,
-      "y": 0,
+      "y": -0.2,
       "z": -6.8,
       "rot": 5,
       "size": [
@@ -386,7 +386,7 @@
       "id": "lapida_s3_b",
       "model": "lapida",
       "x": 2.8,
-      "y": 0,
+      "y": -0.2,
       "z": 6.8,
       "rot": 185,
       "size": [
@@ -442,7 +442,7 @@
       "id": "huerto_a",
       "model": "huerto_calabazas",
       "x": -11.4,
-      "y": 0,
+      "y": -0.2,
       "z": 8.8,
       "rot": 0,
       "size": [
@@ -457,7 +457,7 @@
       "id": "huerto_b",
       "model": "huerto_calabazas",
       "x": 11.4,
-      "y": 0,
+      "y": -0.2,
       "z": -8.8,
       "rot": 180,
       "size": [
@@ -590,7 +590,7 @@
       "id": "huesos_1",
       "model": "huesos",
       "x": -6.4,
-      "y": 0,
+      "y": -0.1,
       "z": -4.4,
       "rot": 0,
       "size": [
@@ -828,12 +828,12 @@
       "id": "arbol_1",
       "model": "arbol_tenebroso",
       "x": -20.5,
-      "y": 0,
+      "y": -0.5,
       "z": -6,
       "rot": 0,
       "size": [
         4.48,
-        5,
+        5.1,
         3.54
       ],
       "collider": "none"
@@ -842,7 +842,7 @@
       "id": "arbol_2",
       "model": "arbol_tenebroso",
       "x": 21,
-      "y": 0,
+      "y": -0.3,
       "z": 3,
       "rot": 90,
       "size": [
@@ -856,7 +856,7 @@
       "id": "arbol_3",
       "model": "arbol_tenebroso",
       "x": 4,
-      "y": 0,
+      "y": -0.3,
       "z": -15.5,
       "rot": 40,
       "size": [
@@ -870,7 +870,7 @@
       "id": "arbol_4",
       "model": "arbol_tenebroso",
       "x": -21,
-      "y": 0,
+      "y": -0.3,
       "z": 9,
       "rot": 200,
       "size": [
@@ -884,7 +884,7 @@
       "id": "arbol_5",
       "model": "arbol_tenebroso",
       "x": 20,
-      "y": 0,
+      "y": -0.4,
       "z": -10,
       "rot": 140,
       "size": [
@@ -912,7 +912,7 @@
       "id": "buzon",
       "model": "buzon_tenebroso",
       "x": 19.5,
-      "y": 0,
+      "y": -0.2,
       "z": 9.5,
       "rot": -20,
       "size": [

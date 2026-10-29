@@ -153,7 +153,7 @@
       "id": "afloramiento",
       "model": "afloramiento",
       "x": 15,
-      "y": 0,
+      "y": -0.8,
       "z": 8.2,
       "rot": 180,
       "size": [
@@ -454,72 +454,16 @@
       "loose": true
     },
     {
-      "id": "camino_a",
-      "model": "piedras_pasaderas",
-      "x": -5.8,
-      "y": 0,
-      "z": -4.4,
-      "rot": 0,
-      "size": [
-        2.4,
-        0.13,
-        0.77
-      ],
-      "collider": "none"
-    },
-    {
-      "id": "camino_b",
-      "model": "piedras_pasaderas",
-      "x": 5.8,
-      "y": 0,
-      "z": 4.4,
-      "rot": 180,
-      "size": [
-        2.4,
-        0.13,
-        0.77
-      ],
-      "collider": "none"
-    },
-    {
-      "id": "camino2_a",
-      "model": "piedras_pasaderas",
-      "x": -12.6,
-      "y": 0,
-      "z": -4.4,
-      "rot": 0,
-      "size": [
-        2.4,
-        0.13,
-        0.77
-      ],
-      "collider": "none"
-    },
-    {
-      "id": "camino2_b",
-      "model": "piedras_pasaderas",
-      "x": 12.6,
-      "y": 0,
-      "z": 4.4,
-      "rot": 180,
-      "size": [
-        2.4,
-        0.13,
-        0.77
-      ],
-      "collider": "none"
-    },
-    {
       "id": "volcan_f",
       "model": "volcan",
       "x": -17.3,
-      "y": -0.5,
+      "y": -2,
       "z": -11.4,
       "rot": 0,
       "size": [
-        13,
-        8.48,
-        12.67
+        17.3,
+        11.29,
+        16.86
       ],
       "collider": "none"
     },
@@ -548,20 +492,6 @@
         2.4,
         2.4,
         0.29
-      ],
-      "collider": "none"
-    },
-    {
-      "id": "arbol_1",
-      "model": "arbol_jungla",
-      "x": -16,
-      "y": 0,
-      "z": -15,
-      "rot": 0,
-      "size": [
-        6.19,
-        8,
-        5.64
       ],
       "collider": "none"
     },
@@ -625,7 +555,7 @@
       "id": "mangle_2",
       "model": "mangle",
       "x": -20.5,
-      "y": 0,
+      "y": -0.2,
       "z": -0.4,
       "rot": 60,
       "size": [
@@ -639,7 +569,7 @@
       "id": "palmera_1",
       "model": "palmera",
       "x": 5,
-      "y": 0,
+      "y": -0.5,
       "z": -14,
       "rot": 20,
       "size": [
@@ -653,7 +583,7 @@
       "id": "palmera_2",
       "model": "palmera",
       "x": -8.6,
-      "y": 0,
+      "y": -0.4,
       "z": -13.5,
       "rot": -30,
       "size": [
@@ -695,7 +625,7 @@
       "id": "afloramiento_f",
       "model": "afloramiento",
       "x": 17.5,
-      "y": 0,
+      "y": -0.8,
       "z": -16,
       "rot": 0,
       "size": [
