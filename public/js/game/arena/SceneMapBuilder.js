@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { THEMES } from './themes.js';
 import { buildPitLiners, buildProceduralBase, roundedPath, tableShape } from './proceduralBase.js';
 import { moverLocal, moverProgress } from './movers.js';
-import { buildDevices } from './devices.js';
+import { buildDevices, trackDistance } from './devices.js';
 import { buildAmbient } from './ambient.js';
 
 /**
@@ -77,7 +77,8 @@ export async function ensureModels(names) {
   }));
 }
 
-const modelsOf = (data) => [...data.objects.map((o) => o.model), ...data.movers.map((m) => m.model)];
+const modelsOf = (data) => [...data.objects.map((o) => o.model), ...data.movers.map((m) => m.model),
+  ...(data.devices ?? []).flatMap((d) => (d.type === 'train' ? d.cars ?? [] : []))];
 
 /** Base horneada del mapa, si existe y coincide con sus medidas. */
 async function loadBase(id, data, baked = true) {
@@ -347,7 +348,7 @@ export function buildSceneMap(stage, physics, layout) {
   });
 
   // Artefactos: cintas, puertas, pasarelas que se caen, trampolines y portales
-  const devices = buildDevices(root, physics, data.devices ?? [], own);
+  const devices = buildDevices(root, physics, data.devices ?? [], own, MODELS);
   for (const d of devices.list) handles.devices.set(d.id, d.group);
   const ambient = buildAmbient(root, data, own); // humo del volcán y burbujas de la lava
 
@@ -368,7 +369,8 @@ export function buildSceneMap(stage, physics, layout) {
       if (waters.some((w) => inRect(w, x, z, 1.4)) || (room?.pits ?? []).some((p) => inRect(p, x, z, 0.8))) continue;
       if (blockers.some((b) => Math.hypot(b.x - x, b.z - z) < b.r)) continue;
       if (movers.some((m) => onMoverPath(m, x, z))) continue;
-      if ((data.devices ?? []).some((d) => Math.hypot(d.x - x, d.z - z) < Math.max(d.w, d.d) / 2 + 0.8)) continue; // ni encima de artefactos
+      if ((data.devices ?? []).some((d) => (d.type === 'train' ? trackDistance(d, x, z) < 1.6
+        : Math.hypot(d.x - x, d.z - z) < Math.max(d.w, d.d) / 2 + 0.8))) continue; // ni encima de artefactos (del tren, solo la vía)
       freePoints.push({ x, z });
     }
   }

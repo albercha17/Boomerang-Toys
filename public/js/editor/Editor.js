@@ -14,7 +14,7 @@ const { normalizeMap, emptyMap, ID_PATTERN, THEMES } = window.MapFormat;
 const DEG = Math.PI / 180;
 const r2 = (v) => Math.round(v * 100) / 100;
 const normDeg = (d) => r2(((((d + 180) % 360) + 360) % 360) - 180);
-const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca' };
+const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca', cuarto: 'Cuarto de juegos' };
 const FLOOR_NAMES = { baldosas: 'Baldosas', rosa: 'Baldosas rosas', arena: 'Arena (desierto)', hierba: 'Hierba' };
 const WALL_NAMES = { baldosas: 'Alicatadas', ninguna: 'Ninguna (al aire libre)' };
 const COLLIDERS = { box: 'Caja', cylinder: 'Cilindro', none: 'Ninguno (se atraviesa)' };
@@ -565,7 +565,8 @@ export class Editor {
   async addDevice(type) {
     const [x, z] = this.viewCenter();
     const base = { conveyor: { w: 6, d: 2.2, speed: 3.5 }, door: { w: 4, d: 0.5, openMs: 2500, closedMs: 2500, offsetMs: 0, height: 2.6 },
-      fragile: { w: 5, d: 2.2, shakeMs: 600, respawnMs: 5000 }, jump: { w: 2, d: 2, target: [r2(x + 6), z], height: 3.5, durationMs: 800 }, portal: { w: 2, d: 2 } }[type];
+      fragile: { w: 5, d: 2.2, shakeMs: 600, respawnMs: 5000 }, jump: { w: 2, d: 2, target: [r2(x + 6), z], height: 3.5, durationMs: 800 }, portal: { w: 2, d: 2 },
+      train: { w: 14, d: 8, radius: 3, speed: 4, carLength: 2.6, cars: ['locomotora', 'vagon_cisterna', 'vagon_tolva', 'furgon_cola'] } }[type];
     const added = [];
     await this.change((d) => {
       d.devices = d.devices ?? [];
@@ -800,6 +801,7 @@ export class Editor {
         door: ['Puerta', 'Sube y baja sola: cerrada es una pared, también para los búmerangs. Primero está cerrada y luego abierta.'],
         fragile: ['Pasarela que se cae', 'Se puede pisar aunque debajo haya un hueco o el vacío. Al pisarla tiembla, se cae y vuelve a salir.'],
         jump: ['Trampolín', 'Lanza por el aire hasta el punto rosa (arrástralo), por encima de todo.'],
+        train: ['Tren', 'Da vueltas por su vía (estírala con la escala o con largo y ancho) y atropella a quien pilla. Se cruza entre vagón y vagón, o saltando.'],
         portal: ['Portal', 'Lleva al otro portal con el mismo enlace (y a los búmerangs que vuelan). Cambia el enlace para emparejarlo con otro.'],
       }[it.type];
       form.title(`${titles[0]} · ${it.id}`);
@@ -828,6 +830,13 @@ export class Editor {
         form.number('Duración (s)', it.durationMs / 1000, 0.1, (v) => set({ durationMs: Math.max(200, Math.round(v * 1000)) }));
       }
       if (it.type === 'portal') form.text('Enlace', it.link, (v) => set({ link: v.slice(0, 20) || it.link }));
+      if (it.type === 'train') {
+        form.number('Velocidad', it.speed, 0.5, (v) => set({ speed: Math.max(0.5, v) }), 'Casillas por segundo');
+        form.number('Radio de las curvas', it.radius, 0.5, (v) => set({ radius: Math.max(0.5, v) }));
+        form.number('Largo de la locomotora', it.carLength, 0.2, (v) => set({ carLength: Math.max(0.5, v) }), 'Los vagones van a su misma escala');
+        form.text('Vagones', it.cars.join(', '), (v) => set({ cars: v.split(',').map((c) => c.trim()).filter(Boolean) }), 'Modelos de la biblioteca, el primero es la locomotora');
+        form.check('Del revés', Boolean(it.flip), (v) => set({ flip: v || undefined }));
+      }
     }
     const actions = form.actions();
     actions.button('Duplicar (Ctrl+D)', () => this.duplicate());

@@ -1,0 +1,551 @@
+{
+  "id": "cuarto",
+  "name": "La alfombra",
+  "theme": "cuarto",
+  "play": true,
+  "note": "Alfombra de carreteras de un cuarto de niños: un tren de juguete da vueltas por un óvalo y atropella; dentro, un castillo hinchable y juguetes; fuera, la casa de muñecas, el baúl y los vehículos grandes. Aros (portales) entre los lados.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [],
+    "floor": "alfombra",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "castillo",
+      "model": "castillo_hinchable",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        3.61,
+        2.4,
+        3.44
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "hucha",
+      "model": "hucha",
+      "x": -3.6,
+      "y": 0,
+      "z": -3.4,
+      "rot": 30,
+      "size": [
+        1.38,
+        1.8,
+        2.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "tipi_1",
+      "model": "tipi",
+      "x": -9.2,
+      "y": 0,
+      "z": -1.6,
+      "rot": 0,
+      "size": [
+        1.62,
+        2.4,
+        1.7
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "libros",
+      "model": "pila_libros",
+      "x": 8.4,
+      "y": 0,
+      "z": -3.2,
+      "rot": -15,
+      "size": [
+        2.12,
+        1.3,
+        1.78
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "robot",
+      "model": "robot_juguete",
+      "x": 4.4,
+      "y": 0,
+      "z": -3.6,
+      "rot": 0,
+      "size": [
+        1.28,
+        2.2,
+        1.01
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "lapiz",
+      "model": "lapiz",
+      "x": -7.4,
+      "y": 0,
+      "z": 1.9,
+      "rot": 0,
+      "size": [
+        4.2,
+        0.23,
+        0.23
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "abaco",
+      "model": "abaco",
+      "x": -3.2,
+      "y": 0,
+      "z": 3.8,
+      "rot": 0,
+      "size": [
+        1.94,
+        1.7,
+        0.67
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cohete",
+      "model": "cohete",
+      "x": 6.9,
+      "y": 0,
+      "z": 3.3,
+      "rot": 0,
+      "size": [
+        1.63,
+        2.4,
+        1.63
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "tipi_2",
+      "model": "tipi",
+      "x": 9.4,
+      "y": 0,
+      "z": 1.6,
+      "rot": 0,
+      "size": [
+        1.62,
+        2.4,
+        1.7
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "casa",
+      "model": "casa_munecas",
+      "x": -15.7,
+      "y": 0,
+      "z": 0,
+      "rot": 90,
+      "size": [
+        2.84,
+        3.2,
+        1.68
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "baul",
+      "model": "baul_juguetes",
+      "x": 15.7,
+      "y": 0,
+      "z": 0,
+      "rot": -90,
+      "size": [
+        1.8,
+        2.2,
+        1.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "excavadora",
+      "model": "excavadora",
+      "x": 15.4,
+      "y": 0,
+      "z": -7.8,
+      "rot": 0,
+      "size": [
+        1.4,
+        1.76,
+        4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "volquete",
+      "model": "camion_volquete",
+      "x": -15.4,
+      "y": 0,
+      "z": 7.8,
+      "rot": 180,
+      "size": [
+        1.42,
+        1.54,
+        4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "monster",
+      "model": "monster_truck",
+      "x": -15.2,
+      "y": 0,
+      "z": -7.8,
+      "rot": 25,
+      "size": [
+        2.04,
+        1.84,
+        3.2
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "carreras",
+      "model": "coche_carreras",
+      "x": 15.4,
+      "y": 0,
+      "z": 8.6,
+      "rot": 90,
+      "size": [
+        1.38,
+        0.73,
+        3.8
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "autobus",
+      "model": "autobus_escolar",
+      "x": 6.6,
+      "y": 0,
+      "z": -9.3,
+      "rot": 90,
+      "size": [
+        1.39,
+        1.45,
+        5.2
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "bomberos",
+      "model": "camion_bomberos",
+      "x": -6.6,
+      "y": 0,
+      "z": 9.3,
+      "rot": 90,
+      "size": [
+        1.57,
+        1.74,
+        4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "domino",
+      "model": "domino",
+      "x": -6.4,
+      "y": 0,
+      "z": -9.3,
+      "rot": 0,
+      "size": [
+        2.4,
+        0.52,
+        2.19
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caballito",
+      "model": "caballito",
+      "x": 6.4,
+      "y": 0,
+      "z": 9.3,
+      "rot": 90,
+      "size": [
+        0.83,
+        1.8,
+        2.1
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "ceras",
+      "model": "ceras",
+      "x": 3.2,
+      "y": 0,
+      "z": 4.8,
+      "rot": 20,
+      "size": [
+        0.92,
+        1,
+        0.75
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "yoyo",
+      "model": "yoyo",
+      "x": -1.4,
+      "y": 0,
+      "z": -9.4,
+      "rot": 0,
+      "size": [
+        1,
+        0.33,
+        1
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "peonza",
+      "model": "peonza",
+      "x": 2.6,
+      "y": 0,
+      "z": 9.4,
+      "rot": 0,
+      "size": [
+        0.9,
+        1.01,
+        0.9
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "cochecito",
+      "model": "coche_juguete",
+      "x": -9.6,
+      "y": 0,
+      "z": 3.2,
+      "rot": 90,
+      "size": [
+        0.8,
+        0.72,
+        1.28
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "bloques",
+      "model": "bloques_madera",
+      "x": 9.8,
+      "y": 0,
+      "z": -0.9,
+      "rot": 30,
+      "size": [
+        1.4,
+        0.6,
+        0.7
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "biplano",
+      "model": "biplano",
+      "x": -22,
+      "y": 0,
+      "z": -8,
+      "rot": 30,
+      "size": [
+        5,
+        1.6,
+        4.18
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "helicoptero",
+      "model": "helicoptero",
+      "x": 22.5,
+      "y": 0,
+      "z": 7,
+      "rot": -40,
+      "size": [
+        4.66,
+        1.54,
+        5
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "globos_1",
+      "model": "globos",
+      "x": -20,
+      "y": 0,
+      "z": 3,
+      "rot": 0,
+      "size": [
+        1.99,
+        4,
+        1.65
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "globos_2",
+      "model": "globos",
+      "x": 20.5,
+      "y": 0,
+      "z": -4,
+      "rot": 0,
+      "size": [
+        1.99,
+        4,
+        1.65
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "oso",
+      "model": "oso_peluche",
+      "x": -9,
+      "y": 0,
+      "z": -14,
+      "rot": 10,
+      "size": [
+        2.75,
+        4,
+        2.75
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "puzle",
+      "model": "puzle",
+      "x": 8,
+      "y": 0,
+      "z": -13.5,
+      "rot": 15,
+      "size": [
+        4,
+        0.11,
+        2.11
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "meeples",
+      "model": "meeples",
+      "x": -20.5,
+      "y": 0,
+      "z": 11,
+      "rot": 0,
+      "size": [
+        2.4,
+        0.6,
+        1.8
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "bloques_f",
+      "model": "bloques_madera",
+      "x": 13,
+      "y": 0,
+      "z": -13.5,
+      "rot": -20,
+      "size": [
+        3,
+        1.29,
+        1.5
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "tren",
+      "type": "train",
+      "x": 0,
+      "z": 0,
+      "w": 24,
+      "d": 13,
+      "rot": 0,
+      "radius": 4.5,
+      "speed": 4.2,
+      "carLength": 3,
+      "cars": [
+        "locomotora",
+        "vagon_cisterna",
+        "vagon_tolva",
+        "furgon_cola"
+      ]
+    },
+    {
+      "id": "aro_i",
+      "type": "portal",
+      "x": -15.4,
+      "z": -3.9,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "aros"
+    },
+    {
+      "id": "aro_d",
+      "type": "portal",
+      "x": 15.4,
+      "z": 3.9,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "aros"
+    }
+  ],
+  "spawns": [
+    [
+      -6,
+      -1.4
+    ],
+    [
+      6,
+      1.4
+    ],
+    [
+      -1.6,
+      4.6
+    ],
+    [
+      1.6,
+      -4.6
+    ],
+    [
+      -13.6,
+      -4.8
+    ],
+    [
+      13.6,
+      4.8
+    ],
+    [
+      0,
+      -9.4
+    ],
+    [
+      0,
+      9.6
+    ]
+  ]
+}

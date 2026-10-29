@@ -87,6 +87,17 @@ function terrainTexture(kind) {
   });
 }
 
+/** Alfombra infantil de carreteras (public/art/suelos/alfombra.png, de herramientas/alfombra.py): cubre la zona entera. */
+function rugTexture() {
+  if (!TEXTURES.alfombra) {
+    const texture = new THREE.TextureLoader().load('/art/suelos/alfombra.png');
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 8;
+    TEXTURES.alfombra = texture;
+  }
+  return TEXTURES.alfombra;
+}
+
 function material(texture, repeatX, repeatY, color = 0xffffff) {
   const map = texture.clone();
   map.repeat.set(repeatX, repeatY);
@@ -165,9 +176,16 @@ export function buildProceduralBase(root, data) {
     floorGeometry.translate(0, -0.1, 0);
     const kind = r.floor ?? 'baldosas';
     const tiled = kind === 'baldosas' || kind === 'rosa';
-    const floorMaterial = tiled ? own(material(tileTexture(kind), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
+    let floorMaterial;
+    if (kind === 'alfombra') {
+      floorMaterial = own(material(rugTexture(), 1 / r.w, 1 / r.d));
+      floorMaterial.map.offset.set(0.5, 0.5);
+      floorMaterial.map.wrapS = floorMaterial.map.wrapT = THREE.ClampToEdgeWrapping;
+    } else {
+      floorMaterial = tiled ? own(material(tileTexture(kind), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
+    }
     add(new THREE.Mesh(own(floorGeometry), floorMaterial));
-    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba' }[kind]; // la terraza rosa, sobre césped
+    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba', alfombra: 'madera' }[kind]; // la terraza rosa, sobre césped; la alfombra, sobre parqué
     if (outsideKind && (r.walls ?? 'baldosas') === 'ninguna') { // al aire libre: el terreno sigue más allá de la zona de juego
       const outW = r.w * 3;
       const outD = r.d * 4;
@@ -183,7 +201,8 @@ export function buildProceduralBase(root, data) {
       hole.lineTo(r.w / 2, r.d / 2);
       hole.lineTo(r.w / 2, -r.d / 2);
       frame.holes.push(hole);
-      const outside = add(new THREE.Mesh(own(new THREE.ShapeGeometry(frame)), own(material(terrainTexture(outsideKind), 1 / 6, 1 / 6, 0xd8d0c4))));
+      const outsideMaterial = outsideKind === 'madera' ? material(woodTexture(), 1 / 4, 1 / 4) : material(terrainTexture(outsideKind), 1 / 6, 1 / 6, 0xd8d0c4);
+      const outside = add(new THREE.Mesh(own(new THREE.ShapeGeometry(frame)), own(outsideMaterial)));
       outside.rotation.x = -Math.PI / 2;
       outside.position.y = -0.12;
     }

@@ -143,7 +143,8 @@ export class BotBrain {
     const me = this.character;
     const arena = game.arena;
     const danger = (x, z) => arena.hazardAt(x, z) !== 0
-      || arena.movers.some((m) => moverNear(m, x, z, 2.6, 0.6));
+      || arena.movers.some((m) => moverNear(m, x, z, 2.6, 0.6))
+      || Boolean(arena.devices?.dangerAt?.(x, z)); // el tren
     const safe = (a) => [0.6, 1.2].every((d) => !danger(me.x + Math.cos(a) * d, me.z + Math.sin(a) * d));
     for (const turn of [0, 0.6, -0.6, 1.2, -1.2, 1.9, -1.9, Math.PI]) {
       if (safe(angle + turn)) return angle + turn;

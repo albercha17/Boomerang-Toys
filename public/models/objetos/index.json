@@ -457,5 +457,135 @@
     "id": "volcan",
     "name": "Volcán",
     "source": "selva\\volcan.glb"
+  },
+  {
+    "id": "locomotora",
+    "name": "Locomotora de vapor",
+    "source": "cuarto\\locomotora.glb"
+  },
+  {
+    "id": "tender",
+    "name": "Ténder de carbón",
+    "source": "cuarto\\tender.glb"
+  },
+  {
+    "id": "furgon_cola",
+    "name": "Furgón de cola",
+    "source": "cuarto\\furgon_cola.glb"
+  },
+  {
+    "id": "vagon_cisterna",
+    "name": "Vagón cisterna",
+    "source": "cuarto\\vagon_cisterna.glb"
+  },
+  {
+    "id": "vagon_tolva",
+    "name": "Vagón tolva",
+    "source": "cuarto\\vagon_tolva.glb"
+  },
+  {
+    "id": "monster_truck",
+    "name": "Monster truck",
+    "source": "cuarto\\monster_truck.glb"
+  },
+  {
+    "id": "autobus_escolar",
+    "name": "Autobús escolar",
+    "source": "cuarto\\autobus_escolar.glb"
+  },
+  {
+    "id": "camion_bomberos",
+    "name": "Camión de bomberos",
+    "source": "cuarto\\camion_bomberos.glb"
+  },
+  {
+    "id": "biplano",
+    "name": "Biplano",
+    "source": "cuarto\\biplano.glb"
+  },
+  {
+    "id": "excavadora",
+    "name": "Excavadora",
+    "source": "cuarto\\excavadora.glb"
+  },
+  {
+    "id": "camion_volquete",
+    "name": "Camión volquete",
+    "source": "cuarto\\camion_volquete.glb"
+  },
+  {
+    "id": "coche_carreras",
+    "name": "Coche de carreras",
+    "source": "cuarto\\coche_carreras.glb"
+  },
+  {
+    "id": "helicoptero",
+    "name": "Helicóptero",
+    "source": "cuarto\\helicoptero.glb"
+  },
+  {
+    "id": "casa_munecas",
+    "name": "Casa de muñecas",
+    "source": "cuarto\\casa_munecas.glb"
+  },
+  {
+    "id": "tipi",
+    "name": "Tipi",
+    "source": "cuarto\\tipi.glb"
+  },
+  {
+    "id": "ceras",
+    "name": "Ceras de colores",
+    "source": "cuarto\\ceras.glb"
+  },
+  {
+    "id": "abaco",
+    "name": "Ábaco",
+    "source": "cuarto\\abaco.glb"
+  },
+  {
+    "id": "hucha",
+    "name": "Hucha de cerdito",
+    "source": "cuarto\\hucha.glb"
+  },
+  {
+    "id": "pila_libros",
+    "name": "Pila de libros",
+    "source": "cuarto\\pila_libros.glb"
+  },
+  {
+    "id": "lapiz",
+    "name": "Lápiz",
+    "source": "cuarto\\lapiz.glb"
+  },
+  {
+    "id": "domino",
+    "name": "Dominó",
+    "source": "cuarto\\domino.glb"
+  },
+  {
+    "id": "meeples",
+    "name": "Meeples",
+    "source": "cuarto\\meeples.glb"
+  },
+  {
+    "id": "puzle",
+    "name": "Puzle",
+    "source": "cuarto\\puzle.glb"
+  },
+  {
+    "id": "yoyo",
+    "name": "Yoyó",
+    "source": "cuarto\\yoyo.glb"
+  },
+  {
+    "id": "globos",
+    "name": "Globos",
+    "source": "cuarto\\globos.glb"
+  },
+  {
+    "id": "castillo_hinchable",
+    "name": "Castillo hinchable",
+    "source": "cuarto\\castillo_hinchable.glb"
   }
 ]

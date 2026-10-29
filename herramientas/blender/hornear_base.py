@@ -160,7 +160,29 @@ def material_terreno(nombre, tipo):
     return m
 
 
+def material_alfombra(nombre):
+    """Alfombra infantil de carreteras (herramientas/alfombra.py): una imagen que cubre la zona de juego entera."""
+    m = bpy.data.materials.new(nombre)
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = 0.95
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = bpy.data.images.load(str(SUELOS / "alfombra.png"))
+    tex.extension = "EXTEND"
+    mapa = nt.nodes.new("ShaderNodeMapping")  # coordenadas del objeto -> 0..1 sobre la zona de juego
+    mapa.inputs["Scale"].default_value = (1 / W, 1 / D, 1)
+    mapa.inputs["Location"].default_value = (0.5, 0.5, 0)
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    nt.links.new(coord.outputs["Object"], mapa.inputs["Vector"])
+    nt.links.new(mapa.outputs["Vector"], tex.inputs["Vector"])
+    nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    return m
+
+
 def material_suelo(nombre, tipo, lado):
+    if tipo == "alfombra":
+        return material_alfombra(nombre)
     if tipo == "rosa":
         return material_baldosas(nombre, lado, (0.97, 0.60, 0.77))
     return material_baldosas(nombre, lado) if tipo == "baldosas" else material_terreno(nombre, tipo)
@@ -267,7 +289,7 @@ else:
     for poligono in suelo.data.polygons:
         poligono.material_index = 0
     fuera = []
-    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba"}.get(TIPO)  # la terraza rosa, sobre césped
+    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba", "alfombra": "madera"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
     if FUERA and r.get("walls", "baldosas") == "ninguna":  # al aire libre: el terreno sigue más allá de la zona de juego
         bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -0.12, 0))
         f = bpy.context.active_object
@@ -287,7 +309,7 @@ else:
         bpy.ops.object.modifier_apply(modifier=agujero.name)
         bpy.data.objects.remove(corte, do_unlink=True)
         f.data.materials.clear()  # el recorte deja huecos de material vacíos
-        f.data.materials.append(material_terreno("fuera", FUERA))
+        f.data.materials.append(material_madera("fuera", tablones=int(D)) if FUERA == "madera" else material_terreno("fuera", FUERA))
         for poligono in f.data.polygons:
             poligono.material_index = 0
         fuera.append(f)

@@ -54,5 +54,12 @@
     "theme": "selva",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "cuarto",
+    "name": "La alfombra",
+    "theme": "cuarto",
+    "play": true,
+    "baked": true
   }
 ]

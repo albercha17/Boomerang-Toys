@@ -9,6 +9,8 @@ import * as THREE from 'three';
  *             se puede pisar aunque debajo haya un hueco o el vacío
  *   jump      trampolín: te lanza por el aire hasta target [x, z] (height, durationMs)
  *   portal    portal: te lleva al otro portal con el mismo `link` (y a los búmerangs que vuelan)
+ *   train     tren de juguete: da vueltas por una vía (w × d, esquinas de radio `radius`) a `speed` y atropella;
+ *             cars = modelos de la biblioteca (el primero, la locomotora), carLength, flip (si van del revés)
  * buildDevices monta lo que se ve y la física; la partida llama a update (animación y estado) y a affect (lo que
  * hacen a personajes, búmerangs y sueltos).
  */
@@ -87,6 +89,161 @@ function stoneTexture() {
   t.colorSpace = THREE.SRGBColorSpace;
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;
+}
+
+/**
+ * Vía del tren: rectángulo de esquinas redondeadas (radio `radius`) de w × d centrado en el artefacto. trackPoint da
+ * el punto a la distancia s de la vía (coordenadas locales u, v) y su dirección; trackDistance, lo lejos que está un
+ * punto del mundo de la vía.
+ */
+function trackShape(def) {
+  const a = def.w / 2;
+  const b = def.d / 2;
+  const r = Math.max(0.5, Math.min(def.radius ?? Math.min(a, b), a, b));
+  const lx = 2 * (a - r);
+  const lz = 2 * (b - r);
+  const arc = (r * Math.PI) / 2;
+  return { a, b, r, lx, lz, arc, length: 2 * lx + 2 * lz + 4 * arc };
+}
+
+export function trackPoint(def, s, shape = trackShape(def)) {
+  const { a, b, r, lx, lz, arc, length } = shape;
+  let t = ((s % length) + length) % length;
+  const segs = [
+    ['line', lx, -a + r, -b, 1, 0], ['arc', arc, a - r, -b + r, -Math.PI / 2],
+    ['line', lz, a, -b + r, 0, 1], ['arc', arc, a - r, b - r, 0],
+    ['line', lx, a - r, b, -1, 0], ['arc', arc, -a + r, b - r, Math.PI / 2],
+    ['line', lz, -a, b - r, 0, -1], ['arc', arc, -a + r, -b + r, Math.PI],
+  ];
+  for (const [kind, len, x0, z0, p0, p1] of segs) {
+    if (t > len) { t -= len; continue; }
+    if (kind === 'line') return { u: x0 + p0 * t, v: z0 + p1 * t, hu: p0, hv: p1 };
+    const ang = p0 + t / r;
+    return { u: x0 + Math.cos(ang) * r, v: z0 + Math.sin(ang) * r, hu: -Math.sin(ang), hv: Math.cos(ang) };
+  }
+  return { u: -a + r, v: -b, hu: 1, hv: 0 };
+}
+
+export function trackDistance(def, x, z) {
+  const { a, b, r } = trackShape(def);
+  const { u, v } = local(def, x, z);
+  const qx = Math.abs(u) - (a - r);
+  const qz = Math.abs(v) - (b - r);
+  return Math.abs(Math.hypot(Math.max(qx, 0), Math.max(qz, 0)) + Math.min(Math.max(qx, qz), 0) - r);
+}
+
+/** Del sistema local del artefacto (u, v) al mundo. */
+function toWorld(def, u, v) {
+  const a = (def.rot ?? 0) * DEG;
+  return { x: def.x + u * Math.cos(a) + v * Math.sin(a), z: def.z - u * Math.sin(a) + v * Math.cos(a) };
+}
+
+const TRAIN_CARS = ['locomotora', 'vagon_cisterna', 'vagon_tolva', 'furgon_cola'];
+const GAUGE = 0.9; // separación de los raíles
+
+function buildTrain(dev, def, own, models) {
+  const shape = trackShape(def);
+  dev.shape = shape;
+  // Traviesas y raíles (instanciados: una malla para cada cosa)
+  const sleepers = Math.ceil(shape.length / 0.6);
+  const sleeperMesh = new THREE.InstancedMesh(own(new THREE.BoxGeometry(0.3, 0.08, 1.5)), own(new THREE.MeshStandardMaterial({ color: 0x9a6a3f, roughness: 0.8 })), sleepers);
+  const railSteps = Math.ceil(shape.length / 0.3);
+  const railMesh = new THREE.InstancedMesh(own(new THREE.BoxGeometry(1, 0.1, 0.09)), own(new THREE.MeshStandardMaterial({ color: 0xb8bcc4, roughness: 0.35, metalness: 0.6 })), railSteps * 2);
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const up = new THREE.Vector3(0, 1, 0);
+  for (let i = 0; i < sleepers; i++) {
+    const p = trackPoint(def, (i * shape.length) / sleepers, shape);
+    q.setFromAxisAngle(up, -Math.atan2(p.hv, p.hu));
+    sleeperMesh.setMatrixAt(i, m.compose(new THREE.Vector3(p.u, 0.04, p.v), q, new THREE.Vector3(1, 1, 1)));
+  }
+  const step = shape.length / railSteps;
+  for (let i = 0; i < railSteps; i++) {
+    const p0 = trackPoint(def, i * step, shape);
+    const p1 = trackPoint(def, (i + 1) * step, shape);
+    for (const [k, side] of [[0, -1], [1, 1]]) { // un tramo de cada raíl, de un punto de la vía al siguiente
+      const ax = p0.u - (p0.hv * side * GAUGE) / 2;
+      const az = p0.v + (p0.hu * side * GAUGE) / 2;
+      const bx = p1.u - (p1.hv * side * GAUGE) / 2;
+      const bz = p1.v + (p1.hu * side * GAUGE) / 2;
+      q.setFromAxisAngle(up, -Math.atan2(bz - az, bx - ax));
+      railMesh.setMatrixAt(i * 2 + k, m.compose(new THREE.Vector3((ax + bx) / 2, 0.12, (az + bz) / 2), q, new THREE.Vector3(Math.hypot(bx - ax, bz - az) + 0.02, 1, 1)));
+    }
+  }
+  for (const mesh of [sleeperMesh, railMesh]) { mesh.receiveShadow = true; mesh.castShadow = true; dev.group.add(mesh); }
+  // Vagones: modelos de la biblioteca a lo largo de la vía (el primero, la locomotora, mide carLength; los demás,
+  // a la misma escala que ella)
+  dev.carLength = def.carLength ?? 2.2;
+  const names = def.cars?.length ? def.cars : TRAIN_CARS;
+  const first = models[names[0]];
+  const scale = first ? dev.carLength / Math.max(first.size.x, first.size.z) : 1;
+  dev.cars = names.map((name, i) => {
+    const holder = new THREE.Group();
+    const model = models[name];
+    let width = 0.9;
+    let length = dev.carLength;
+    if (model) {
+      const copy = model.scene.clone(true);
+      const s = first ? scale : dev.carLength / Math.max(model.size.x, model.size.z);
+      length = Math.max(model.size.x, model.size.z) * s;
+      copy.scale.setScalar(s);
+      const turn = new THREE.Group(); // el largo del modelo, a lo largo de la vía
+      if (model.size.z > model.size.x) turn.rotation.y = Math.PI / 2;
+      if (def.flip) turn.rotation.y += Math.PI;
+      turn.add(copy);
+      width = Math.min(model.size.x, model.size.z) * s;
+      holder.add(turn);
+    } else {
+      const box = new THREE.Mesh(own(new THREE.BoxGeometry(dev.carLength, 0.9, 0.9)), own(new THREE.MeshStandardMaterial({ color: i ? 0x3a86ff : 0xe63946, roughness: 0.5 })));
+      box.position.y = 0.45;
+      box.castShadow = true;
+      holder.add(box);
+    }
+    dev.group.add(holder);
+    return { holder, width, length, x: def.x, z: def.z, hx: 1, hz: 0 };
+  });
+  dev.trainLength = dev.cars.reduce((sum, car) => sum + car.length + 0.25, 0);
+  // Humo de la locomotora
+  dev.puffs = [];
+  const puffGeometry = own(new THREE.SphereGeometry(1, 8, 6));
+  for (let i = 0; i < 5; i++) {
+    const puff = new THREE.Mesh(puffGeometry, own(new THREE.MeshStandardMaterial({ color: 0xf2f2f2, roughness: 1, transparent: true, opacity: 0, depthWrite: false })));
+    dev.group.add(puff);
+    dev.puffs.push({ mesh: puff, phase: i / 5 });
+  }
+}
+
+/** Mueve el tren: la cabeza avanza `speed` por segundo y cada vagón sigue la vía detrás. */
+function updateTrain(d, now) {
+  const head = (now / 1000) * (d.speed ?? 4);
+  const a = (d.rot ?? 0) * DEG;
+  let back = head; // donde acaba el vagón de delante
+  d.cars.forEach((car, i) => {
+    const L = car.length;
+    const center = back - L / 2;
+    back -= L + 0.25;
+    const f = trackPoint(d, center + L / 2, d.shape);
+    const b = trackPoint(d, center - L / 2, d.shape);
+    const u = (f.u + b.u) / 2;
+    const v = (f.v + b.v) / 2;
+    const yaw = Math.atan2(f.v - b.v, f.u - b.u);
+    car.holder.position.set(u, 0.17, v);
+    car.holder.rotation.y = -yaw;
+    const w = toWorld(d, u, v);
+    car.x = w.x;
+    car.z = w.z;
+    // dirección en el mundo (el giro del artefacto lleva +x hacia -z)
+    car.hx = Math.cos(yaw) * Math.cos(a) + Math.sin(yaw) * Math.sin(a);
+    car.hz = -Math.cos(yaw) * Math.sin(a) + Math.sin(yaw) * Math.cos(a);
+    if (i === 0) {
+      for (const p of d.puffs) {
+        const k = ((now / 1600 + p.phase) % 1 + 1) % 1;
+        p.mesh.position.set(u + Math.cos(yaw) * L * 0.3, 1.3 + k * 1.6, v + Math.sin(yaw) * L * 0.3);
+        p.mesh.scale.setScalar(0.12 + k * 0.35);
+        p.mesh.material.opacity = Math.sin(k * Math.PI) * 0.7;
+      }
+    }
+  });
 }
 
 const PORTAL_COLORS = [0x9b5de5, 0x00b4c6, 0xff7f11, 0x2bb673, 0xe63946];
@@ -177,6 +334,8 @@ export function buildDevices(root, physics, list, own, models = {}) {
       dev.group.add(dev.swirl);
       dev.radius = r;
       dev.color = color;
+    } else if (def.type === 'train') {
+      buildTrain(dev, def, own, models);
     }
     if (def.type === 'door') {
       dev.body = physics.addWall(def.x, (dev.height) / 2, def.z, def.w / 2, dev.height / 2, def.d / 2, (def.rot ?? 0) * DEG);
@@ -196,6 +355,7 @@ export function buildDevices(root, physics, list, own, models = {}) {
     update(now, dt) {
       for (const d of devices) {
         if (d.type === 'conveyor') d.texture.offset.x -= (d.speed ?? 3.5) * dt / 1.2;
+        else if (d.type === 'train') updateTrain(d, now);
         else if (d.type === 'portal') d.swirl.rotation.z += dt * 2.5;
         else if (d.type === 'jump') d.top.position.y += (0.26 - d.top.position.y) * Math.min(1, dt * 8);
         else if (d.type === 'door') {
@@ -239,6 +399,22 @@ export function buildDevices(root, physics, list, own, models = {}) {
           for (const c of chars) if (inside(d, c.x, c.z)) { c.body.position.x += dir.x * step; c.body.position.z += dir.z * step; }
           for (const w of game.weapons) if (w.state === 'ground' && inside(d, w.x, w.z)) { w.body.position.x += dir.x * step; w.body.position.z += dir.z * step; }
           for (const p of game.arena.props ?? []) if (inside(d, p.body.position.x, p.body.position.z)) { p.body.position.x += dir.x * step; p.body.position.z += dir.z * step; p.body.wakeUp?.(); }
+        } else if (d.type === 'train') {
+          // Atropella a quien pilla un vagón (quien va por el aire, saltando, se libra)
+          for (const c of chars) {
+            const r = c.def.radius;
+            for (const car of d.cars) {
+              const dx = c.x - car.x;
+              const dz = c.z - car.z;
+              const ahead = dx * car.hx + dz * car.hz;
+              const side = -dx * car.hz + dz * car.hx;
+              if (Math.abs(ahead) < car.length / 2 + r * 0.6 && Math.abs(side) < car.width / 2 + r * 0.6) {
+                game.kill(c, Math.atan2(car.hz, car.hx), now, { force: true });
+                game.stage.shake(200, 0.35);
+                break;
+              }
+            }
+          }
         } else if (d.type === 'fragile') {
           if (d.state === 'idle' && chars.some((c) => inside(d, c.x, c.z))) { d.state = 'shaking'; d.since = now; }
         } else if (d.type === 'jump') {
@@ -263,6 +439,11 @@ export function buildDevices(root, physics, list, own, models = {}) {
           for (const w of game.weapons) if (w.state !== 'held') travel(w, w.x, w.z, (x, z) => w.body.position.set(x, w.body.position.y, z));
         }
       }
+    },
+
+    /** ¿Hay un tren cerca de ese punto? (para que los bots no se metan delante) */
+    dangerAt(x, z) {
+      return devices.some((d) => d.type === 'train' && d.cars.some((car, i) => Math.hypot(car.x - x, car.z - z) < (i === 0 ? 4 : 2.4)));
     },
 
     dispose() {

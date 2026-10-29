@@ -5,7 +5,8 @@
  *   { id, name, theme, play,                         play: false = no sale en la rotación del juego
  *     table: { w, d, chamfer, thickness, height }    mesa: salirse = caer (height = altura hasta el suelo)
  *     room:  { w, d, wallHeight, tile, wallTile, pitDepth, pits: [{ x, z, w, d, round }],   o habitación
- *              floor: 'baldosas' | 'rosa' | 'arena' | 'hierba', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base)
+ *              floor: 'baldosas' | 'rosa' | 'arena' | 'hierba' | 'alfombra', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base;
+ *              alfombra = la alfombra infantil de carreteras, con parqué alrededor)
  *     water: [{ x, z, w, d, y, round, lava }]        agua: caer dentro = ahogarse (lava: true = te quemas)
  *     objects: [{ id, model, x, y, z, rot, tilt: [x, z], size: [w, h, d], stretch: [x, y, z],
  *                 collider: 'box' | 'cylinder' | 'none', bush, loose }]
@@ -16,6 +17,7 @@
  *       conveyor { speed } · door { openMs, closedMs, offsetMs, height, style } · fragile { shakeMs, respawnMs, style }
  *       (style: 'piedra' = de piedra con musgo; sin style, la puerta roja y la pasarela de tablas)
  *       jump { target: [x, z], height, durationMs } · portal { link } (dos portales con el mismo link)
+ *       train { radius, speed, cars: [modelo...], carLength, flip }   tren que da vueltas por su vía (w × d) y atropella
  *     spawns: [[x, z], ...] }
  */
 (function (root, factory) {
@@ -26,8 +28,8 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva'];
-  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto'];
+  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra'];
   const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
   const round = (v) => Math.round(num(v) * 1000) / 1000;
@@ -89,7 +91,7 @@
         periodMs: Math.max(1000, Math.round(num(m.periodMs, 7000))), pauseMs: Math.max(0, Math.round(num(m.pauseMs, 900))) });
     }
     out.movers = movers;
-    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal'];
+    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train'];
     out.devices = (data.devices ?? []).filter((d) => DEVICE_TYPES.includes(d.type)).map((d) => {
       const dev = { id: uniqueId(d.id ?? d.type), type: d.type, x: round(d.x), z: round(d.z), w: Math.max(0.3, round(num(d.w, 2))), d: Math.max(0.3, round(num(d.d, 2))), rot: round(d.rot) };
       if (d.type === 'conveyor') dev.speed = round(num(d.speed, 3.5));
@@ -98,6 +100,11 @@
       if (d.type === 'jump') Object.assign(dev, { target: (d.target ?? [d.x + 6, d.z]).slice(0, 2).map(round), height: round(num(d.height, 3.5)), durationMs: Math.round(num(d.durationMs, 800)) });
       if (d.type === 'portal') dev.link = String(d.link ?? 'a').slice(0, 20);
       if ((d.type === 'door' || d.type === 'fragile') && d.style === 'piedra') dev.style = 'piedra';
+      if (d.type === 'train') {
+        Object.assign(dev, { radius: round(num(d.radius, Math.min(dev.w, dev.d) / 2)), speed: round(num(d.speed, 4)), carLength: Math.max(0.5, round(num(d.carLength, 2.2))),
+          cars: (Array.isArray(d.cars) && d.cars.length ? d.cars : ['locomotora', 'vagon_cisterna', 'vagon_tolva', 'furgon_cola']).map(String).slice(0, 12) });
+        if (d.flip) dev.flip = true;
+      }
       return dev;
     });
     out.spawns = (data.spawns ?? []).map(([x, z]) => [round(x), round(z)]);
