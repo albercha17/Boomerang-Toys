@@ -3,6 +3,7 @@ import { flat } from '../render/materials.js';
 
 const PARTICLE_GEOMETRY = new THREE.BoxGeometry(0.09, 0.09, 0.09);
 const GRAVITY = 18;
+const DUST_GEOMETRY = new THREE.SphereGeometry(1, 8, 6);
 
 /**
  * Efectos visuales efímeros: confeti de impacto, onda expansiva y arco del golpe.
@@ -31,6 +32,18 @@ export class Effects {
       });
       this.stage.scene.add(mesh);
     }
+  }
+
+  /** Polvillo de una pisada: una nubecita que crece, sube un poco y se desvanece. */
+  dust(x, z, color = 0xf1eadf) {
+    const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, depthWrite: false });
+    const mesh = new THREE.Mesh(DUST_GEOMETRY, material);
+    mesh.position.set(x + (Math.random() - 0.5) * 0.2, 0.08, z + (Math.random() - 0.5) * 0.2);
+    this.addTransient(mesh, 0.45, (t) => {
+      mesh.scale.setScalar(0.12 + t * 0.28);
+      mesh.position.y = 0.08 + t * 0.18;
+      material.opacity = 0.55 * (1 - t);
+    });
   }
 
   /** Onda blanca en el suelo. */

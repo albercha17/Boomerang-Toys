@@ -237,6 +237,115 @@ function split(scene, settings) {
 }
 
 /**
+ * Ojos de cada personaje para los párpados (medidos de frente, en unidades del modelo de 1,5 de alto):
+ * [x, y, ancho/2, alto/2, color de la piel (si no, se toma de la textura de encima del ojo)]. Los que no tienen ojos a la vista (visor, máscara, cuencas) no parpadean.
+ */
+const EYES = {
+  muneca: [[-0.15, 1.06, 0.055, 0.075], [0.12, 1.06, 0.055, 0.075]],
+  barbie: [[-0.04, 1.38, 0.018, 0.012], [0.04, 1.38, 0.018, 0.012]],
+  peluche: [[-0.13, 1.2, 0.07, 0.07]],
+  mago: [[-0.1, 0.925, 0.045, 0.06, 0xe0a57c], [0.1, 0.925, 0.045, 0.06, 0xe0a57c]],
+  vikingo: [[-0.04, 1.14, 0.022, 0.02], [0.075, 1.14, 0.022, 0.02]],
+  bichito: [[-0.2, 1.125, 0.085, 0.085, 0xf5cf3c], [0.16, 1.125, 0.085, 0.085, 0xf5cf3c]],
+  cristi: [[-0.2, 0.99, 0.065, 0.07], [0.26, 0.99, 0.065, 0.07]],
+  woody: [[-0.04, 1.25, 0.025, 0.028, 0xe9b48c], [0.06, 1.25, 0.025, 0.028, 0xe9b48c]],
+  mario: [[-0.11, 1.14, 0.035, 0.04], [0.025, 1.14, 0.035, 0.04]],
+  stitch: [[-0.25, 1.05, 0.07, 0.075], [0.2, 1.05, 0.07, 0.075]],
+  goku: [[-0.1, 0.9, 0.035, 0.02], [0.1, 0.9, 0.035, 0.02]],
+  levi: [[-0.19, 1.04, 0.06, 0.06], [0.2, 1.04, 0.06, 0.06]],
+  dibujo: [[-0.125, 1.025, 0.025, 0.025], [0.025, 1.025, 0.025, 0.025]],
+  jengibre: [[-0.06, 1.14, 0.04, 0.04], [0.14, 1.14, 0.04, 0.04]],
+  cascanueces: [[-0.1, 1.06, 0.025, 0.025], [0.11, 1.06, 0.025, 0.025]],
+  jesus: [[-0.09, 1.14, 0.03, 0.03], [0.11, 1.14, 0.03, 0.03]],
+  alber: [[-0.21, 0.95, 0.06, 0.06], [0.2, 0.95, 0.06, 0.06]],
+  angy: [[-0.15, 1.05, 0.055, 0.055], [0.175, 1.05, 0.055, 0.055]],
+};
+
+/** Color de la textura en un punto (u, v), para que el párpado sea del color de la piel de alrededor. */
+function sampleTexture(map, uv) {
+  const img = map?.image;
+  if (!img?.width) return new THREE.Color(0xf0c8a0);
+  if (!map.userData.pixels) {
+    const c = document.createElement('canvas');
+    c.width = img.width;
+    c.height = img.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    map.userData.pixels = g.getImageData(0, 0, c.width, c.height);
+  }
+  const { data, width, height } = map.userData.pixels;
+  const px = Math.max(0, Math.min(width - 1, Math.floor(uv.x * width)));
+  const py = Math.max(0, Math.min(height - 1, Math.floor((map.flipY ? 1 - uv.y : uv.y) * height)));
+  const k = (py * width + px) * 4;
+  return new THREE.Color().setRGB(data[k] / 255, data[k + 1] / 255, data[k + 2] / 255, THREE.SRGBColorSpace);
+}
+
+/** Párpados de un personaje (una vez por modelo): dónde van (en el modelo), su tamaño y su color. */
+function eyelidsFor(id, source) {
+  if (source.lids !== undefined) return source.lids;
+  source.lids = null;
+  const eyes = EYES[id];
+  if (!eyes || !source.skin) return null;
+  const probe = new THREE.Mesh(source.skin.geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+  const ray = new THREE.Raycaster();
+  const hitAt = (x, y) => {
+    ray.set(new THREE.Vector3(x, y, 5), new THREE.Vector3(0, 0, -1));
+    return ray.intersectObject(probe)[0] ?? null;
+  };
+  const lids = [];
+  for (const [x, y, rx, ry, color] of eyes) {
+    if (!hitAt(x, y)) continue;
+    // El párpado es plano y la cara curva: se pone por delante del punto más adelantado de toda su zona
+    let front = -Infinity;
+    for (const fx of [-1, -0.5, 0, 0.5, 1]) {
+      for (const fy of [1.1, 0.5, 0, -0.5, -1]) {
+        const h = hitAt(x + fx * rx * 1.25, y + fy * ry * 1.1);
+        if (h) front = Math.max(front, h.point.z);
+      }
+    }
+    const skin = color === undefined ? hitAt(x - Math.sign(x) * rx * 0.2, y - ry * 1.9) ?? hitAt(x, y - ry * 2.6) : null; // la piel de la mejilla (encima suele haber ceja o pelo)
+    lids.push({ pos: new THREE.Vector3(x, y + ry * 1.1, front + 0.01), rx: rx * 1.3, ry: ry * 2.3,
+      color: color !== undefined ? new THREE.Color(color) : skin?.uv ? sampleTexture(source.material.map, skin.uv) : new THREE.Color(0xf0c8a0) });
+  }
+  source.lids = lids.length ? lids : null;
+  return source.lids;
+}
+
+const LID_GEOMETRY = (() => {
+  const g = new THREE.CircleGeometry(1, 20, 0, Math.PI); // media elipse: el borde recto abajo
+  g.rotateZ(Math.PI); // ahora la parte curva abajo; se colgará del borde de arriba
+  g.translate(0, 0, 0);
+  return g;
+})();
+
+/** Coloca los párpados en el hueso de la cabeza (se mueven con ella). */
+function addEyelids(figure, id, source, headBone) {
+  const lids = eyelidsFor(id, source);
+  if (!lids || !headBone) return [];
+  figure.model.updateMatrixWorld(true);
+  const toBone = new THREE.Matrix4().copy(headBone.matrixWorld).invert().multiply(figure.model.matrixWorld);
+  const boneRot = new THREE.Quaternion();
+  const modelRot = new THREE.Quaternion();
+  headBone.getWorldQuaternion(boneRot);
+  figure.model.getWorldQuaternion(modelRot);
+  const rot = boneRot.invert().multiply(modelRot); // del modelo al hueso
+  const boneScale = headBone.getWorldScale(new THREE.Vector3()).divide(figure.model.getWorldScale(new THREE.Vector3()));
+  return lids.map((l) => {
+    const mesh = new THREE.Mesh(LID_GEOMETRY, new THREE.MeshStandardMaterial({ color: l.color, roughness: 0.6, side: THREE.DoubleSide }));
+    mesh.position.copy(l.pos).applyMatrix4(toBone);
+    mesh.quaternion.copy(rot);
+    mesh.scale.set(l.rx / boneScale.x, 0.001, 1);
+    mesh.userData.full = l.ry / boneScale.y;
+    mesh.visible = false;
+    headBone.add(mesh);
+    return mesh;
+  });
+}
+
+/** Gestos al estar parado un rato (cada uno, una animación corta). */
+const FIDGETS = ['mirar', 'saltito', 'estirarse', 'saludar', 'pie', 'mirar', 'rascarse'];
+
+/**
  * Huesos «virtuales» alineados con los ejes del modelo (x a su izquierda, y arriba, z al frente): la animación gira
  * sus rotation.x/y/z y mueve su position (desplazamiento desde el reposo) como si los huesos no estuvieran girados,
  * y apply() lo pasa al hueso de verdad (los de Blender vienen girados cada uno a lo largo de su eje).
@@ -342,6 +451,10 @@ export class IaFigure {
       real = byName;
     }
     if (real) this.bones = virtualBones(real, this.model);
+    this.lids = real ? addEyelids(this, id, source, real.head) : []; // párpados: parpadean
+    this.blinkAt = 1 + Math.random() * 3;
+    this.lookTarget = 0; // hacia dónde mira la cabeza (relativo al cuerpo): al rival más cercano
+    this.headLook = 0;
 
     this.hand = new THREE.Object3D();
     if (real?.handR) {
@@ -367,6 +480,12 @@ export class IaFigure {
   }
 
   strike() { this.action = { kind: 'strike', t: 0 }; }
+  /** Celebra (ha eliminado a alguien): brazos arriba y saltitos. */
+  celebrate() { this.cheer = { kind: 'celebrar', t: 0 }; }
+  /** Saltito de alegría (ha cogido algo). */
+  hop() { this.cheer = { kind: 'saltito', t: 0 }; }
+  /** La cabeza mira hacia ese ángulo (radianes, relativo al cuerpo; se limita). */
+  lookAt(rel) { this.lookTarget = Math.max(-0.9, Math.min(0.9, rel)); }
   throw() { this.action = { kind: 'throw', t: 0 }; }
   /** Se aplasta un instante (al terminar el dash o al caer del Supersalto). */
   land(k = 1) { this.squash = { t: 0, k }; }
@@ -514,10 +633,49 @@ export class IaFigure {
         }
       }
     }
+    // Vida: parado un rato hace gestos; al celebrar o coger algo, brazos arriba y saltitos
+    const still = !moving && !aiming && !this.action && !dashing;
+    this.idleFor = still ? (this.idleFor ?? 0) + dt : 0;
+    if (!still) this.fidget = null;
+    if (!this.fidget && still && this.idleFor > (this.nextFidget ?? 2.5)) {
+      this.fidget = { kind: FIDGETS[Math.floor(Math.random() * FIDGETS.length)], t: 0 };
+      this.nextFidget = this.idleFor + 3.5 + Math.random() * 4;
+    }
+    let hop = 0;
+    let headYaw = null;
+    let lean2 = 0;
+    let footTap = 0;
+    let gArmL = null; // brazos de los gestos (se aplican después del ajuste del personaje)
+    let gArmR = null;
+    const gesture = this.cheer ?? this.fidget;
+    if (gesture) {
+      gesture.t += dt;
+      const dur = { celebrar: 1.2, saltito: 0.55, mirar: 1.8, estirarse: 1.5, saludar: 1.4, pie: 1.3, rascarse: 1.3 }[gesture.kind];
+      const k = gesture.t / dur;
+      if (k >= 1) {
+        if (gesture === this.cheer) this.cheer = null; else this.fidget = null;
+      } else {
+        const s = Math.sin(k * Math.PI);
+        switch (gesture.kind) {
+          case 'celebrar': if (armsFree) { gArmL = -2.6 * s; gArmR = -2.6 * s; elbowR = 0.3; } hop = Math.abs(Math.sin(k * Math.PI * 3)) * 0.28; break;
+          case 'saltito': hop = s * 0.32; if (armsFree) { gArmL = -0.8 * s; gArmR = -0.8 * s; } break;
+          case 'estirarse': if (armsFree) { gArmL = -2.9 * s; gArmR = -2.9 * s; elbowR = 0.1; } lean2 = -0.18 * s; break;
+          case 'saludar': if (armsFree) { gArmR = -2.8 * s; elbowR = 0.5 + Math.sin(gesture.t * 14) * 0.5 * s; } headYaw = 0.3 * s; break;
+          case 'mirar': headYaw = Math.sin(k * Math.PI * 2) * 0.75; break;
+          case 'pie': footTap = Math.max(0, Math.sin(gesture.t * 15)) * s; break;
+          case 'rascarse': if (armsFree) { gArmR = -2.4 * s; elbowR = 1.9 * s; } headYaw = -0.25 * s; break;
+          default: break;
+        }
+      }
+    }
     const tune = this.tune;
     armL *= tune.armAmp ?? 1;
     armR *= tune.armAmp ?? 1;
     twist *= tune.twistAmp ?? 1;
+    // Los gestos, más amplios que el balanceo (aunque el personaje lo tenga reducido)
+    const gestureAmp = Math.min(1, (tune.armAmp ?? 1) * 2.2);
+    if (gArmL !== null) armL = gArmL * gestureAmp;
+    if (gArmR !== null) armR = gArmR * gestureAmp;
     if (b.upperArmL) {
       b.upperArmL.rotation.x = ease(b.upperArmL.rotation.x, armL, 20);
       b.upperArmL.rotation.z = ease(b.upperArmL.rotation.z, -spread, 12);
@@ -536,18 +694,24 @@ export class IaFigure {
     this.lean = ease(this.lean, leanTarget, 9);
     this.bank = ease(this.bank, bankTarget, 7);
     b.hips.rotation.y = sin * 0.14 * run * this.gait;
-    b.hips.rotation.z = cos * 0.05 * this.gait; // la cadera baja del lado de la pierna que se apoya
+    b.hips.rotation.z = cos * 0.05 * this.gait + (still ? Math.sin(this.time * 0.9) * 0.035 : 0); // cadera; parado, cambia el peso de pierna
+    if (footTap && b.thighR) { b.thighR.rotation.x = -footTap * 0.25; if (b.footR) b.footR.rotation.x = -footTap * 0.6; } // golpecitos con el pie
     b.chest.rotation.y = ease(b.chest.rotation.y, -sin * 0.2 * run * this.gait * (tune.twistAmp ?? 1) + twist, 14);
-    b.spine.rotation.x = ease(b.spine.rotation.x, this.lean * 0.5 + (moving ? 0 : Math.sin(this.time * 2.4) * 0.02), 10);
+    b.spine.rotation.x = ease(b.spine.rotation.x, this.lean * 0.5 + lean2 + (moving ? 0 : Math.sin(this.time * 2.4) * 0.025), 10);
     b.hips.position.y = -Math.abs(cos) * 0.035 * this.gait; // baja al apoyar
     // Cabeza: compensa la inclinación (mira al frente), cabecea un poco y va algo tarde en los giros
     this.headLag = ease(this.headLag ?? 0, bankTarget, 5);
     b.head.rotation.x = ease(b.head.rotation.x, -this.lean * 0.7 + (moving ? Math.sin(ph * 2) * 0.04 * run : Math.sin(this.time * 1.3) * 0.03), 12);
     b.head.rotation.z = -this.headLag * 0.6 + (moving ? 0 : Math.sin(this.time * 0.9) * 0.04);
-    b.head.rotation.y = -this.headLag * 0.8 - twist * 0.4;
+    this.headLook = ease(this.headLook, headYaw ?? this.lookTarget * (moving ? 0.4 : 1), 6); // mira al rival (o a los lados)
+    b.head.rotation.y = -this.headLag * 0.8 - twist * 0.4 + this.headLook;
 
     // Todo el cuerpo: botecito, contoneo de los de cuerpo redondo, inclinación y ladeo
-    this.body.position.y = moving && !dashing ? Math.abs(sin) * (0.04 + 0.04 * run) * this.scale : 0;
+    this.body.position.y = (moving && !dashing ? Math.abs(sin) * (0.04 + 0.04 * run) : 0) * this.scale + hop * this.scale;
+    // Pisada: avisa a quien lo lleva (polvo en el suelo)
+    const foot = Math.sign(sin);
+    if (this.gait > 0.6 && speed > 2.5 && foot !== this.lastFoot) this.stepped = true;
+    this.lastFoot = foot;
     const waddle = rigid ? 0.16 : 0.03;
     this.body.rotation.x = (moving && !dashing ? sin * waddle : 0) + this.bank;
     this.body.rotation.z = -this.lean * 0.6; // el resto lo pone la columna
@@ -566,6 +730,21 @@ export class IaFigure {
     }
     this.model.scale.set(this.scale * sxz, this.scale * sy, this.scale * sxz);
     for (const v of Object.values(b)) v.apply();
+    // Parpadeo: cada 2-6 s (a veces dos seguidos); medio cerrados en el dash y al aterrizar
+    if (this.lids.length) {
+      if (this.time > this.blinkAt) {
+        this.blinkStart = this.time;
+        this.blinkAt = this.time + (Math.random() < 0.2 ? 0.28 : 2 + Math.random() * 4);
+      }
+      const bt = (this.time - (this.blinkStart ?? -9)) / 0.16;
+      let closed = bt >= 0 && bt < 1 ? Math.sin(bt * Math.PI) : 0;
+      if (dashing || this.squash) closed = Math.max(closed, 0.45);
+      if (gesture?.kind === 'estirarse') closed = Math.max(closed, 0.8 * Math.sin(Math.min(1, gesture.t / 1.5) * Math.PI));
+      for (const lid of this.lids) {
+        lid.visible = closed > 0.03;
+        lid.scale.y = Math.max(0.001, closed * lid.userData.full);
+      }
+    }
   }
 
   handWorldPosition(target) {

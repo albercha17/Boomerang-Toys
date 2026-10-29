@@ -307,6 +307,22 @@ export class Character {
     this.lastSpeed = speed;
     this.lastFacing = this.facing;
     this.smoothAccel = (this.smoothAccel ?? 0) + (accel - (this.smoothAccel ?? 0)) * Math.min(1, dt * 10);
+    // Vida: parado, la cabeza mira al rival más cercano; al pisar corriendo, polvillo
+    if (this.figure.lookAt) {
+      let best = null;
+      let bestD = 9;
+      for (const other of this.game.characters.values()) {
+        if (other === this || !other.alive) continue;
+        const d = Math.hypot(other.x - x, other.z - z);
+        if (d < bestD) { bestD = d; best = other; }
+      }
+      const rel = best ? Math.atan2(Math.sin(Math.atan2(best.z - z, best.x - x) - this.facing), Math.cos(Math.atan2(best.z - z, best.x - x) - this.facing)) : 0;
+      this.figure.lookAt(best && Math.abs(rel) < 1.9 ? -rel : 0);
+    }
+    if (this.figure.stepped) {
+      this.figure.stepped = false;
+      if (this.alive && !this.hidden && !this.leap) this.game.effects.dust(x, z);
+    }
     this.figure.animate(dt, this.moving, this.charging, {
       speed: this.isFrozen(now) ? 0 : speed, accel: this.smoothAccel, turn: dt > 0 ? turnDiff / dt : 0, dashing: this.isDashing(now),
     });

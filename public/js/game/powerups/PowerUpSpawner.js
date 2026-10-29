@@ -58,6 +58,7 @@ export class PowerUpSpawner {
         character.addAbility(item.def.id);
         game.effects.burst(item.x, 0.6, item.z, [item.def.color, 0xffffff], 18, 0.6);
       }
+      character.figure.hop?.(); // saltito de alegría
       item.open(now); // se abre (la tapa salta) y luego desaparece
       this.opening.push(item);
     }

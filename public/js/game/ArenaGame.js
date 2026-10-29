@@ -713,6 +713,10 @@ export class ArenaGame {
       return;
     }
     this.debris.burst(victim, angle, now); // antes de ocultar la figura: usa la posición de sus piezas
+    // Quien lo ha eliminado (el dueño del búmerang que lo ha tocado, o el más cercano) lo celebra
+    const near = this.weapons.filter((w) => w.owner && w.owner !== victim && Math.hypot(w.x - victim.x, w.z - victim.z) < 2.5);
+    const winner = near[0]?.owner ?? [...this.characters.values()].filter((c) => c !== victim && c.alive && Math.hypot(c.x - victim.x, c.z - victim.z) < 2.5)[0];
+    winner?.figure.celebrate?.();
     if (victim.weapon) victim.weapon.dropAt(victim.x, victim.z, angle);
     victim.kill(now + RESPAWN_MS);
   }
