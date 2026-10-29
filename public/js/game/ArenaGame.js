@@ -170,6 +170,7 @@ export class ArenaGame {
     for (const character of this.characters.values()) {
       character.hidden = false;
       if (!character.alive || this.frozen || character.falling || character.leap) continue;
+      arena.keepInside?.(character.body);
       const hazard = arena.hazardAt(character.x, character.z);
       if (hazard) {
         this.startFall(character, hazard);

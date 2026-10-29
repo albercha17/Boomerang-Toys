@@ -1,0 +1,649 @@
+{
+  "id": "recreativos",
+  "name": "Recreativos",
+  "theme": "recreativos",
+  "play": true,
+  "note": "Laberinto de neón que cada 10 s cambia de paredes (parpadean antes; las que suben empujan a quien pillan); portales en los lados; máquinas recreativas alrededor. Kits Cozy de sala de juegos y electrónica de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [],
+    "floor": "arcade",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "garras",
+      "model": "maquina_garras",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        1.05,
+        2.4,
+        1.17
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "dado_1",
+      "model": "dado_20",
+      "x": -6.756,
+      "y": 0,
+      "z": -4.6,
+      "rot": 20,
+      "size": [
+        1,
+        0.4,
+        0.6
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "dado_2",
+      "model": "dado_20",
+      "x": 8.356,
+      "y": 0,
+      "z": 3.4,
+      "rot": 20,
+      "size": [
+        1,
+        0.4,
+        0.6
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "cinta_1",
+      "model": "cinta_casete",
+      "x": -10.533,
+      "y": 0,
+      "z": 3.4,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.12,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "cinta_2",
+      "model": "cinta_casete",
+      "x": 12.133,
+      "y": 0,
+      "z": -4.6,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.12,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "mando_1",
+      "model": "mando_consola",
+      "x": -2.978,
+      "y": 0,
+      "z": 7.4,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.3,
+        0.83
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "mando_2",
+      "model": "mando_consola",
+      "x": 4.578,
+      "y": 0,
+      "z": -8.6,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.3,
+        0.83
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "portatil_1",
+      "model": "consola_portatil",
+      "x": -14.311,
+      "y": 0,
+      "z": -4.6,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.15,
+        0.6
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "portatil_2",
+      "model": "consola_portatil",
+      "x": 15.911,
+      "y": 0,
+      "z": 3.4,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.15,
+        0.6
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "arcade_0",
+      "model": "maquina_arcade",
+      "x": -16.8,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_1",
+      "model": "maquina_arcade",
+      "x": -14,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_2",
+      "model": "maquina_arcade",
+      "x": -11.2,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_3",
+      "model": "pinball",
+      "x": -8.4,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.19,
+        3,
+        2.35
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_4",
+      "model": "maquina_arcade",
+      "x": -5.6,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_5",
+      "model": "maquina_arcade",
+      "x": -2.8,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_6",
+      "model": "maquina_arcade",
+      "x": 0,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_7",
+      "model": "pinball",
+      "x": 2.8,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.19,
+        3,
+        2.35
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_8",
+      "model": "maquina_arcade",
+      "x": 5.6,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_9",
+      "model": "maquina_arcade",
+      "x": 8.4,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_10",
+      "model": "maquina_arcade",
+      "x": 11.2,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_11",
+      "model": "pinball",
+      "x": 14,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.19,
+        3,
+        2.35
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arcade_12",
+      "model": "maquina_arcade",
+      "x": 16.8,
+      "y": 0,
+      "z": -12.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.36
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "skee__1",
+      "model": "skee_ball",
+      "x": -19.4,
+      "y": 0,
+      "z": -6,
+      "rot": 90,
+      "size": [
+        0.97,
+        2.8,
+        3.61
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "garras__1",
+      "model": "maquina_garras",
+      "x": -19.4,
+      "y": 0,
+      "z": -1,
+      "rot": 90,
+      "size": [
+        1.31,
+        3,
+        1.46
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "hockey__1",
+      "model": "hockey_aire",
+      "x": -18.8,
+      "y": 0,
+      "z": 4.6,
+      "rot": 90,
+      "size": [
+        4,
+        1.62,
+        2.2
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla__1",
+      "model": "silla_gamer",
+      "x": -19.8,
+      "y": 0,
+      "z": 9.4,
+      "rot": 90,
+      "size": [
+        0.99,
+        1.8,
+        1.17
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "skee_1",
+      "model": "skee_ball",
+      "x": 19.4,
+      "y": 0,
+      "z": -6,
+      "rot": -90,
+      "size": [
+        0.97,
+        2.8,
+        3.61
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "garras_1",
+      "model": "maquina_garras",
+      "x": 19.4,
+      "y": 0,
+      "z": -1,
+      "rot": -90,
+      "size": [
+        1.31,
+        3,
+        1.46
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "hockey_1",
+      "model": "hockey_aire",
+      "x": 18.8,
+      "y": 0,
+      "z": 4.6,
+      "rot": 90,
+      "size": [
+        4,
+        1.62,
+        2.2
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "silla_1",
+      "model": "silla_gamer",
+      "x": 19.8,
+      "y": 0,
+      "z": 9.4,
+      "rot": -90,
+      "size": [
+        0.99,
+        1.8,
+        1.17
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "billar",
+      "model": "billar",
+      "x": -9,
+      "y": 0,
+      "z": 13.6,
+      "rot": 0,
+      "size": [
+        5,
+        1.6,
+        2.85
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "futbolin",
+      "model": "futbolin",
+      "x": 7,
+      "y": 0,
+      "z": 13.4,
+      "rot": 0,
+      "size": [
+        3.4,
+        2.03,
+        2.8
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "tele",
+      "model": "tele_retro",
+      "x": -20.5,
+      "y": 0,
+      "z": -11,
+      "rot": 30,
+      "size": [
+        1.35,
+        2.4,
+        1.08
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "radiocasete",
+      "model": "radiocasete",
+      "x": 20.6,
+      "y": 0,
+      "z": -11.2,
+      "rot": -30,
+      "size": [
+        2.04,
+        1.6,
+        0.6
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "amplificador_1",
+      "model": "amplificador",
+      "x": -20.8,
+      "y": 0,
+      "z": 12,
+      "rot": 20,
+      "size": [
+        1.91,
+        2,
+        1.14
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "amplificador_2",
+      "model": "amplificador",
+      "x": 20.8,
+      "y": 0,
+      "z": 12,
+      "rot": -20,
+      "size": [
+        1.91,
+        2,
+        1.14
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "videoconsola",
+      "model": "videoconsola",
+      "x": 1,
+      "y": 0,
+      "z": 13.2,
+      "rot": 0,
+      "size": [
+        2,
+        0.53,
+        1.53
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cascos",
+      "model": "cascos",
+      "x": 3.6,
+      "y": 0,
+      "z": 13.4,
+      "rot": 0,
+      "size": [
+        1.2,
+        1.32,
+        0.6
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "discoteca",
+      "model": "bola_discoteca",
+      "x": 0,
+      "y": 6.5,
+      "z": -2,
+      "rot": 0,
+      "size": [
+        1.03,
+        1.6,
+        1.03
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "laberinto",
+      "type": "maze",
+      "x": 0,
+      "z": 0,
+      "w": 34,
+      "d": 20,
+      "rot": 0,
+      "cols": 9,
+      "rows": 5,
+      "periodMs": 10000,
+      "warnMs": 1500,
+      "height": 1.8,
+      "open": 0.3,
+      "seed": 80,
+      "color": 2879743
+    },
+    {
+      "id": "portal_i",
+      "type": "portal",
+      "x": -15.111,
+      "z": 0,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "link": "neon"
+    },
+    {
+      "id": "portal_d",
+      "type": "portal",
+      "x": 15.111,
+      "z": 0,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "link": "neon"
+    }
+  ],
+  "spawns": [
+    [
+      -15.711,
+      -7.3
+    ],
+    [
+      14.511,
+      8.7
+    ],
+    [
+      14.511,
+      -7.3
+    ],
+    [
+      -15.711,
+      8.7
+    ],
+    [
+      -0.6,
+      -7.3
+    ],
+    [
+      -0.6,
+      8.7
+    ],
+    [
+      -8.156,
+      0.7
+    ],
+    [
+      6.956,
+      0.7
+    ]
+  ]
+}

@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { THEMES } from './themes.js';
 import { buildPitLiners, buildProceduralBase, roundedPath, tableShape } from './proceduralBase.js';
 import { moverLocal, moverProgress } from './movers.js';
-import { buildDevices, trackDistance } from './devices.js';
+import { buildDevices, trackDistance, mazeDistance } from './devices.js';
 import { buildAmbient } from './ambient.js';
 import { surfaceKind, surfaceMaterial, projectUV } from '../render/surfaces.js';
 
@@ -217,6 +217,35 @@ export function placeMover(def, own = (r) => r) {
   return { pin, roll, angle };
 }
 
+/**
+ * Bordillo alrededor de la zona de juego en los mapas sin paredes: marca dónde acaba (ahí está la pared invisible).
+ * Del estilo del mapa: piedra en la selva y el cementerio, madera en el Oeste y la isla, valla blanca en el mundo
+ * Barbie, ribete de tela en la alfombra, metal en la luna, galleta en las golosinas.
+ */
+const RIMS = {
+  hierba: { color: 0x8f8a7a, h: 0.35, w: 0.45 }, noche: { color: 0x6c6878, h: 0.4, w: 0.45 }, arena: { color: 0x8a5a32, h: 0.4, w: 0.4 },
+  playa: { color: 0x9a6a3c, h: 0.3, w: 0.45 }, rosa: { color: 0xffffff, h: 0.45, w: 0.3 }, alfombra: { color: 0x2f6db5, h: 0.12, w: 0.5 },
+  luna: { color: 0xb8c0cc, h: 0.35, w: 0.4, metal: true }, chocolate: { color: 0xd9a05b, h: 0.4, w: 0.5 }, arcade: { color: 0xff2bd6, h: 0.35, w: 0.3, neon: true },
+};
+function buildRim(root, room, data) {
+  const def = RIMS[room.floor] ?? { color: 0x9a9a9a, h: 0.35, w: 0.4 };
+  const material = new THREE.MeshStandardMaterial({ color: def.color, roughness: def.metal ? 0.35 : 0.8, metalness: def.metal ? 0.6 : 0,
+    emissive: def.neon ? def.color : 0x000000, emissiveIntensity: def.neon ? 1.4 : 0 });
+  const W2 = room.w / 2;
+  const D2 = room.d / 2;
+  const owned = [material];
+  for (const [x, z, w, d] of [[0, -D2 - def.w / 2, room.w + def.w * 2, def.w], [0, D2 + def.w / 2, room.w + def.w * 2, def.w],
+    [-W2 - def.w / 2, 0, def.w, room.d], [W2 + def.w / 2, 0, def.w, room.d]]) {
+    const geometry = new THREE.BoxGeometry(w, def.h, d);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, def.h / 2 - 0.02, z);
+    mesh.castShadow = mesh.receiveShadow = true;
+    root.add(mesh);
+    owned.push(geometry);
+  }
+  return owned;
+}
+
 export function buildSceneMap(stage, physics, layout) {
   const entry = CACHE[layout.sceneMap];
   const data = entry.data;
@@ -323,6 +352,7 @@ export function buildSceneMap(stage, physics, layout) {
     bodies.push(physics.addWall(0, H, D2 + 0.25, W2 + 0.5, H, 0.25)); // delante (invisible: no tapa la vista)
     bodies.push(physics.addWall(-W2 - 0.25, H, 0, 0.25, H, D2 + 0.5));
     bodies.push(physics.addWall(W2 + 0.25, H, 0, 0.25, H, D2 + 0.5));
+    if ((room.walls ?? 'baldosas') === 'ninguna') owned.push(...buildRim(root, room, data)); // borde visible
   } else {
     bodies.push(physics.addFloorBox(0, -t.thickness / 2, 0, t.w / 2, t.thickness / 2, t.d / 2));
   }
@@ -399,7 +429,7 @@ export function buildSceneMap(stage, physics, layout) {
       if (waters.some((w) => inRect(w, x, z, 1.4)) || (room?.pits ?? []).some((p) => inRect(p, x, z, 0.8))) continue;
       if (blockers.some((b) => Math.hypot(b.x - x, b.z - z) < b.r)) continue;
       if (movers.some((m) => onMoverPath(m, x, z))) continue;
-      if ((data.devices ?? []).some((d) => (d.type === 'train' ? trackDistance(d, x, z) < 1.6
+      if ((data.devices ?? []).some((d) => (d.type === 'train' ? trackDistance(d, x, z) < 1.6 : d.type === 'maze' ? mazeDistance(d, x, z) < 1
         : Math.hypot(d.x - x, d.z - z) < Math.max(d.w, d.d) / 2 + 0.8))) continue; // ni encima de artefactos (del tren, solo la vía)
       freePoints.push({ x, z });
     }
@@ -415,6 +445,14 @@ export function buildSceneMap(stage, physics, layout) {
     spawnPoints: data.spawns.map(([x, z]) => ({ x, z })),
     freePoints,
     bounds: { minX: -t.w / 2, maxX: t.w / 2, minZ: -t.d / 2, maxZ: t.d / 2 },
+    /** Habitaciones: devuelve dentro a quien se haya salido (un dash muy fuerte puede atravesar el borde). */
+    keepInside(body) {
+      if (!room) return;
+      const m = 0.45;
+      const x = Math.max(-t.w / 2 + m, Math.min(t.w / 2 - m, body.position.x));
+      const z = Math.max(-t.d / 2 + m, Math.min(t.d / 2 - m, body.position.z));
+      if (x !== body.position.x || z !== body.position.z) body.position.set(x, body.position.y, z);
+    },
     movers,
     bushes,
     devices,
@@ -428,7 +466,8 @@ export function buildSceneMap(stage, physics, layout) {
       if (pool) return pool.lava ? 3 : 2;
       // Hueco sin agua: te caes (con agua, como la bañera, el borde se pisa y lo que ahoga es el agua)
       if ((room?.pits ?? []).some((p) => inRounded(p, x, z) && !waters.some((w) => inRect(p, w.x, w.z)))) return 1;
-      return onArea(x, z) ? 0 : 1;
+      // En una habitación el borde es una pared (visible o no): fuera no se cae; en la mesa, sí
+      return onArea(x, z) || room ? 0 : 1;
     },
 
     bushAt(x, z) {

@@ -1077,5 +1077,185 @@
     "id": "rollo_canela",
     "name": "Rollo de canela",
     "source": "dulces\\rollo_canela.glb"
+  },
+  {
+    "id": "vaso_cepillos",
+    "name": "Vaso de cepillos",
+    "source": "banera\\vaso_cepillos.glb"
+  },
+  {
+    "id": "alfombrilla_bano",
+    "name": "Alfombrilla de baño",
+    "source": "banera\\alfombrilla_bano.glb"
+  },
+  {
+    "id": "bascula",
+    "name": "Báscula",
+    "source": "banera\\bascula.glb"
+  },
+  {
+    "id": "bide",
+    "name": "Bidé",
+    "source": "banera\\bide.glb"
+  },
+  {
+    "id": "dosificador",
+    "name": "Dosificador",
+    "source": "banera\\dosificador.glb"
+  },
+  {
+    "id": "champu",
+    "name": "Bote de champú",
+    "source": "banera\\champu.glb"
+  },
+  {
+    "id": "caja_panuelos",
+    "name": "Caja de pañuelos",
+    "source": "banera\\caja_panuelos.glb"
+  },
+  {
+    "id": "cepillo_pelo",
+    "name": "Cepillo del pelo",
+    "source": "banera\\cepillo_pelo.glb"
+  },
+  {
+    "id": "desatascador",
+    "name": "Desatascador",
+    "source": "banera\\desatascador.glb"
+  },
+  {
+    "id": "jabonera",
+    "name": "Jabonera",
+    "source": "banera\\jabonera.glb"
+  },
+  {
+    "id": "perfume",
+    "name": "Perfume",
+    "source": "banera\\perfume.glb"
+  },
+  {
+    "id": "pastilla_jabon",
+    "name": "Pastilla de jabón",
+    "source": "banera\\pastilla_jabon.glb"
+  },
+  {
+    "id": "toallas",
+    "name": "Toallas",
+    "source": "banera\\toallas.glb"
+  },
+  {
+    "id": "secador",
+    "name": "Secador",
+    "source": "banera\\secador.glb"
+  },
+  {
+    "id": "tarro_crema",
+    "name": "Tarro de crema",
+    "source": "banera\\tarro_crema.glb"
+  },
+  {
+    "id": "pasta_dientes",
+    "name": "Pasta de dientes",
+    "source": "banera\\pasta_dientes.glb"
+  },
+  {
+    "id": "esmaltes",
+    "name": "Esmaltes de uñas",
+    "source": "banera\\esmaltes.glb"
+  },
+  {
+    "id": "secamanos",
+    "name": "Secamanos",
+    "source": "banera\\secamanos.glb"
+  },
+  {
+    "id": "maquina_arcade",
+    "name": "Máquina arcade",
+    "source": "recreativos\\maquina_arcade.glb"
+  },
+  {
+    "id": "maquina_garras",
+    "name": "Máquina de garras",
+    "source": "recreativos\\maquina_garras.glb"
+  },
+  {
+    "id": "pinball",
+    "name": "Pinball",
+    "source": "recreativos\\pinball.glb"
+  },
+  {
+    "id": "skee_ball",
+    "name": "Skee-ball",
+    "source": "recreativos\\skee_ball.glb"
+  },
+  {
+    "id": "hockey_aire",
+    "name": "Hockey de aire",
+    "source": "recreativos\\hockey_aire.glb"
+  },
+  {
+    "id": "billar",
+    "name": "Mesa de billar",
+    "source": "recreativos\\billar.glb"
+  },
+  {
+    "id": "futbolin",
+    "name": "Futbolín",
+    "source": "recreativos\\futbolin.glb"
+  },
+  {
+    "id": "silla_gamer",
+    "name": "Silla gamer",
+    "source": "recreativos\\silla_gamer.glb"
+  },
+  {
+    "id": "bola_discoteca",
+    "name": "Bola de discoteca",
+    "source": "recreativos\\bola_discoteca.glb"
+  },
+  {
+    "id": "radiocasete",
+    "name": "Radiocasete",
+    "source": "recreativos\\radiocasete.glb"
+  },
+  {
+    "id": "tele_retro",
+    "name": "Tele retro",
+    "source": "recreativos\\tele_retro.glb"
+  },
+  {
+    "id": "mando_consola",
+    "name": "Mando de consola",
+    "source": "recreativos\\mando_consola.glb"
+  },
+  {
+    "id": "consola_portatil",
+    "name": "Consola portátil",
+    "source": "recreativos\\consola_portatil.glb"
+  },
+  {
+    "id": "cinta_casete",
+    "name": "Cinta de casete",
+    "source": "recreativos\\cinta_casete.glb"
+  },
+  {
+    "id": "amplificador",
+    "name": "Amplificador",
+    "source": "recreativos\\amplificador.glb"
+  },
+  {
+    "id": "cascos",
+    "name": "Cascos",
+    "source": "recreativos\\cascos.glb"
+  },
+  {
+    "id": "videoconsola",
+    "name": "Videoconsola",
+    "source": "recreativos\\videoconsola.glb"
+  },
+  {
+    "id": "dado_20",
+    "name": "Dado de 20",
+    "source": "recreativos\\dado_20.glb"
   }
 ]

@@ -132,6 +132,7 @@ def material_terreno(nombre, tipo):
         "luna": ((0.55, 0.55, 0.60), (0.36, 0.36, 0.42), (0.20, 0.20, 0.25)),  # polvo lunar con cráteres
         "chocolate": ((0.32, 0.17, 0.09), (0.22, 0.11, 0.06), (0.95, 0.45, 0.65)),  # chocolate con virutas de colores
         "playa": ((0.86, 0.74, 0.50), (0.74, 0.62, 0.40), (0.60, 0.50, 0.34)),  # arena fina de playa
+        "arcade": ((0.05, 0.03, 0.12), (0.04, 0.02, 0.09), (0.3, 0.05, 0.3)),  # moqueta de recreativos (el juego pinta la rejilla)
     }[tipo]
     m = bpy.data.materials.new(nombre)
     m.use_nodes = True
@@ -294,7 +295,7 @@ else:
         poligono.material_index = 0
     fuera = []
     FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba", "alfombra": "madera", "noche": "noche", "luna": "luna",
-             "chocolate": "chocolate", "playa": "mar"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
+             "chocolate": "chocolate", "playa": "mar", "arcade": "arcade"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
     if FUERA and r.get("walls", "baldosas") == "ninguna":  # al aire libre: el terreno sigue más allá de la zona de juego
         bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -0.12, 0))
         f = bpy.context.active_object

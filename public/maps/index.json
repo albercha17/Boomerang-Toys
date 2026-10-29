@@ -82,5 +82,12 @@
     "theme": "dulces",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "recreativos",
+    "name": "Recreativos",
+    "theme": "recreativos",
+    "play": true,
+    "baked": true
   }
 ]

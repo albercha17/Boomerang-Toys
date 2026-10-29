@@ -128,9 +128,267 @@
         3.16
       ],
       "collider": "cylinder"
+    },
+    {
+      "id": "extra_bide",
+      "model": "bide",
+      "x": -5.4,
+      "y": 0,
+      "z": -6.4,
+      "rot": 0,
+      "size": [
+        3.17,
+        3.6,
+        4.63
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "extra_champu",
+      "model": "champu",
+      "x": -1,
+      "y": 0,
+      "z": -2.6,
+      "rot": 0,
+      "size": [
+        1.07,
+        3.2,
+        0.61
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_dosificador",
+      "model": "dosificador",
+      "x": 2,
+      "y": 0,
+      "z": -1.2,
+      "rot": 20,
+      "size": [
+        1.05,
+        2.8,
+        1.23
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_vaso_cepillos",
+      "model": "vaso_cepillos",
+      "x": -13.2,
+      "y": 0,
+      "z": -1.4,
+      "rot": 0,
+      "size": [
+        1.44,
+        3.2,
+        1.44
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_perfume",
+      "model": "perfume",
+      "x": 4.6,
+      "y": 0,
+      "z": 3.4,
+      "rot": 0,
+      "size": [
+        1.8,
+        2.2,
+        1.2
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_panuelos",
+      "model": "caja_panuelos",
+      "x": -5.4,
+      "y": 0,
+      "z": 3.4,
+      "rot": 15,
+      "size": [
+        1.2,
+        1.9,
+        1.2
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "extra_toallas",
+      "model": "toallas",
+      "x": -0.6,
+      "y": 0,
+      "z": 5.6,
+      "rot": 0,
+      "size": [
+        2.6,
+        1.03,
+        1.92
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "extra_jabonera",
+      "model": "jabonera",
+      "x": 11,
+      "y": 0,
+      "z": 4.4,
+      "rot": 0,
+      "size": [
+        1.92,
+        2.6,
+        1.23
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_desatascador",
+      "model": "desatascador",
+      "x": -7.2,
+      "y": 0,
+      "z": -1.2,
+      "rot": 0,
+      "size": [
+        0.86,
+        3.2,
+        0.86
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_crema",
+      "model": "tarro_crema",
+      "x": 6.6,
+      "y": 0,
+      "z": 7.2,
+      "rot": 0,
+      "size": [
+        3.9,
+        1.3,
+        2.34
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "extra_secamanos",
+      "model": "secamanos",
+      "x": 13.6,
+      "y": 0,
+      "z": 2.2,
+      "rot": -90,
+      "size": [
+        2.12,
+        2.2,
+        1.3
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "extra_bascula",
+      "model": "bascula",
+      "x": -3.6,
+      "y": 0,
+      "z": 7.6,
+      "rot": 10,
+      "size": [
+        2.6,
+        0.52,
+        2.69
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "extra_alfombrilla",
+      "model": "alfombrilla_bano",
+      "x": 5.4,
+      "y": 0,
+      "z": -1.6,
+      "rot": 0,
+      "size": [
+        3.6,
+        0.14,
+        2.25
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "extra_jabon",
+      "model": "pastilla_jabon",
+      "x": 1.4,
+      "y": 0,
+      "z": 1,
+      "rot": 0,
+      "size": [
+        1.2,
+        0.46,
+        0.83
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "extra_pasta",
+      "model": "pasta_dientes",
+      "x": -2.6,
+      "y": 0,
+      "z": 0.8,
+      "rot": 30,
+      "size": [
+        1.6,
+        0.24,
+        0.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "extra_esmaltes",
+      "model": "esmaltes",
+      "x": 8.6,
+      "y": 0,
+      "z": 3,
+      "rot": 0,
+      "size": [
+        1.2,
+        1.2,
+        1.54
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "extra_cepillo",
+      "model": "cepillo_pelo",
+      "x": 10.4,
+      "y": 0,
+      "z": -1.2,
+      "rot": -20,
+      "size": [
+        1.8,
+        0.3,
+        0.6
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "extra_secador",
+      "model": "secador",
+      "x": -7,
+      "y": 0,
+      "z": 6.8,
+      "rot": 40,
+      "size": [
+        1.6,
+        1.14,
+        1.14
+      ],
+      "collider": "box",
+      "loose": true
     }
   ],
   "movers": [],
+  "devices": [],
   "spawns": [
     [
       -9,

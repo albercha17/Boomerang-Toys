@@ -156,6 +156,13 @@ export const THEMES = Object.freeze({
     blocks: [0xff5fa2, 0xffb3d9, 0xc77dff, 0x80ffdb, 0xffd166, 0xffffff],
     props: ['cojin'],
   },
+  recreativos: {
+    id: 'recreativos', name: 'Recreativos',
+    background: 0x07040f,
+    sky: 0x9a7cff, ground: 0x1a0a2a, sun: 0.9,
+    blocks: [0xff2bd6, 0x2bf0ff, 0xffe62b, 0x7cff4f, 0xff7a2b, 0xffffff],
+    props: ['pelota'],
+  },
   piratas: {
     id: 'piratas', name: 'Isla pirata',
     background: 0x7fd3f0,

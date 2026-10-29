@@ -9,6 +9,8 @@ import * as THREE from 'three';
  *             se puede pisar aunque debajo haya un hueco o el vacío
  *   jump      trampolín: te lanza por el aire hasta target [x, z] (height, durationMs)
  *   portal    portal: te lleva al otro portal con el mismo `link` (y a los búmerangs que vuelan)
+ *   maze      laberinto: paredes en una cuadrícula cols × rows que cada `periodMs` cambian a otro laberinto (las
+ *             que sobran se hunden, las nuevas suben; parpadean `warnMs` antes); height, color, open, seed
  *   train     tren de juguete: da vueltas por una vía (w × d, esquinas de radio `radius`) a `speed` y atropella;
  *             cars = modelos de la biblioteca (el primero, la locomotora), carLength, flip (si van del revés)
  * buildDevices monta lo que se ve y la física; la partida llama a update (animación y estado) y a affect (lo que
@@ -246,6 +248,146 @@ function updateTrain(d, now) {
   });
 }
 
+/** Generador de números con semilla (mulberry32): el mismo laberinto para la misma vuelta. */
+function seeded(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Tramos de pared posibles de un laberinto de cols × rows casillas (sin el borde): verticales entre una casilla y
+ * la de su derecha, horizontales entre una y la de abajo. Cada uno con su centro, largo y orientación (local).
+ */
+function mazeSegments(def) {
+  const cw = def.w / def.cols;
+  const ch = def.d / def.rows;
+  const segs = [];
+  for (let i = 0; i < def.cols - 1; i++) {
+    for (let j = 0; j < def.rows; j++) segs.push({ a: [i, j], b: [i + 1, j], u: -def.w / 2 + (i + 1) * cw, v: -def.d / 2 + (j + 0.5) * ch, len: ch, vertical: true });
+  }
+  for (let i = 0; i < def.cols; i++) {
+    for (let j = 0; j < def.rows - 1; j++) segs.push({ a: [i, j], b: [i, j + 1], u: -def.w / 2 + (i + 0.5) * cw, v: -def.d / 2 + (j + 1) * ch, len: cw, vertical: false });
+  }
+  return segs;
+}
+
+/** Qué tramos están levantados en la vuelta `epoch`: un laberinto (todo conectado) con algunos huecos de más. */
+function mazeLayout(def, segs, epoch) {
+  const rand = seeded((def.seed ?? 7) * 7919 + epoch * 104729);
+  const { cols, rows } = def;
+  const key = (i, j) => j * cols + i;
+  const wallOf = new Map(segs.map((s, k) => [`${key(...s.a)}-${key(...s.b)}`, k]));
+  const up = new Array(segs.length).fill(true);
+  const seen = new Set([key(Math.floor(rand() * cols), Math.floor(rand() * rows))]);
+  const stack = [[...seen][0]];
+  while (stack.length) { // recorrido en profundidad: tira paredes hasta que todo está conectado
+    const c = stack[stack.length - 1];
+    const i = c % cols;
+    const j = Math.floor(c / cols);
+    const next = [[i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]].filter(([x, y]) => x >= 0 && y >= 0 && x < cols && y < rows && !seen.has(key(x, y)));
+    if (!next.length) { stack.pop(); continue; }
+    const [x, y] = next[Math.floor(rand() * next.length)];
+    const n = key(x, y);
+    up[wallOf.get(c < n ? `${c}-${n}` : `${n}-${c}`)] = false;
+    seen.add(n);
+    stack.push(n);
+  }
+  const open = def.open ?? 0.35; // y quita algunas más: varios caminos, mejor para pelear
+  for (let k = 0; k < up.length; k++) if (up[k] && rand() < open) up[k] = false;
+  return up;
+}
+
+function buildMaze(dev, def, own, physics) {
+  const segs = mazeSegments(def);
+  const h = def.height ?? 1.8;
+  const thick = 0.4;
+  const neon = new THREE.Color(def.color ?? 0x2bf0ff);
+  const body = new THREE.InstancedMesh(own(new THREE.BoxGeometry(1, 1, 1)),
+    own(new THREE.MeshStandardMaterial({ color: 0x1a1030, roughness: 0.35, metalness: 0.3, emissive: 0x2a0a4a, emissiveIntensity: 0.6 })), segs.length);
+  const strip = new THREE.InstancedMesh(own(new THREE.BoxGeometry(1, 1, 1)),
+    own(new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })), segs.length * 2); // sin luz: el color de cada tramo brilla
+  strip.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(segs.length * 2 * 3).fill(1), 3);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  dev.group.add(body, strip);
+  dev.segs = segs.map((s) => ({ ...s, rise: 0, target: 0, bodyOn: true,
+    body: (() => {
+      const w = toWorld(def, s.u, s.v);
+      const rot = (def.rot ?? 0) * DEG + (s.vertical ? Math.PI / 2 : 0);
+      return { w, rot, half: [s.len / 2 + thick / 2, h / 2, thick / 2] };
+    })() }));
+  for (const s of dev.segs) s.physics = physics.addWall(s.body.w.x, h / 2, s.body.w.z, ...s.body.half, s.body.rot); // se quitan los bajados al empezar
+  dev.mazeMeshes = { body, strip };
+  dev.mazeH = h;
+  dev.thick = thick;
+  dev.epoch = -1;
+  dev.neon = neon;
+}
+
+/** Cada `periodMs`, laberinto nuevo: lo que sobra se hunde y lo nuevo sube; antes, parpadea lo que va a cambiar. */
+function updateMaze(d, now, dt, physics) {
+  const period = d.periodMs ?? 10000;
+  const warn = d.warnMs ?? 1500;
+  const epoch = Math.floor(now / period);
+  if (epoch !== d.epoch) {
+    d.epoch = epoch;
+    const up = mazeLayout(d, d.segs, epoch);
+    const next = mazeLayout(d, d.segs, epoch + 1);
+    d.segs.forEach((s, k) => { s.target = up[k] ? 1 : 0; s.next = next[k] ? 1 : 0; });
+  }
+  const warning = now % period > period - warn;
+  const blink = warning && Math.floor(now / 120) % 2 === 0;
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const yAxis = new THREE.Vector3(0, 1, 0);
+  const c = new THREE.Color();
+  const { body, strip } = d.mazeMeshes;
+  d.segs.forEach((s, k) => {
+    s.rise += (s.target - s.rise) * Math.min(1, dt * 6);
+    const y = -d.mazeH / 2 - 0.05 + s.rise * (d.mazeH + 0.05);
+    q.setFromAxisAngle(yAxis, s.vertical ? Math.PI / 2 : 0);
+    body.setMatrixAt(k, m.compose(new THREE.Vector3(s.u, y, s.v), q, new THREE.Vector3(s.len + d.thick, d.mazeH, d.thick)));
+    // Ribetes de neón arriba (en las dos caras); en el aviso parpadean los que van a cambiar
+    const changes = s.next !== s.target;
+    const glow = changes && blink ? 0.15 : 1;
+    c.copy(d.neon).multiplyScalar(glow);
+    if (changes && warning && !s.target) c.setRGB(blink ? 1 : 0.4, blink ? 0.9 : 0.35, 0.1); // va a subir: aviso amarillo en el suelo
+    for (const side of [-1, 1]) {
+      const off = new THREE.Vector3(0, 0, side * (d.thick / 2 + 0.01)).applyQuaternion(q);
+      const sy = s.target || !warning ? y + d.mazeH / 2 - 0.08 : 0.03;
+      strip.setMatrixAt(k * 2 + (side > 0 ? 1 : 0), m.compose(new THREE.Vector3(s.u + off.x, sy, s.v + off.z), q,
+        new THREE.Vector3(s.len + d.thick, 0.06, 0.04)));
+      strip.setColorAt(k * 2 + (side > 0 ? 1 : 0), c);
+    }
+    const solid = s.rise > 0.5;
+    if (solid && !s.bodyOn) { physics.add(s.physics); s.bodyOn = true; s.justRose = true; } else if (!solid && s.bodyOn) { physics.remove(s.physics); s.bodyOn = false; }
+  });
+  body.instanceMatrix.needsUpdate = true;
+  strip.instanceMatrix.needsUpdate = true;
+  strip.instanceColor.needsUpdate = true;
+}
+
+/** ¿Está el punto encima de algún tramo posible del laberinto? (para no poner allí power-ups ni apariciones) */
+export function mazeDistance(def, x, z) {
+  const { u, v } = local(def, x, z);
+  if (Math.abs(u) > def.w / 2 + 0.5 || Math.abs(v) > def.d / 2 + 0.5) return Infinity;
+  const cw = def.w / def.cols;
+  const ch = def.d / def.rows;
+  const fu = (u + def.w / 2) / cw;
+  const fv = (v + def.d / 2) / ch;
+  const du = Math.abs(fu - Math.round(fu)) * cw;
+  const dv = Math.abs(fv - Math.round(fv)) * ch;
+  const inU = Math.round(fu) > 0 && Math.round(fu) < def.cols;
+  const inV = Math.round(fv) > 0 && Math.round(fv) < def.rows;
+  return Math.min(inU ? du : Infinity, inV ? dv : Infinity);
+}
+
 const PORTAL_COLORS = [0x9b5de5, 0x00b4c6, 0xff7f11, 0x2bb673, 0xe63946];
 
 export function buildDevices(root, physics, list, own, models = {}) {
@@ -336,6 +478,8 @@ export function buildDevices(root, physics, list, own, models = {}) {
       dev.color = color;
     } else if (def.type === 'train') {
       buildTrain(dev, def, own, models);
+    } else if (def.type === 'maze') {
+      buildMaze(dev, def, own, physics);
     }
     if (def.type === 'door') {
       dev.body = physics.addWall(def.x, (dev.height) / 2, def.z, def.w / 2, dev.height / 2, def.d / 2, (def.rot ?? 0) * DEG);
@@ -356,6 +500,7 @@ export function buildDevices(root, physics, list, own, models = {}) {
       for (const d of devices) {
         if (d.type === 'conveyor') d.texture.offset.x -= (d.speed ?? 3.5) * dt / 1.2;
         else if (d.type === 'train') updateTrain(d, now);
+        else if (d.type === 'maze') updateMaze(d, now, dt, physics);
         else if (d.type === 'portal') d.swirl.rotation.z += dt * 2.5;
         else if (d.type === 'jump') d.top.position.y += (0.26 - d.top.position.y) * Math.min(1, dt * 8);
         else if (d.type === 'door') {
@@ -399,6 +544,26 @@ export function buildDevices(root, physics, list, own, models = {}) {
           for (const c of chars) if (inside(d, c.x, c.z)) { c.body.position.x += dir.x * step; c.body.position.z += dir.z * step; }
           for (const w of game.weapons) if (w.state === 'ground' && inside(d, w.x, w.z)) { w.body.position.x += dir.x * step; w.body.position.z += dir.z * step; }
           for (const p of game.arena.props ?? []) if (inside(d, p.body.position.x, p.body.position.z)) { p.body.position.x += dir.x * step; p.body.position.z += dir.z * step; p.body.wakeUp?.(); }
+        } else if (d.type === 'maze') {
+          // A quien le sube una pared debajo, la pared lo empuja al lado más cercano
+          for (const s of d.segs) {
+            if (!s.bodyOn) continue;
+            for (const c of chars) {
+              const { u, v } = local(d, c.x, c.z);
+              const du = u - s.u;
+              const dv = v - s.v;
+              const along = s.vertical ? dv : du;
+              const across = s.vertical ? du : dv;
+              const reach = d.thick / 2 + c.def.radius;
+              if (Math.abs(along) > s.len / 2 + d.thick / 2 || Math.abs(across) >= reach) continue;
+              const push = (across >= 0 ? 1 : -1) * (reach + 0.02) - across;
+              const pu = s.vertical ? push : 0;
+              const pv = s.vertical ? 0 : push;
+              const a = (d.rot ?? 0) * DEG;
+              c.body.position.x += pu * Math.cos(a) + pv * Math.sin(a);
+              c.body.position.z += -pu * Math.sin(a) + pv * Math.cos(a);
+            }
+          }
         } else if (d.type === 'train') {
           // Atropella a quien pilla un vagón (quien va por el aire, saltando, se libra)
           for (const c of chars) {
@@ -448,6 +613,7 @@ export function buildDevices(root, physics, list, own, models = {}) {
 
     dispose() {
       for (const d of devices) if (d.body && d.bodyOn) physics.remove(d.body);
+      for (const d of devices) for (const s of d.segs ?? []) if (s.bodyOn) physics.remove(s.physics);
     },
   };
   // Las puertas empiezan con su pared puesta

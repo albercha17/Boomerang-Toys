@@ -18,6 +18,7 @@
  *       (style: 'piedra' = de piedra con musgo; sin style, la puerta roja y la pasarela de tablas)
  *       jump { target: [x, z], height, durationMs } · portal { link } (dos portales con el mismo link)
  *       train { radius, speed, cars: [modelo...], carLength, flip }   tren que da vueltas por su vía (w × d) y atropella
+ *       maze { cols, rows, periodMs, warnMs, height, open, seed, color }   laberinto que cambia de paredes
  *     spawns: [[x, z], ...] }
  */
 (function (root, factory) {
@@ -28,8 +29,8 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto', 'halloween', 'piratas', 'espacio', 'dulces'];
-  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra', 'noche', 'luna', 'chocolate', 'playa'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto', 'halloween', 'piratas', 'espacio', 'dulces', 'recreativos'];
+  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra', 'noche', 'luna', 'chocolate', 'playa', 'arcade'];
   const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
   const round = (v) => Math.round(num(v) * 1000) / 1000;
@@ -91,7 +92,7 @@
         periodMs: Math.max(1000, Math.round(num(m.periodMs, 7000))), pauseMs: Math.max(0, Math.round(num(m.pauseMs, 900))) });
     }
     out.movers = movers;
-    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train'];
+    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train', 'maze'];
     out.devices = (data.devices ?? []).filter((d) => DEVICE_TYPES.includes(d.type)).map((d) => {
       const dev = { id: uniqueId(d.id ?? d.type), type: d.type, x: round(d.x), z: round(d.z), w: Math.max(0.3, round(num(d.w, 2))), d: Math.max(0.3, round(num(d.d, 2))), rot: round(d.rot) };
       if (d.type === 'conveyor') dev.speed = round(num(d.speed, 3.5));
@@ -100,6 +101,11 @@
       if (d.type === 'jump') Object.assign(dev, { target: (d.target ?? [d.x + 6, d.z]).slice(0, 2).map(round), height: round(num(d.height, 3.5)), durationMs: Math.round(num(d.durationMs, 800)) });
       if (d.type === 'portal') dev.link = String(d.link ?? 'a').slice(0, 20);
       if ((d.type === 'door' || d.type === 'fragile') && d.style === 'piedra') dev.style = 'piedra';
+      if (d.type === 'maze') {
+        Object.assign(dev, { cols: Math.max(2, Math.min(16, Math.round(num(d.cols, 8)))), rows: Math.max(2, Math.min(12, Math.round(num(d.rows, 5)))),
+          periodMs: Math.max(3000, Math.round(num(d.periodMs, 10000))), warnMs: Math.max(0, Math.round(num(d.warnMs, 1500))),
+          height: round(num(d.height, 1.8)), open: Math.max(0, Math.min(0.9, round(num(d.open, 0.35)))), seed: Math.round(num(d.seed, 7)), color: Math.round(num(d.color, 0x2bf0ff)) });
+      }
       if (d.type === 'train') {
         Object.assign(dev, { radius: round(num(d.radius, Math.min(dev.w, dev.d) / 2)), speed: round(num(d.speed, 4)), carLength: Math.max(0.5, round(num(d.carLength, 2.2))),
           cars: (Array.isArray(d.cars) && d.cars.length ? d.cars : ['locomotora', 'vagon_cisterna', 'vagon_tolva', 'furgon_cola']).map(String).slice(0, 12) });
