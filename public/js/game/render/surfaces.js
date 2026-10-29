@@ -11,6 +11,9 @@ const KINDS = {
   hierba: { tile: 3.5, tint: 0xbfe8a0, rough: 1 },
   arena: { tile: 4, tint: 0xf0dcc4, rough: 1 },
   playa: { tile: 4, tint: 0xfff0d0, rough: 1 },
+  nieve: { tile: 4, tint: 0xf4f8ff, rough: 0.9, gain: 1.15 },
+  empedrado: { tile: 3, tint: 0xf2e6d4, rough: 0.9, gain: 1.2 },
+  feria: { tile: 3, tint: 0xffd9b8, rough: 0.85, gain: 1.35 },
   arena_rosa: { dir: 'playa', tile: 4, tint: 0xffc2dc, rough: 1 }, // alrededor del mundo Barbie (`dir`: carpeta de otra textura)
   noche: { tile: 4, tint: 0x6b7f96, rough: 1 },
   luna: { tile: 5, tint: 0xd8d8e4, rough: 1 },
@@ -27,7 +30,7 @@ export function surfaceKind(name, data) {
   const floor = data.room?.floor ?? 'baldosas';
   if (/tablero|pata/.test(name)) return 'mesa';
   if (/pared/.test(name)) return 'azulejo_pared';
-  if (/fuera/.test(name)) return { arena: 'arena', hierba: 'hierba', rosa: 'arena_rosa', alfombra: 'parquet', noche: 'noche', luna: 'luna', chocolate: 'chocolate', playa: 'mar', arcade: 'arcade' }[floor] ?? null;
+  if (/fuera/.test(name)) return { arena: 'arena', hierba: 'hierba', rosa: 'arena_rosa', alfombra: 'parquet', noche: 'noche', luna: 'luna', chocolate: 'chocolate', playa: 'mar', arcade: 'arcade', nieve: 'nieve', empedrado: 'hierba', feria: 'hierba' }[floor] ?? null;
   if (/suelo/.test(name)) return data.room ? floor : 'baldosas';
   return null;
 }

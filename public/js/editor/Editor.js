@@ -14,7 +14,7 @@ const { normalizeMap, emptyMap, ID_PATTERN, THEMES } = window.MapFormat;
 const DEG = Math.PI / 180;
 const r2 = (v) => Math.round(v * 100) / 100;
 const normDeg = (d) => r2(((((d + 180) % 360) + 360) % 360) - 180);
-const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca', cuarto: 'Cuarto de juegos', halloween: 'Halloween', piratas: 'Isla pirata', espacio: 'Base lunar', dulces: 'Golosinas', recreativos: 'Recreativos' };
+const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca', cuarto: 'Cuarto de juegos', halloween: 'Halloween', piratas: 'Isla pirata', espacio: 'Base lunar', dulces: 'Golosinas', recreativos: 'Recreativos', invierno: 'Pueblo nevado', castillo: 'Castillo', feria: 'Feria' };
 const FLOOR_NAMES = { baldosas: 'Baldosas', rosa: 'Baldosas rosas', arena: 'Arena (desierto)', hierba: 'Hierba' };
 const WALL_NAMES = { baldosas: 'Alicatadas', ninguna: 'Ninguna (al aire libre)' };
 const COLLIDERS = { box: 'Caja', cylinder: 'Cilindro', none: 'Ninguno (se atraviesa)' };
@@ -566,6 +566,8 @@ export class Editor {
     const [x, z] = this.viewCenter();
     const base = { conveyor: { w: 6, d: 2.2, speed: 3.5 }, door: { w: 4, d: 0.5, openMs: 2500, closedMs: 2500, offsetMs: 0, height: 2.6 },
       fragile: { w: 5, d: 2.2, shakeMs: 600, respawnMs: 5000 }, jump: { w: 2, d: 2, target: [r2(x + 6), z], height: 3.5, durationMs: 800 }, portal: { w: 2, d: 2 },
+      ice: { w: 6, d: 4, grip: 0.08, round: 1 }, spikes: { w: 2, d: 2, downMs: 2200, warnMs: 700, upMs: 1200, offsetMs: 0 },
+      spinner: { w: 8, d: 8, radius: 4, speed: 1.4, arms: 2, height: 0.55, color: 0xff4d6d },
       maze: { w: 16, d: 10, cols: 5, rows: 3, periodMs: 10000, warnMs: 1500, height: 1.8, open: 0.35, seed: 7, color: 0x2bf0ff },
       train: { w: 14, d: 8, radius: 3, speed: 4, carLength: 2.6, cars: ['locomotora', 'vagon_cisterna', 'vagon_tolva', 'furgon_cola'] } }[type];
     const added = [];
@@ -802,6 +804,9 @@ export class Editor {
         door: ['Puerta', 'Sube y baja sola: cerrada es una pared, también para los búmerangs. Primero está cerrada y luego abierta.'],
         fragile: ['Pasarela que se cae', 'Se puede pisar aunque debajo haya un hueco o el vacío. Al pisarla tiembla, se cae y vuelve a salir.'],
         jump: ['Trampolín', 'Lanza por el aire hasta el punto rosa (arrástralo), por encima de todo.'],
+        ice: ['Hielo', 'Quien lo pisa resbala: tarda en arrancar, frenar y girar.'],
+        spikes: ['Pinchos', 'Salen del suelo, asoman un momento como aviso y luego matan. Varios con distinto desfase se turnan.'],
+        spinner: ['Brazo giratorio', 'Barre el suelo dando vueltas y tumba a quien pilla. Se salta con un trampolín o se esquiva.'],
         maze: ['Laberinto', 'Paredes en cuadrícula que cada cierto tiempo cambian a otro laberinto (parpadean antes de cambiar). Estíralo para cubrir más zona.'],
         train: ['Tren', 'Da vueltas por su vía (estírala con la escala o con largo y ancho) y atropella a quien pilla. Se cruza entre vagón y vagón, o saltando.'],
         portal: ['Portal', 'Lleva al otro portal con el mismo enlace (y a los búmerangs que vuelan). Cambia el enlace para emparejarlo con otro.'],
@@ -832,6 +837,21 @@ export class Editor {
         form.number('Duración (s)', it.durationMs / 1000, 0.1, (v) => set({ durationMs: Math.max(200, Math.round(v * 1000)) }));
       }
       if (it.type === 'portal') form.text('Enlace', it.link, (v) => set({ link: v.slice(0, 20) || it.link }));
+      if (it.type === 'ice') {
+        form.number('Agarre (0-1)', it.grip, 0.02, (v) => set({ grip: Math.max(0.01, Math.min(1, v)) }), 'Menos = resbala más');
+        form.double('Agujero (ancho y fondo)', [it.holeW ?? 0, it.holeD ?? 0], 0.2, (v) => set({ holeW: Math.max(0, v[0]), holeD: Math.max(0, v[1]) }));
+      }
+      if (it.type === 'spikes') {
+        form.number('Abajo (s)', it.downMs / 1000, 0.2, (v) => set({ downMs: Math.max(300, Math.round(v * 1000)) }));
+        form.number('Aviso (s)', it.warnMs / 1000, 0.1, (v) => set({ warnMs: Math.max(0, Math.round(v * 1000)) }));
+        form.number('Arriba (s)', it.upMs / 1000, 0.2, (v) => set({ upMs: Math.max(200, Math.round(v * 1000)) }));
+        form.number('Desfase (s)', it.offsetMs / 1000, 0.2, (v) => set({ offsetMs: Math.round(v * 1000) }), 'Para que varios se turnen');
+      }
+      if (it.type === 'spinner') {
+        form.number('Largo del brazo', it.radius, 0.5, (v) => set({ radius: Math.max(1, v) }));
+        form.number('Velocidad (vueltas/s × 6,3)', it.speed, 0.1, (v) => set({ speed: v }), 'Negativo: al revés');
+        form.number('Brazos', it.arms, 1, (v) => set({ arms: Math.max(1, Math.min(4, Math.round(v))) }));
+      }
       if (it.type === 'maze') {
         form.number('Columnas', it.cols, 1, (v) => set({ cols: Math.max(2, Math.round(v)) }));
         form.number('Filas', it.rows, 1, (v) => set({ rows: Math.max(2, Math.round(v)) }));

@@ -156,6 +156,27 @@ export const THEMES = Object.freeze({
     blocks: [0xff5fa2, 0xffb3d9, 0xc77dff, 0x80ffdb, 0xffd166, 0xffffff],
     props: ['cojin'],
   },
+  invierno: {
+    id: 'invierno', name: 'Pueblo nevado',
+    background: 0xbfdcf0,
+    sky: 0xf2f8ff, ground: 0x9fb8cc, sun: 1.7,
+    blocks: [0xe63946, 0x2a9d8f, 0xf4a261, 0xffffff, 0x457b9d, 0xffd166],
+    props: ['pelota'],
+  },
+  castillo: {
+    id: 'castillo', name: 'Asedio al castillo',
+    background: 0xa8d8ff,
+    sky: 0xfff6e8, ground: 0x6b8f4e, sun: 1.9,
+    blocks: [0xc0392b, 0x2e86c1, 0xf1c40f, 0x7f8c8d, 0x8e5a2b, 0xffffff],
+    props: ['naranja'],
+  },
+  feria: {
+    id: 'feria', name: 'La feria',
+    background: 0xffd7a8,
+    sky: 0xfff4e4, ground: 0x7aa85a, sun: 1.85,
+    blocks: [0xff4d6d, 0x4dabf7, 0xffd43b, 0x69db7c, 0xb197fc, 0xffffff],
+    props: ['pelota'],
+  },
   recreativos: {
     id: 'recreativos', name: 'Recreativos',
     background: 0x07040f,

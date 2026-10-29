@@ -19,6 +19,7 @@
  *       jump { target: [x, z], height, durationMs } · portal { link } (dos portales con el mismo link)
  *       train { radius, speed, cars: [modelo...], carLength, flip }   tren que da vueltas por su vía (w × d) y atropella
  *       maze { cols, rows, periodMs, warnMs, height, open, seed, color }   laberinto que cambia de paredes
+ *       ice { grip, round, holeW, holeD, holeRound } · spikes { downMs, warnMs, upMs, offsetMs } · spinner { radius, speed, arms, height, color }
  *     spawns: [[x, z], ...] }
  */
 (function (root, factory) {
@@ -29,8 +30,8 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto', 'halloween', 'piratas', 'espacio', 'dulces', 'recreativos'];
-  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra', 'noche', 'luna', 'chocolate', 'playa', 'arcade'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto', 'halloween', 'piratas', 'espacio', 'dulces', 'recreativos', 'invierno', 'castillo', 'feria'];
+  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra', 'noche', 'luna', 'chocolate', 'playa', 'arcade', 'nieve', 'empedrado', 'feria'];
   const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
   const round = (v) => Math.round(num(v) * 1000) / 1000;
@@ -92,7 +93,7 @@
         periodMs: Math.max(1000, Math.round(num(m.periodMs, 7000))), pauseMs: Math.max(0, Math.round(num(m.pauseMs, 900))) });
     }
     out.movers = movers;
-    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train', 'maze'];
+    const DEVICE_TYPES = ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train', 'maze', 'ice', 'spikes', 'spinner'];
     out.devices = (data.devices ?? []).filter((d) => DEVICE_TYPES.includes(d.type)).map((d) => {
       const dev = { id: uniqueId(d.id ?? d.type), type: d.type, x: round(d.x), z: round(d.z), w: Math.max(0.3, round(num(d.w, 2))), d: Math.max(0.3, round(num(d.d, 2))), rot: round(d.rot) };
       if (d.type === 'conveyor') dev.speed = round(num(d.speed, 3.5));
@@ -101,6 +102,12 @@
       if (d.type === 'jump') Object.assign(dev, { target: (d.target ?? [d.x + 6, d.z]).slice(0, 2).map(round), height: round(num(d.height, 3.5)), durationMs: Math.round(num(d.durationMs, 800)) });
       if (d.type === 'portal') dev.link = String(d.link ?? 'a').slice(0, 20);
       if ((d.type === 'door' || d.type === 'fragile') && d.style === 'piedra') dev.style = 'piedra';
+      if (d.type === 'ice') Object.assign(dev, { grip: Math.max(0.01, Math.min(1, round(num(d.grip, 0.08)))), round: round(num(d.round, 1)),
+        holeW: Math.max(0, round(num(d.holeW, 0))), holeD: Math.max(0, round(num(d.holeD, 0))), holeRound: round(num(d.holeRound, 0.8)) });
+      if (d.type === 'spikes') Object.assign(dev, { downMs: Math.max(300, Math.round(num(d.downMs, 2200))), warnMs: Math.max(0, Math.round(num(d.warnMs, 700))),
+        upMs: Math.max(200, Math.round(num(d.upMs, 1200))), offsetMs: Math.round(num(d.offsetMs, 0)) });
+      if (d.type === 'spinner') Object.assign(dev, { radius: round(num(d.radius, Math.min(dev.w, dev.d) / 2)), speed: round(num(d.speed, 1.4)),
+        arms: Math.max(1, Math.min(4, Math.round(num(d.arms, 2)))), height: round(num(d.height, 0.55)), color: Math.round(num(d.color, 0xff4d6d)) });
       if (d.type === 'maze') {
         Object.assign(dev, { cols: Math.max(2, Math.min(16, Math.round(num(d.cols, 8)))), rows: Math.max(2, Math.min(12, Math.round(num(d.rows, 5)))),
           periodMs: Math.max(3000, Math.round(num(d.periodMs, 10000))), warnMs: Math.max(0, Math.round(num(d.warnMs, 1500))),

@@ -32,7 +32,7 @@ $('add-mover').addEventListener('click', () => editor.addMover());
 $('add-spawn').addEventListener('click', () => editor.addSpawn());
 $('add-water').addEventListener('click', () => editor.addWater());
 $('add-pit').addEventListener('click', () => editor.addPit());
-for (const type of ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train', 'maze']) $(`add-${type}`).addEventListener('click', () => editor.addDevice(type));
+for (const type of ['conveyor', 'door', 'fragile', 'jump', 'portal', 'train', 'maze', 'ice', 'spikes', 'spinner']) $(`add-${type}`).addEventListener('click', () => editor.addDevice(type));
 window.addEventListener('resize', () => stage.resize());
 window.addEventListener('beforeunload', (e) => { if (editor.dirty) e.preventDefault(); });
 

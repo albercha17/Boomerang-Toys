@@ -1,0 +1,818 @@
+{
+  "id": "castillo",
+  "name": "Asedio al castillo",
+  "theme": "castillo",
+  "play": true,
+  "note": "Muralla en el centro con dos rastrillos que suben y bajan a destiempo; pinchos que salen del suelo delante de las puertas y en ola por los patios; catapultas y tiendas a cada lado. Kit Cozy medieval de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [],
+    "floor": "empedrado",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "muro_n",
+      "model": "muralla",
+      "x": 0,
+      "y": 0,
+      "z": -8.1,
+      "rot": 90,
+      "size": [
+        3,
+        3.24,
+        1.19
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "muro_c1",
+      "model": "muralla",
+      "x": 0,
+      "y": 0,
+      "z": -1.7,
+      "rot": 90,
+      "size": [
+        3.4,
+        3.67,
+        1.35
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "muro_c2",
+      "model": "muralla",
+      "x": 0,
+      "y": 0,
+      "z": 1.7,
+      "rot": 90,
+      "size": [
+        3.4,
+        3.67,
+        1.35
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "muro_s",
+      "model": "muralla",
+      "x": 0,
+      "y": 0,
+      "z": 8.1,
+      "rot": 90,
+      "size": [
+        3,
+        3.24,
+        1.19
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "torre_puerta_a",
+      "model": "torre_castillo",
+      "x": 0,
+      "y": 0,
+      "z": -10.2,
+      "rot": 0,
+      "size": [
+        1.34,
+        3.6,
+        1.44
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "torre_puerta_b",
+      "model": "torre_castillo",
+      "x": 0,
+      "y": 0,
+      "z": 10.2,
+      "rot": 180,
+      "size": [
+        1.34,
+        3.6,
+        1.44
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "catapulta_a",
+      "model": "catapulta",
+      "x": -12.6,
+      "y": 0,
+      "z": -6.4,
+      "rot": 90,
+      "size": [
+        1.64,
+        1.48,
+        3
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "catapulta_b",
+      "model": "catapulta",
+      "x": 12.6,
+      "y": 0,
+      "z": 6.4,
+      "rot": 270,
+      "size": [
+        1.64,
+        1.48,
+        3
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "balista_a",
+      "model": "balista",
+      "x": -6.4,
+      "y": 0,
+      "z": 7.4,
+      "rot": 70,
+      "size": [
+        2.35,
+        1.73,
+        2.4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "balista_b",
+      "model": "balista",
+      "x": 6.4,
+      "y": 0,
+      "z": -7.4,
+      "rot": 250,
+      "size": [
+        2.35,
+        1.73,
+        2.4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canon_a",
+      "model": "canon_medieval",
+      "x": -12.8,
+      "y": 0,
+      "z": 2.4,
+      "rot": 90,
+      "size": [
+        2.05,
+        1.22,
+        2.4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canon_b",
+      "model": "canon_medieval",
+      "x": 12.8,
+      "y": 0,
+      "z": -2.4,
+      "rot": 270,
+      "size": [
+        2.05,
+        1.22,
+        2.4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "tienda_a",
+      "model": "tienda_medieval",
+      "x": -15.4,
+      "y": 0,
+      "z": 8.4,
+      "rot": 0,
+      "size": [
+        4.49,
+        3,
+        4.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "tienda_b",
+      "model": "tienda_medieval",
+      "x": 15.4,
+      "y": 0,
+      "z": -8.4,
+      "rot": 180,
+      "size": [
+        4.49,
+        3,
+        4.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "carro_a",
+      "model": "carro_heno",
+      "x": -5.6,
+      "y": 0,
+      "z": -9.4,
+      "rot": 0,
+      "size": [
+        1.35,
+        1.83,
+        3
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "carro_b",
+      "model": "carro_heno",
+      "x": 5.6,
+      "y": 0,
+      "z": 9.4,
+      "rot": 180,
+      "size": [
+        1.35,
+        1.83,
+        3
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "pozo_a",
+      "model": "pozo",
+      "x": -5.4,
+      "y": 0,
+      "z": -2.6,
+      "rot": 0,
+      "size": [
+        1.79,
+        2.2,
+        1.79
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "pozo_b",
+      "model": "pozo",
+      "x": 5.4,
+      "y": 0,
+      "z": 2.6,
+      "rot": 180,
+      "size": [
+        1.79,
+        2.2,
+        1.79
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "barricada_a",
+      "model": "barricada_pinchos",
+      "x": -7.2,
+      "y": 0,
+      "z": 0.4,
+      "rot": 90,
+      "size": [
+        2.6,
+        1.33,
+        1.13
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barricada_b",
+      "model": "barricada_pinchos",
+      "x": 7.2,
+      "y": 0,
+      "z": -0.4,
+      "rot": 270,
+      "size": [
+        2.6,
+        1.33,
+        1.13
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "muneco_a",
+      "model": "muneco_entreno",
+      "x": -15.6,
+      "y": 0,
+      "z": -2.4,
+      "rot": 0,
+      "size": [
+        1.34,
+        2,
+        1.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "muneco_b",
+      "model": "muneco_entreno",
+      "x": 15.6,
+      "y": 0,
+      "z": 2.4,
+      "rot": 180,
+      "size": [
+        1.34,
+        2,
+        1.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "armadura_a",
+      "model": "armadura",
+      "x": -3.4,
+      "y": 0,
+      "z": 9.4,
+      "rot": 0,
+      "size": [
+        1.12,
+        2.2,
+        0.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "armadura_b",
+      "model": "armadura",
+      "x": 3.4,
+      "y": 0,
+      "z": -9.4,
+      "rot": 180,
+      "size": [
+        1.12,
+        2.2,
+        0.7
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "estandarte_a",
+      "model": "estandarte",
+      "x": -3.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 0,
+      "size": [
+        1.18,
+        3,
+        0.82
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "estandarte_b",
+      "model": "estandarte",
+      "x": 3.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 180,
+      "size": [
+        1.18,
+        3,
+        0.82
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "polvora_a",
+      "model": "barril_polvora",
+      "x": -12.6,
+      "y": 0,
+      "z": -3,
+      "rot": 0,
+      "size": [
+        1.11,
+        1,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "polvora_b",
+      "model": "barril_polvora",
+      "x": 12.6,
+      "y": 0,
+      "z": 3,
+      "rot": 180,
+      "size": [
+        1.11,
+        1,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "polvora2_a",
+      "model": "barril_polvora",
+      "x": -6.6,
+      "y": 0,
+      "z": 4.6,
+      "rot": 0,
+      "size": [
+        1.11,
+        1,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "polvora2_b",
+      "model": "barril_polvora",
+      "x": 6.6,
+      "y": 0,
+      "z": -4.6,
+      "rot": 180,
+      "size": [
+        1.11,
+        1,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "homenaje",
+      "model": "torre_homenaje",
+      "x": 13,
+      "y": 0,
+      "z": -16.5,
+      "rot": 0,
+      "size": [
+        4.15,
+        9,
+        4.18
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "torre_i",
+      "model": "torre_castillo",
+      "x": -21,
+      "y": 0,
+      "z": -11,
+      "rot": 0,
+      "size": [
+        2.23,
+        6,
+        2.41
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "torre_d",
+      "model": "torre_castillo",
+      "x": 21,
+      "y": 0,
+      "z": -11,
+      "rot": 0,
+      "size": [
+        2.23,
+        6,
+        2.41
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "atalaya",
+      "model": "atalaya",
+      "x": -14,
+      "y": 0,
+      "z": -16,
+      "rot": 0,
+      "size": [
+        2.52,
+        6.5,
+        2.85
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "trebuchet",
+      "model": "trebuchet",
+      "x": -22,
+      "y": 0,
+      "z": 2,
+      "rot": 60,
+      "size": [
+        2.64,
+        6,
+        5.33
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "grada",
+      "model": "grada_torneo",
+      "x": 22,
+      "y": 0,
+      "z": 3,
+      "rot": -90,
+      "size": [
+        7.07,
+        4,
+        3.1
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "almenara_i",
+      "model": "almenara",
+      "x": -21.5,
+      "y": 0,
+      "z": 11,
+      "rot": 0,
+      "size": [
+        1.43,
+        3,
+        1.57
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "almenara_d",
+      "model": "almenara",
+      "x": 21.5,
+      "y": 0,
+      "z": 11,
+      "rot": 0,
+      "size": [
+        1.43,
+        3,
+        1.57
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "tienda_real",
+      "model": "tienda_real",
+      "x": 0,
+      "y": 0,
+      "z": -16.5,
+      "rot": 0,
+      "size": [
+        9.01,
+        5,
+        8.74
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "rastrillo_n",
+      "type": "door",
+      "x": 0,
+      "z": -5,
+      "w": 3.2,
+      "d": 0.5,
+      "rot": 90,
+      "openMs": 2600,
+      "closedMs": 2200,
+      "offsetMs": 0,
+      "height": 3,
+      "style": "piedra"
+    },
+    {
+      "id": "rastrillo_s",
+      "type": "door",
+      "x": 0,
+      "z": 5,
+      "w": 3.2,
+      "d": 0.5,
+      "rot": 90,
+      "openMs": 2600,
+      "closedMs": 2200,
+      "offsetMs": 2400,
+      "height": 3,
+      "style": "piedra"
+    },
+    {
+      "id": "pinchos_puerta_0",
+      "type": "spikes",
+      "x": -2.4,
+      "z": -5,
+      "w": 1.8,
+      "d": 3,
+      "rot": 0,
+      "downMs": 2400,
+      "warnMs": 700,
+      "upMs": 1100,
+      "offsetMs": 0
+    },
+    {
+      "id": "pinchos_puerta_1",
+      "type": "spikes",
+      "x": 2.4,
+      "z": -5,
+      "w": 1.8,
+      "d": 3,
+      "rot": 0,
+      "downMs": 2400,
+      "warnMs": 700,
+      "upMs": 1100,
+      "offsetMs": 0
+    },
+    {
+      "id": "pinchos_puerta_2",
+      "type": "spikes",
+      "x": -2.4,
+      "z": 5,
+      "w": 1.8,
+      "d": 3,
+      "rot": 0,
+      "downMs": 2400,
+      "warnMs": 700,
+      "upMs": 1100,
+      "offsetMs": 2100
+    },
+    {
+      "id": "pinchos_puerta_3",
+      "type": "spikes",
+      "x": 2.4,
+      "z": 5,
+      "w": 1.8,
+      "d": 3,
+      "rot": 0,
+      "downMs": 2400,
+      "warnMs": 700,
+      "upMs": 1100,
+      "offsetMs": 2100
+    },
+    {
+      "id": "pinchos_ola__1_0",
+      "type": "spikes",
+      "x": -9.8,
+      "z": -7.2,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 0
+    },
+    {
+      "id": "pinchos_ola__1_1",
+      "type": "spikes",
+      "x": -9.8,
+      "z": -3.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 650
+    },
+    {
+      "id": "pinchos_ola__1_2",
+      "type": "spikes",
+      "x": -9.8,
+      "z": 0,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 1300
+    },
+    {
+      "id": "pinchos_ola__1_3",
+      "type": "spikes",
+      "x": -9.8,
+      "z": 3.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 1950
+    },
+    {
+      "id": "pinchos_ola__1_4",
+      "type": "spikes",
+      "x": -9.8,
+      "z": 7.2,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 2600
+    },
+    {
+      "id": "pinchos_ola_1_0",
+      "type": "spikes",
+      "x": 9.8,
+      "z": -7.2,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 0
+    },
+    {
+      "id": "pinchos_ola_1_1",
+      "type": "spikes",
+      "x": 9.8,
+      "z": -3.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 650
+    },
+    {
+      "id": "pinchos_ola_1_2",
+      "type": "spikes",
+      "x": 9.8,
+      "z": 0,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 1300
+    },
+    {
+      "id": "pinchos_ola_1_3",
+      "type": "spikes",
+      "x": 9.8,
+      "z": 3.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 1950
+    },
+    {
+      "id": "pinchos_ola_1_4",
+      "type": "spikes",
+      "x": 9.8,
+      "z": 7.2,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "downMs": 1800,
+      "warnMs": 600,
+      "upMs": 900,
+      "offsetMs": 2600
+    }
+  ],
+  "spawns": [
+    [
+      -13,
+      -0.6
+    ],
+    [
+      13,
+      0.6
+    ],
+    [
+      -6.6,
+      -5.4
+    ],
+    [
+      6.6,
+      5.4
+    ],
+    [
+      -12.4,
+      6.4
+    ],
+    [
+      12.4,
+      -6.4
+    ],
+    [
+      -5,
+      4.6
+    ],
+    [
+      5,
+      -4.6
+    ]
+  ]
+}

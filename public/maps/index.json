@@ -89,5 +89,26 @@
     "theme": "recreativos",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "invierno",
+    "name": "Pueblo nevado",
+    "theme": "invierno",
+    "play": true,
+    "baked": true
+  },
+  {
+    "id": "castillo",
+    "name": "Asedio al castillo",
+    "theme": "castillo",
+    "play": true,
+    "baked": true
+  },
+  {
+    "id": "feria",
+    "name": "La feria",
+    "theme": "feria",
+    "play": true,
+    "baked": true
   }
 ]

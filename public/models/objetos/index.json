@@ -1257,5 +1257,330 @@
     "id": "dado_20",
     "name": "Dado de 20",
     "source": "recreativos\\dado_20.glb"
+  },
+  {
+    "id": "pino_nevado",
+    "name": "Pino nevado",
+    "source": "invierno\\pino_nevado.glb"
+  },
+  {
+    "id": "pino",
+    "name": "Pino",
+    "source": "invierno\\pino.glb"
+  },
+  {
+    "id": "muneco_nieve",
+    "name": "Muñeco de nieve",
+    "source": "invierno\\muneco_nieve.glb"
+  },
+  {
+    "id": "cabana_nevada",
+    "name": "Cabaña nevada",
+    "source": "invierno\\cabana_nevada.glb"
+  },
+  {
+    "id": "chalet",
+    "name": "Chalet",
+    "source": "invierno\\chalet.glb"
+  },
+  {
+    "id": "iglu",
+    "name": "Iglú",
+    "source": "invierno\\iglu.glb"
+  },
+  {
+    "id": "bloque_hielo",
+    "name": "Bloque de hielo",
+    "source": "invierno\\bloque_hielo.glb"
+  },
+  {
+    "id": "monton_nieve",
+    "name": "Montón de nieve",
+    "source": "invierno\\monton_nieve.glb"
+  },
+  {
+    "id": "iceberg",
+    "name": "Iceberg",
+    "source": "invierno\\iceberg.glb"
+  },
+  {
+    "id": "moto_nieve",
+    "name": "Moto de nieve",
+    "source": "invierno\\moto_nieve.glb"
+  },
+  {
+    "id": "lena",
+    "name": "Leña",
+    "source": "invierno\\lena.glb"
+  },
+  {
+    "id": "hoguera",
+    "name": "Hoguera",
+    "source": "invierno\\hoguera.glb"
+  },
+  {
+    "id": "trineo",
+    "name": "Trineo",
+    "source": "invierno\\trineo.glb"
+  },
+  {
+    "id": "reno_madera",
+    "name": "Reno de madera",
+    "source": "invierno\\reno_madera.glb"
+  },
+  {
+    "id": "farola_navidad",
+    "name": "Farola de Navidad",
+    "source": "invierno\\farola_navidad.glb"
+  },
+  {
+    "id": "puesto_navidad",
+    "name": "Puesto de Navidad",
+    "source": "invierno\\puesto_navidad.glb"
+  },
+  {
+    "id": "puesto_chocolate",
+    "name": "Puesto de chocolate",
+    "source": "invierno\\puesto_chocolate.glb"
+  },
+  {
+    "id": "casita_jengibre",
+    "name": "Casita de jengibre",
+    "source": "invierno\\casita_jengibre.glb"
+  },
+  {
+    "id": "casa_navidad",
+    "name": "Casa de Navidad",
+    "source": "invierno\\casa_navidad.glb"
+  },
+  {
+    "id": "pala_nieve",
+    "name": "Pala de nieve",
+    "source": "invierno\\pala_nieve.glb"
+  },
+  {
+    "id": "pila_regalos",
+    "name": "Pila de regalos",
+    "source": "invierno\\pila_regalos.glb"
+  },
+  {
+    "id": "calcetin_navidad",
+    "name": "Calcetín de Navidad",
+    "source": "invierno\\calcetin_navidad.glb"
+  },
+  {
+    "id": "bola_nieve",
+    "name": "Bola de nieve",
+    "source": "invierno\\bola_nieve.glb"
+  },
+  {
+    "id": "pina",
+    "name": "Piña de pino",
+    "source": "invierno\\pina.glb"
+  },
+  {
+    "id": "almenara",
+    "name": "Almenara",
+    "source": "castillo\\almenara.glb"
+  },
+  {
+    "id": "ariete",
+    "name": "Ariete",
+    "source": "castillo\\ariete.glb"
+  },
+  {
+    "id": "atalaya",
+    "name": "Atalaya",
+    "source": "castillo\\atalaya.glb"
+  },
+  {
+    "id": "balista",
+    "name": "Balista",
+    "source": "castillo\\balista.glb"
+  },
+  {
+    "id": "valla_justas",
+    "name": "Valla de justas",
+    "source": "castillo\\valla_justas.glb"
+  },
+  {
+    "id": "barricada_pinchos",
+    "name": "Barricada de pinchos",
+    "source": "castillo\\barricada_pinchos.glb"
+  },
+  {
+    "id": "canon_medieval",
+    "name": "Cañón medieval",
+    "source": "castillo\\canon_medieval.glb"
+  },
+  {
+    "id": "carro_caballo",
+    "name": "Carro",
+    "source": "castillo\\carro_caballo.glb"
+  },
+  {
+    "id": "carro_heno",
+    "name": "Carro de heno",
+    "source": "castillo\\carro_heno.glb"
+  },
+  {
+    "id": "carro_mercado",
+    "name": "Carro de mercado",
+    "source": "castillo\\carro_mercado.glb"
+  },
+  {
+    "id": "catapulta",
+    "name": "Catapulta",
+    "source": "castillo\\catapulta.glb"
+  },
+  {
+    "id": "empalizada_madera",
+    "name": "Empalizada",
+    "source": "castillo\\empalizada_madera.glb"
+  },
+  {
+    "id": "estandarte",
+    "name": "Estandarte",
+    "source": "castillo\\estandarte.glb"
+  },
+  {
+    "id": "muneco_entreno",
+    "name": "Muñeco de entreno",
+    "source": "castillo\\muneco_entreno.glb"
+  },
+  {
+    "id": "muralla",
+    "name": "Muralla",
+    "source": "castillo\\muralla.glb"
+  },
+  {
+    "id": "tienda_real",
+    "name": "Tienda real",
+    "source": "castillo\\tienda_real.glb"
+  },
+  {
+    "id": "pozo",
+    "name": "Pozo",
+    "source": "castillo\\pozo.glb"
+  },
+  {
+    "id": "torre_puerta",
+    "name": "Torre de la puerta",
+    "source": "castillo\\torre_puerta.glb"
+  },
+  {
+    "id": "armadura",
+    "name": "Armadura",
+    "source": "castillo\\armadura.glb"
+  },
+  {
+    "id": "tienda_medieval",
+    "name": "Tienda medieval",
+    "source": "castillo\\tienda_medieval.glb"
+  },
+  {
+    "id": "torre_castillo",
+    "name": "Torre del castillo",
+    "source": "castillo\\torre_castillo.glb"
+  },
+  {
+    "id": "torre_homenaje",
+    "name": "Torre del homenaje",
+    "source": "castillo\\torre_homenaje.glb"
+  },
+  {
+    "id": "trebuchet",
+    "name": "Trabuquete",
+    "source": "castillo\\trebuchet.glb"
+  },
+  {
+    "id": "grada_torneo",
+    "name": "Grada de torneo",
+    "source": "castillo\\grada_torneo.glb"
+  },
+  {
+    "id": "tiovivo",
+    "name": "Tiovivo",
+    "source": "feria\\tiovivo.glb"
+  },
+  {
+    "id": "carpa_circo",
+    "name": "Carpa de circo",
+    "source": "feria\\carpa_circo.glb"
+  },
+  {
+    "id": "carromato",
+    "name": "Carromato",
+    "source": "feria\\carromato.glb"
+  },
+  {
+    "id": "casa_risa",
+    "name": "Casa de la risa",
+    "source": "feria\\casa_risa.glb"
+  },
+  {
+    "id": "caseta_feria",
+    "name": "Caseta de feria",
+    "source": "feria\\caseta_feria.glb"
+  },
+  {
+    "id": "coche_choque",
+    "name": "Coche de choque",
+    "source": "feria\\coche_choque.glb"
+  },
+  {
+    "id": "entrada_parque",
+    "name": "Entrada del parque",
+    "source": "feria\\entrada_parque.glb"
+  },
+  {
+    "id": "lanzar_aros",
+    "name": "Lanzar aros",
+    "source": "feria\\lanzar_aros.glb"
+  },
+  {
+    "id": "maquina_algodon",
+    "name": "Máquina de algodón",
+    "source": "feria\\maquina_algodon.glb"
+  },
+  {
+    "id": "maquina_palomitas",
+    "name": "Máquina de palomitas",
+    "source": "feria\\maquina_palomitas.glb"
+  },
+  {
+    "id": "martillo_fuerza",
+    "name": "Martillo de fuerza",
+    "source": "feria\\martillo_fuerza.glb"
+  },
+  {
+    "id": "montana_rusa",
+    "name": "Montaña rusa",
+    "source": "feria\\montana_rusa.glb"
+  },
+  {
+    "id": "noria",
+    "name": "Noria",
+    "source": "feria\\noria.glb"
+  },
+  {
+    "id": "sillas_voladoras",
+    "name": "Sillas voladoras",
+    "source": "feria\\sillas_voladoras.glb"
+  },
+  {
+    "id": "taquilla",
+    "name": "Taquilla",
+    "source": "feria\\taquilla.glb"
+  },
+  {
+    "id": "torre_caida",
+    "name": "Torre de caída",
+    "source": "feria\\torre_caida.glb"
+  },
+  {
+    "id": "minigolf",
+    "name": "Minigolf",
+    "source": "feria\\minigolf.glb"
   }
 ]

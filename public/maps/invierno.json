@@ -1,0 +1,754 @@
+{
+  "id": "invierno",
+  "name": "Pueblo nevado",
+  "theme": "invierno",
+  "play": true,
+  "note": "Lago helado en el centro (resbala) con un agujero de agua helada (ahoga) y tablones que se caen; placas de hielo; rampas de nieve. Kit Cozy de Navidad e invierno de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [
+      {
+        "x": 0,
+        "z": 0,
+        "w": 7,
+        "d": 4.4,
+        "round": 1.6
+      }
+    ],
+    "floor": "nieve",
+    "walls": "ninguna"
+  },
+  "water": [
+    {
+      "x": 0,
+      "z": 0,
+      "w": 7,
+      "d": 4.4,
+      "y": -0.35,
+      "round": 1.6
+    }
+  ],
+  "objects": [
+    {
+      "id": "pino_a",
+      "model": "pino_nevado",
+      "x": -12.4,
+      "y": 0,
+      "z": -6.2,
+      "rot": 0,
+      "size": [
+        2.4,
+        4,
+        2.29
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "pino_b",
+      "model": "pino_nevado",
+      "x": 12.4,
+      "y": 0,
+      "z": 6.2,
+      "rot": 180,
+      "size": [
+        2.4,
+        4,
+        2.29
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "pino2_a",
+      "model": "pino_nevado",
+      "x": -15.4,
+      "y": 0,
+      "z": 3.6,
+      "rot": 40,
+      "size": [
+        2.04,
+        3.4,
+        1.95
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "pino2_b",
+      "model": "pino_nevado",
+      "x": 15.4,
+      "y": 0,
+      "z": -3.6,
+      "rot": 220,
+      "size": [
+        2.04,
+        3.4,
+        1.95
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "muneco_a",
+      "model": "muneco_nieve",
+      "x": -9.6,
+      "y": 0,
+      "z": 7.4,
+      "rot": 20,
+      "size": [
+        1.93,
+        2.2,
+        1.71
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "muneco_b",
+      "model": "muneco_nieve",
+      "x": 9.6,
+      "y": 0,
+      "z": -7.4,
+      "rot": 200,
+      "size": [
+        1.93,
+        2.2,
+        1.71
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "hielo_a",
+      "model": "bloque_hielo",
+      "x": -11.2,
+      "y": 0,
+      "z": -1.6,
+      "rot": 15,
+      "size": [
+        1.6,
+        1.19,
+        1.39
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "hielo_b",
+      "model": "bloque_hielo",
+      "x": 11.2,
+      "y": 0,
+      "z": 1.6,
+      "rot": 195,
+      "size": [
+        1.6,
+        1.19,
+        1.39
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "hielo2_a",
+      "model": "bloque_hielo",
+      "x": -4.4,
+      "y": 0,
+      "z": -8.4,
+      "rot": 30,
+      "size": [
+        1.4,
+        1.04,
+        1.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "hielo2_b",
+      "model": "bloque_hielo",
+      "x": 4.4,
+      "y": 0,
+      "z": 8.4,
+      "rot": 210,
+      "size": [
+        1.4,
+        1.04,
+        1.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "trineo_a",
+      "model": "trineo",
+      "x": -15.2,
+      "y": 0,
+      "z": -1.6,
+      "rot": 90,
+      "size": [
+        1.34,
+        1.61,
+        2.4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "trineo_b",
+      "model": "trineo",
+      "x": 15.2,
+      "y": 0,
+      "z": 1.6,
+      "rot": 270,
+      "size": [
+        1.34,
+        1.61,
+        2.4
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "farola_a",
+      "model": "farola_navidad",
+      "x": -9.2,
+      "y": 0,
+      "z": -8.6,
+      "rot": 0,
+      "size": [
+        1.14,
+        3,
+        1.04
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "farola_b",
+      "model": "farola_navidad",
+      "x": 9.2,
+      "y": 0,
+      "z": 8.6,
+      "rot": 180,
+      "size": [
+        1.14,
+        3,
+        1.04
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "reno_a",
+      "model": "reno_madera",
+      "x": -4.2,
+      "y": 0,
+      "z": 8.8,
+      "rot": 0,
+      "size": [
+        0.55,
+        1.8,
+        1.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "reno_b",
+      "model": "reno_madera",
+      "x": 4.2,
+      "y": 0,
+      "z": -8.8,
+      "rot": 180,
+      "size": [
+        0.55,
+        1.8,
+        1.42
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lena_a",
+      "model": "lena",
+      "x": -15.6,
+      "y": 0,
+      "z": 8.8,
+      "rot": 0,
+      "size": [
+        1.6,
+        1.01,
+        1.35
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lena_b",
+      "model": "lena",
+      "x": 15.6,
+      "y": 0,
+      "z": -8.8,
+      "rot": 180,
+      "size": [
+        1.6,
+        1.01,
+        1.35
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "iglu",
+      "model": "iglu",
+      "x": 0,
+      "y": 0,
+      "z": -8.4,
+      "rot": 0,
+      "size": [
+        3.4,
+        1.48,
+        3.99
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "hoguera",
+      "model": "hoguera",
+      "x": 0,
+      "y": 0,
+      "z": 8.6,
+      "rot": 0,
+      "size": [
+        1.6,
+        0.98,
+        1.6
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "monton_a",
+      "model": "monton_nieve",
+      "x": -13,
+      "y": 0,
+      "z": 0.8,
+      "rot": 0,
+      "size": [
+        2.4,
+        0.81,
+        1.83
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "monton_b",
+      "model": "monton_nieve",
+      "x": 13,
+      "y": 0,
+      "z": -0.8,
+      "rot": 180,
+      "size": [
+        2.4,
+        0.81,
+        1.83
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "regalos_a",
+      "model": "pila_regalos",
+      "x": -7.2,
+      "y": 0,
+      "z": -6,
+      "rot": 0,
+      "size": [
+        1.2,
+        1.08,
+        0.95
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "regalos_b",
+      "model": "pila_regalos",
+      "x": 7.2,
+      "y": 0,
+      "z": 6,
+      "rot": 180,
+      "size": [
+        1.2,
+        1.08,
+        0.95
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "bola_a",
+      "model": "bola_nieve",
+      "x": -12.6,
+      "y": 0,
+      "z": 5.2,
+      "rot": 0,
+      "size": [
+        0.68,
+        0.9,
+        0.68
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "bola_b",
+      "model": "bola_nieve",
+      "x": 12.6,
+      "y": 0,
+      "z": -5.2,
+      "rot": 180,
+      "size": [
+        0.68,
+        0.9,
+        0.68
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "pina_a",
+      "model": "pina",
+      "x": -5.6,
+      "y": 0,
+      "z": 5.4,
+      "rot": 0,
+      "size": [
+        0.8,
+        0.31,
+        0.58
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "pina_b",
+      "model": "pina",
+      "x": 5.6,
+      "y": 0,
+      "z": -5.4,
+      "rot": 180,
+      "size": [
+        0.8,
+        0.31,
+        0.58
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "cabana",
+      "model": "cabana_nevada",
+      "x": -12,
+      "y": 0,
+      "z": -16.5,
+      "rot": 15,
+      "size": [
+        5.23,
+        6,
+        5.56
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "chalet",
+      "model": "chalet",
+      "x": 8,
+      "y": 0,
+      "z": -16.5,
+      "rot": -10,
+      "size": [
+        10.04,
+        7,
+        8.94
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "casa",
+      "model": "casa_navidad",
+      "x": 21,
+      "y": 0,
+      "z": -7,
+      "rot": -60,
+      "size": [
+        5.33,
+        5,
+        4
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "jengibre",
+      "model": "casita_jengibre",
+      "x": -21.5,
+      "y": 0,
+      "z": -7,
+      "rot": 60,
+      "size": [
+        3.89,
+        3.5,
+        3.6
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "puesto",
+      "model": "puesto_navidad",
+      "x": -21.5,
+      "y": 0,
+      "z": 5,
+      "rot": 80,
+      "size": [
+        3.39,
+        3.4,
+        2.86
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "chocolate",
+      "model": "puesto_chocolate",
+      "x": 21.5,
+      "y": 0,
+      "z": 5,
+      "rot": -80,
+      "size": [
+        2.76,
+        3.2,
+        1.88
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pino_f1",
+      "model": "pino_nevado",
+      "x": -3,
+      "y": 0,
+      "z": -15.5,
+      "rot": 0,
+      "size": [
+        3.29,
+        5.5,
+        3.15
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pino_f2",
+      "model": "pino_nevado",
+      "x": 18,
+      "y": 0,
+      "z": -13,
+      "rot": 0,
+      "size": [
+        2.99,
+        5,
+        2.86
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pino_f3",
+      "model": "pino",
+      "x": -19,
+      "y": 0,
+      "z": -12,
+      "rot": 0,
+      "size": [
+        3.03,
+        5,
+        2.89
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pino_f4",
+      "model": "pino_nevado",
+      "x": 22,
+      "y": 0,
+      "z": 11,
+      "rot": 0,
+      "size": [
+        2.7,
+        4.5,
+        2.58
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pino_f5",
+      "model": "pino_nevado",
+      "x": -22,
+      "y": 0,
+      "z": 12,
+      "rot": 0,
+      "size": [
+        2.7,
+        4.5,
+        2.58
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "moto",
+      "model": "moto_nieve",
+      "x": 15,
+      "y": 0,
+      "z": 13.5,
+      "rot": 30,
+      "size": [
+        1.61,
+        1.6,
+        4.21
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "iceberg",
+      "model": "iceberg",
+      "x": 2,
+      "y": 0,
+      "z": -21,
+      "rot": 0,
+      "size": [
+        6.44,
+        4,
+        5.88
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pala",
+      "model": "pala_nieve",
+      "x": 3.4,
+      "y": 0,
+      "z": 8.8,
+      "rot": 60,
+      "size": [
+        1.8,
+        0.22,
+        0.63
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "lago",
+      "type": "ice",
+      "x": 0,
+      "z": 0,
+      "w": 15,
+      "d": 10,
+      "rot": 0,
+      "grip": 0.07,
+      "round": 3,
+      "holeW": 7,
+      "holeD": 4.4,
+      "holeRound": 1.6
+    },
+    {
+      "id": "placa_i",
+      "type": "ice",
+      "x": -9.4,
+      "z": 3.2,
+      "w": 3.6,
+      "d": 3,
+      "rot": 0,
+      "grip": 0.1,
+      "round": 1,
+      "holeW": 0,
+      "holeD": 0,
+      "holeRound": 0.8
+    },
+    {
+      "id": "placa_d",
+      "type": "ice",
+      "x": 9.4,
+      "z": -3.2,
+      "w": 3.6,
+      "d": 3,
+      "rot": 0,
+      "grip": 0.1,
+      "round": 1,
+      "holeW": 0,
+      "holeD": 0,
+      "holeRound": 0.8
+    },
+    {
+      "id": "tablones",
+      "type": "fragile",
+      "x": 0,
+      "z": 0,
+      "w": 8.2,
+      "d": 1.6,
+      "rot": 0,
+      "shakeMs": 700,
+      "respawnMs": 4500
+    },
+    {
+      "id": "rampa_i",
+      "type": "jump",
+      "x": -15.4,
+      "z": -9,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        -4.6,
+        6.2
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "rampa_d",
+      "type": "jump",
+      "x": 15.4,
+      "z": 9,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        4.6,
+        -6.2
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    }
+  ],
+  "spawns": [
+    [
+      -11,
+      -4.4
+    ],
+    [
+      11,
+      4.4
+    ],
+    [
+      -8.6,
+      -5.8
+    ],
+    [
+      8.6,
+      5.8
+    ],
+    [
+      -6.6,
+      8.2
+    ],
+    [
+      6.6,
+      -8.2
+    ],
+    [
+      -15.4,
+      6.2
+    ],
+    [
+      15.4,
+      -6.2
+    ]
+  ]
+}

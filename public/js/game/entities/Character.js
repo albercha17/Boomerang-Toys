@@ -272,7 +272,7 @@ export class Character {
     }
 
     const speed = this.def.speed * (this.charging ? this.def.aimSpeedFactor : 1);
-    const k = 1 - Math.exp(-ACCELERATION * dt); // arranca y frena en ~0,15 s: se siente más suelto
+    const k = 1 - Math.exp(-ACCELERATION * (this.grip ?? 1) * dt); // arranca y frena en ~0,15 s (en el hielo, resbala)
     const v = this.body.velocity;
     v.set(v.x + (mx * speed - v.x) * k, 0, v.z + (my * speed - v.z) * k);
     this.moving = this.charging ? magnitude * this.def.aimSpeedFactor : magnitude;

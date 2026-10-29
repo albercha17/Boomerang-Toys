@@ -9,6 +9,9 @@ import * as THREE from 'three';
  *             se puede pisar aunque debajo haya un hueco o el vacío
  *   jump      trampolín: te lanza por el aire hasta target [x, z] (height, durationMs)
  *   portal    portal: te lleva al otro portal con el mismo `link` (y a los búmerangs que vuelan)
+ *   ice       hielo: quien lo pisa resbala (grip: cuánto agarra, 0..1)
+ *   spikes    pinchos: salen del suelo (downMs abajo, warnMs asomando, upMs arriba: matan; offsetMs para turnarse)
+ *   spinner   brazo giratorio a ras de suelo que tumba a quien pilla (radius, speed rad/s, arms, height, color)
  *   maze      laberinto: paredes en una cuadrícula cols × rows que cada `periodMs` cambian a otro laberinto (las
  *             que sobran se hunden, las nuevas suben; parpadean `warnMs` antes); height, color, open, seed
  *   train     tren de juguete: da vueltas por una vía (w × d, esquinas de radio `radius`) a `speed` y atropella;
@@ -388,6 +391,168 @@ export function mazeDistance(def, x, z) {
   return Math.min(inU ? du : Infinity, inV ? dv : Infinity);
 }
 
+/** Hielo: lámina azul clara y brillante con grietas (dibujada una vez). */
+let ICE_TEXTURE = null;
+function iceTexture() {
+  if (ICE_TEXTURE) return ICE_TEXTURE;
+  const n = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = n;
+  const g = canvas.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, n, n);
+  grad.addColorStop(0, '#cfefff');
+  grad.addColorStop(0.5, '#a9dcf5');
+  grad.addColorStop(1, '#d9f4ff');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, n, n);
+  g.strokeStyle = 'rgba(255,255,255,0.85)';
+  for (let k = 0; k < 18; k++) { // grietas
+    let x = Math.random() * n;
+    let y = Math.random() * n;
+    g.lineWidth = 1 + Math.random() * 2;
+    g.beginPath();
+    g.moveTo(x, y);
+    for (let s = 0; s < 6; s++) { x += (Math.random() - 0.5) * 120; y += (Math.random() - 0.5) * 120; g.lineTo(x, y); }
+    g.stroke();
+  }
+  g.fillStyle = 'rgba(255,255,255,0.35)';
+  for (let k = 0; k < 40; k++) g.fillRect(Math.random() * n, Math.random() * n, 30 + Math.random() * 60, 3); // reflejos
+  ICE_TEXTURE = new THREE.CanvasTexture(canvas);
+  ICE_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+  ICE_TEXTURE.wrapS = ICE_TEXTURE.wrapT = THREE.RepeatWrapping;
+  return ICE_TEXTURE;
+}
+
+function buildIce(dev, def, own) {
+  const tex = own(iceTexture().clone());
+  tex.repeat.set(def.w / 6, def.d / 6);
+  tex.needsUpdate = true;
+  const r = Math.min(def.round ?? 1, def.w / 2 - 0.01, def.d / 2 - 0.01);
+  const shape = new THREE.Shape();
+  const a = def.w / 2;
+  const b = def.d / 2;
+  shape.moveTo(-a + r, -b); shape.lineTo(a - r, -b); shape.quadraticCurveTo(a, -b, a, -b + r); shape.lineTo(a, b - r);
+  shape.quadraticCurveTo(a, b, a - r, b); shape.lineTo(-a + r, b); shape.quadraticCurveTo(-a, b, -a, b - r); shape.lineTo(-a, -b + r);
+  shape.quadraticCurveTo(-a, -b, -a + r, -b);
+  if (def.holeW > 0 && def.holeD > 0) { // agujero en el centro (un hueco con agua): el hielo no lo tapa
+    const ha = def.holeW / 2;
+    const hb = def.holeD / 2;
+    const hr = Math.min(def.holeRound ?? 0.8, ha - 0.01, hb - 0.01);
+    const hole = new THREE.Path();
+    hole.moveTo(-ha + hr, -hb); hole.lineTo(ha - hr, -hb); hole.quadraticCurveTo(ha, -hb, ha, -hb + hr); hole.lineTo(ha, hb - hr);
+    hole.quadraticCurveTo(ha, hb, ha - hr, hb); hole.lineTo(-ha + hr, hb); hole.quadraticCurveTo(-ha, hb, -ha, hb - hr); hole.lineTo(-ha, -hb + hr);
+    hole.quadraticCurveTo(-ha, -hb, -ha + hr, -hb);
+    shape.holes.push(hole);
+  }
+  const geometry = new THREE.ShapeGeometry(shape, 8);
+  const uv = geometry.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (geometry.attributes.position.getX(i) + a) / 6, (geometry.attributes.position.getY(i) + b) / 6);
+  const mesh = new THREE.Mesh(own(geometry), own(new THREE.MeshStandardMaterial({ map: tex, roughness: 0.08, metalness: 0.15, envMapIntensity: 1.2 })));
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.y = 0.025;
+  mesh.receiveShadow = true;
+  dev.group.add(mesh);
+}
+
+/** Pinchos: placa con agujeros y conos que salen del suelo. Ciclo: abajo → asoman (aviso) → arriba (matan) → abajo. */
+function buildSpikes(dev, def, own) {
+  const plate = new THREE.Mesh(own(new THREE.BoxGeometry(def.w, 0.06, def.d)), own(new THREE.MeshStandardMaterial({ color: 0x5a5560, roughness: 0.6, metalness: 0.5 })));
+  plate.position.y = 0.03;
+  plate.receiveShadow = true;
+  dev.group.add(plate);
+  const step = 0.55;
+  const nx = Math.max(1, Math.floor(def.w / step));
+  const nz = Math.max(1, Math.floor(def.d / step));
+  const cone = own(new THREE.ConeGeometry(0.13, 0.75, 8));
+  cone.translate(0, 0.375, 0);
+  dev.spikeMesh = new THREE.InstancedMesh(cone, own(new THREE.MeshStandardMaterial({ color: 0xd8dde6, roughness: 0.25, metalness: 0.85 })), nx * nz);
+  dev.spikeMesh.castShadow = true;
+  dev.spikeCells = [];
+  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) dev.spikeCells.push([-def.w / 2 + (i + 0.5) * (def.w / nx), -def.d / 2 + (j + 0.5) * (def.d / nz)]);
+  dev.group.add(dev.spikeMesh);
+  dev.spikeH = 0;
+}
+
+/** Fase de los pinchos: 'down', 'warn' (asoman), 'up' (matan). */
+function spikePhase(d, now) {
+  const cycle = (d.downMs ?? 2200) + (d.warnMs ?? 700) + (d.upMs ?? 1200);
+  const t = ((now + (d.offsetMs ?? 0)) % cycle + cycle) % cycle;
+  if (t < (d.downMs ?? 2200)) return 'down';
+  if (t < (d.downMs ?? 2200) + (d.warnMs ?? 700)) return 'warn';
+  return 'up';
+}
+
+function updateSpikes(d, now, dt) {
+  d.phase = spikePhase(d, now);
+  const target = d.phase === 'up' ? 1 : d.phase === 'warn' ? 0.18 + Math.sin(now / 40) * 0.05 : -0.05;
+  d.spikeH += (target - d.spikeH) * Math.min(1, dt * (d.phase === 'up' ? 30 : 10));
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const s = new THREE.Vector3(1, Math.max(0.001, d.spikeH), 1);
+  d.spikeCells.forEach(([u, v], k) => d.spikeMesh.setMatrixAt(k, m.compose(new THREE.Vector3(u, 0.02, v), q, s)));
+  d.spikeMesh.instanceMatrix.needsUpdate = true;
+}
+
+/** Brazo giratorio: poste en el centro y una barra de rayas que barre a ras de suelo (salta o agáchate... salta). */
+function buildSpinner(dev, def, own) {
+  const r = def.radius ?? Math.min(def.w, def.d) / 2;
+  const h = def.height ?? 0.55;
+  const post = new THREE.Mesh(own(new THREE.CylinderGeometry(0.45, 0.6, h + 0.5, 20)), own(new THREE.MeshStandardMaterial({ color: def.color ?? 0xff4d6d, roughness: 0.4 })));
+  post.position.y = (h + 0.5) / 2;
+  post.castShadow = true;
+  dev.group.add(post);
+  dev.arm = new THREE.Group();
+  dev.arm.position.y = h;
+  dev.group.add(dev.arm);
+  const arms = def.arms ?? 2;
+  const stripe = (() => { // barra de rayas de feria
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 32;
+    const g = c.getContext('2d');
+    for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#ffffff' : (def.stripe ?? '#ff3b6b'); g.fillRect(i * 32, 0, 32, 32); }
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return own(t);
+  })();
+  const barMaterial = own(new THREE.MeshStandardMaterial({ map: stripe, roughness: 0.35 }));
+  const bulbMaterial = own(new THREE.MeshBasicMaterial({ color: 0xffe58a }));
+  const bulb = own(new THREE.SphereGeometry(0.09, 8, 6));
+  for (let k = 0; k < arms; k++) {
+    const holder = new THREE.Group();
+    holder.rotation.y = (k / arms) * Math.PI * 2;
+    const bar = new THREE.Mesh(own(new THREE.CylinderGeometry(0.22, 0.22, r, 14)), barMaterial);
+    bar.rotation.z = Math.PI / 2;
+    bar.position.x = r / 2;
+    bar.castShadow = true;
+    holder.add(bar);
+    for (let b = 1; b < 6; b++) { const s = new THREE.Mesh(bulb, bulbMaterial); s.position.set((b / 6) * r, 0.24, 0); holder.add(s); }
+    dev.arm.add(holder);
+  }
+  dev.radius = r;
+  dev.arms = arms;
+  dev.angle = def.phase ?? 0;
+}
+
+function updateSpinner(d, now, dt) {
+  d.angle += (d.speed ?? 1.4) * dt;
+  d.arm.rotation.y = d.angle;
+}
+
+/** ¿Barre el brazo el punto (x, z)? */
+function spinnerHits(d, x, z, r) {
+  const dx = x - d.x;
+  const dz = z - d.z;
+  const dist = Math.hypot(dx, dz);
+  if (dist > d.radius + r || dist < 0.5) return dist < 0.6 + r; // el poste también
+  const a = Math.atan2(-dz, dx) - (d.rot ?? 0) * DEG; // mismo sentido que rotation.y
+  for (let k = 0; k < d.arms; k++) {
+    const arm = d.angle + (k / d.arms) * Math.PI * 2;
+    const diff = Math.atan2(Math.sin(a - arm), Math.cos(a - arm));
+    if (Math.abs(diff * dist) < 0.25 + r * 0.7) return true;
+  }
+  return false;
+}
+
 const PORTAL_COLORS = [0x9b5de5, 0x00b4c6, 0xff7f11, 0x2bb673, 0xe63946];
 
 export function buildDevices(root, physics, list, own, models = {}) {
@@ -480,6 +645,12 @@ export function buildDevices(root, physics, list, own, models = {}) {
       buildTrain(dev, def, own, models);
     } else if (def.type === 'maze') {
       buildMaze(dev, def, own, physics);
+    } else if (def.type === 'ice') {
+      buildIce(dev, def, own);
+    } else if (def.type === 'spikes') {
+      buildSpikes(dev, def, own);
+    } else if (def.type === 'spinner') {
+      buildSpinner(dev, def, own);
     }
     if (def.type === 'door') {
       dev.body = physics.addWall(def.x, (dev.height) / 2, def.z, def.w / 2, dev.height / 2, def.d / 2, (def.rot ?? 0) * DEG);
@@ -501,6 +672,8 @@ export function buildDevices(root, physics, list, own, models = {}) {
         if (d.type === 'conveyor') d.texture.offset.x -= (d.speed ?? 3.5) * dt / 1.2;
         else if (d.type === 'train') updateTrain(d, now);
         else if (d.type === 'maze') updateMaze(d, now, dt, physics);
+        else if (d.type === 'spikes') updateSpikes(d, now, dt);
+        else if (d.type === 'spinner') updateSpinner(d, now, dt);
         else if (d.type === 'portal') d.swirl.rotation.z += dt * 2.5;
         else if (d.type === 'jump') d.top.position.y += (0.26 - d.top.position.y) * Math.min(1, dt * 8);
         else if (d.type === 'door') {
@@ -537,7 +710,30 @@ export function buildDevices(root, physics, list, own, models = {}) {
     /** Lo que hacen a personajes, búmerangs y sueltos (antes del paso de física). */
     affect(game, now, dt) {
       const chars = [...game.characters.values()].filter((c) => c.alive && !c.falling && !c.leap);
+      for (const c of game.characters.values()) c.grip = 1; // agarre al suelo (el hielo lo baja)
       for (const d of devices) {
+        if (d.type === 'ice') {
+          for (const c of chars) if (inside(d, c.x, c.z)) c.grip = d.grip ?? 0.08;
+          continue;
+        }
+        if (d.type === 'spikes') {
+          if (d.phase === 'up') {
+            for (const c of chars) {
+              if (!inside(d, c.x, c.z, -0.1)) continue;
+              game.kill(c, Math.random() * Math.PI * 2, now, { force: true });
+              game.effects.burst(c.x, 0.4, c.z, [0xd8dde6, 0xffffff, 0xff4d00], 16, 0.6);
+            }
+          }
+          continue;
+        }
+        if (d.type === 'spinner') {
+          for (const c of chars) {
+            if (!spinnerHits(d, c.x, c.z, c.def.radius)) continue;
+            game.kill(c, Math.atan2(c.z - d.z, c.x - d.x), now, { force: true });
+            game.stage.shake(180, 0.3);
+          }
+          continue;
+        }
         if (d.type === 'conveyor') {
           const dir = along(d);
           const step = (d.speed ?? 3.5) * dt;
@@ -608,7 +804,9 @@ export function buildDevices(root, physics, list, own, models = {}) {
 
     /** ¿Hay un tren cerca de ese punto? (para que los bots no se metan delante) */
     dangerAt(x, z) {
-      return devices.some((d) => d.type === 'train' && d.cars.some((car, i) => Math.hypot(car.x - x, car.z - z) < (i === 0 ? 4 : 2.4)));
+      return devices.some((d) => (d.type === 'train' && d.cars.some((car, i) => Math.hypot(car.x - x, car.z - z) < (i === 0 ? 4 : 2.4)))
+        || (d.type === 'spikes' && d.phase !== 'down' && inside(d, x, z, 0.3))
+        || (d.type === 'spinner' && Math.hypot(x - d.x, z - d.z) < d.radius + 0.6 && spinnerHits({ ...d, angle: d.angle + 0.35 }, x, z, 0.8)));
     },
 
     dispose() {

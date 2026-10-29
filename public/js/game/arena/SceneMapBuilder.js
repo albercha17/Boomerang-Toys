@@ -225,7 +225,8 @@ export function placeMover(def, own = (r) => r) {
 const RIMS = {
   hierba: { color: 0x8f8a7a, h: 0.35, w: 0.45 }, noche: { color: 0x6c6878, h: 0.4, w: 0.45 }, arena: { color: 0x8a5a32, h: 0.4, w: 0.4 },
   playa: { color: 0x9a6a3c, h: 0.3, w: 0.45 }, rosa: { color: 0xffffff, h: 0.45, w: 0.3 }, alfombra: { color: 0x2f6db5, h: 0.12, w: 0.5 },
-  luna: { color: 0xb8c0cc, h: 0.35, w: 0.4, metal: true }, chocolate: { color: 0xd9a05b, h: 0.4, w: 0.5 }, arcade: { color: 0xff2bd6, h: 0.35, w: 0.3, neon: true },
+  luna: { color: 0xb8c0cc, h: 0.35, w: 0.4, metal: true }, nieve: { color: 0xffffff, h: 0.5, w: 0.6 }, empedrado: { color: 0x9a948a, h: 0.5, w: 0.5 },
+  feria: { color: 0xff4d6d, h: 0.4, w: 0.3 }, chocolate: { color: 0xd9a05b, h: 0.4, w: 0.5 }, arcade: { color: 0xff2bd6, h: 0.35, w: 0.3, neon: true },
 };
 function buildRim(root, room, data) {
   const def = RIMS[room.floor] ?? { color: 0x9a9a9a, h: 0.35, w: 0.4 };

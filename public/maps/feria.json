@@ -1,0 +1,532 @@
+{
+  "id": "feria",
+  "name": "La feria",
+  "theme": "feria",
+  "play": true,
+  "note": "Dos brazos giratorios barren las plazas de los lados (tumban; se saltan con los trampolines); tiovivo en el centro; coches de choque sueltos; pasillos mecánicos. Kit Cozy de parque de atracciones de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [],
+    "floor": "feria",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "tiovivo",
+      "model": "tiovivo",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        3.79,
+        3.4,
+        3.79
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "taquilla_a",
+      "model": "taquilla",
+      "x": -4.2,
+      "y": 0,
+      "z": -8.2,
+      "rot": 0,
+      "size": [
+        1.72,
+        2.6,
+        1.84
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "taquilla_b",
+      "model": "taquilla",
+      "x": 4.2,
+      "y": 0,
+      "z": 8.2,
+      "rot": 180,
+      "size": [
+        1.72,
+        2.6,
+        1.84
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "palomitas_a",
+      "model": "maquina_palomitas",
+      "x": -2.4,
+      "y": 0,
+      "z": 7.6,
+      "rot": 0,
+      "size": [
+        1.09,
+        2.2,
+        0.93
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "palomitas_b",
+      "model": "maquina_palomitas",
+      "x": 2.4,
+      "y": 0,
+      "z": -7.6,
+      "rot": 180,
+      "size": [
+        1.09,
+        2.2,
+        0.93
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "algodon_a",
+      "model": "maquina_algodon",
+      "x": -4.6,
+      "y": 0,
+      "z": 5,
+      "rot": 20,
+      "size": [
+        1.54,
+        2.2,
+        1.55
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "algodon_b",
+      "model": "maquina_algodon",
+      "x": 4.6,
+      "y": 0,
+      "z": -5,
+      "rot": 200,
+      "size": [
+        1.54,
+        2.2,
+        1.55
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caseta_a",
+      "model": "caseta_feria",
+      "x": -15.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 0,
+      "size": [
+        2.29,
+        2.8,
+        1.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caseta_b",
+      "model": "caseta_feria",
+      "x": 15.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 180,
+      "size": [
+        2.29,
+        2.8,
+        1.49
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "aros_a",
+      "model": "lanzar_aros",
+      "x": -15.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 0,
+      "size": [
+        1.72,
+        2.4,
+        1.23
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "aros_b",
+      "model": "lanzar_aros",
+      "x": 15.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 180,
+      "size": [
+        1.72,
+        2.4,
+        1.23
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "martillo_a",
+      "model": "martillo_fuerza",
+      "x": -5.4,
+      "y": 0,
+      "z": -3.6,
+      "rot": 0,
+      "size": [
+        0.98,
+        3.2,
+        0.74
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "martillo_b",
+      "model": "martillo_fuerza",
+      "x": 5.4,
+      "y": 0,
+      "z": 3.6,
+      "rot": 180,
+      "size": [
+        0.98,
+        3.2,
+        0.74
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "choque_a",
+      "model": "coche_choque",
+      "x": -9.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 30,
+      "size": [
+        1.29,
+        2.17,
+        1.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "choque_b",
+      "model": "coche_choque",
+      "x": 9.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 210,
+      "size": [
+        1.29,
+        2.17,
+        1.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "choque2_a",
+      "model": "coche_choque",
+      "x": -3.2,
+      "y": 0,
+      "z": 2,
+      "rot": -60,
+      "size": [
+        1.29,
+        2.17,
+        1.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "choque2_b",
+      "model": "coche_choque",
+      "x": 3.2,
+      "y": 0,
+      "z": -2,
+      "rot": 120,
+      "size": [
+        1.29,
+        2.17,
+        1.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "globos_a",
+      "model": "globos",
+      "x": -16,
+      "y": 0,
+      "z": 0.2,
+      "rot": 0,
+      "size": [
+        1.29,
+        2.6,
+        1.07
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "globos_b",
+      "model": "globos",
+      "x": 16,
+      "y": 0,
+      "z": -0.2,
+      "rot": 180,
+      "size": [
+        1.29,
+        2.6,
+        1.07
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "noria",
+      "model": "noria",
+      "x": -9,
+      "y": 0,
+      "z": -17,
+      "rot": 0,
+      "size": [
+        9.51,
+        11,
+        3.11
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "montana",
+      "model": "montana_rusa",
+      "x": 9,
+      "y": 0,
+      "z": -16.5,
+      "rot": 0,
+      "size": [
+        12.12,
+        6,
+        2.17
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "circo",
+      "model": "carpa_circo",
+      "x": 22.5,
+      "y": 0,
+      "z": -4,
+      "rot": -70,
+      "size": [
+        8.6,
+        6,
+        8.93
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "torre",
+      "model": "torre_caida",
+      "x": -21.5,
+      "y": 0,
+      "z": -9,
+      "rot": 0,
+      "size": [
+        3.4,
+        10,
+        3.5
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "sillas",
+      "model": "sillas_voladoras",
+      "x": -22,
+      "y": 0,
+      "z": 5,
+      "rot": 0,
+      "size": [
+        5.32,
+        5.5,
+        5.46
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "entrada",
+      "model": "entrada_parque",
+      "x": 0,
+      "y": 0,
+      "z": 13.8,
+      "rot": 180,
+      "size": [
+        5.44,
+        4,
+        1.67
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "casa_risa",
+      "model": "casa_risa",
+      "x": 22,
+      "y": 0,
+      "z": 8,
+      "rot": -90,
+      "size": [
+        5.13,
+        5,
+        5.09
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "carromato",
+      "model": "carromato",
+      "x": 18,
+      "y": 0,
+      "z": -13,
+      "rot": -30,
+      "size": [
+        1.96,
+        3.2,
+        5.06
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "minigolf",
+      "model": "minigolf",
+      "x": -16,
+      "y": 0,
+      "z": 13.6,
+      "rot": 0,
+      "size": [
+        1.27,
+        1.6,
+        4.12
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "brazo_i",
+      "type": "spinner",
+      "x": -10.4,
+      "z": 0,
+      "w": 9,
+      "d": 9,
+      "rot": 0,
+      "radius": 4.4,
+      "speed": 1.5,
+      "arms": 2,
+      "height": 0.55,
+      "color": 16731501
+    },
+    {
+      "id": "brazo_d",
+      "type": "spinner",
+      "x": 10.4,
+      "z": 0,
+      "w": 9,
+      "d": 9,
+      "rot": 0,
+      "radius": 4.4,
+      "speed": -1.5,
+      "arms": 2,
+      "height": 0.55,
+      "color": 5090295
+    },
+    {
+      "id": "pasillo_n",
+      "type": "conveyor",
+      "x": 6,
+      "z": -9.6,
+      "w": 8,
+      "d": 1.8,
+      "rot": 0,
+      "speed": 3
+    },
+    {
+      "id": "pasillo_s",
+      "type": "conveyor",
+      "x": -6,
+      "z": 9.6,
+      "w": 8,
+      "d": 1.8,
+      "rot": 180,
+      "speed": 3
+    },
+    {
+      "id": "salto_i",
+      "type": "jump",
+      "x": -16,
+      "z": -4.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        -3,
+        -6
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "salto_d",
+      "type": "jump",
+      "x": 16,
+      "z": 4.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        3,
+        6
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    }
+  ],
+  "spawns": [
+    [
+      -4.4,
+      -1.6
+    ],
+    [
+      4.4,
+      1.6
+    ],
+    [
+      -1,
+      -5.6
+    ],
+    [
+      1,
+      5.6
+    ],
+    [
+      -14.4,
+      -5
+    ],
+    [
+      14.4,
+      5
+    ],
+    [
+      -12,
+      8.2
+    ],
+    [
+      12,
+      -8.2
+    ]
+  ]
+}
