@@ -1,0 +1,789 @@
+{
+  "id": "dulces",
+  "name": "País de las golosinas",
+  "theme": "dulces",
+  "play": true,
+  "note": "Tarta gigante en el centro; dos ríos de chocolate caliente (queman) con gofres que se caen; ruedas de regaliz que ruedan; trampolines a la tarta; algodón de azúcar para esconderse. Kit Cozy de dulces de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [
+      {
+        "x": -9,
+        "z": 3,
+        "w": 3,
+        "d": 9,
+        "round": 0.9
+      },
+      {
+        "x": 9,
+        "z": -3,
+        "w": 3,
+        "d": 9,
+        "round": 0.9
+      }
+    ],
+    "floor": "chocolate",
+    "walls": "ninguna"
+  },
+  "water": [
+    {
+      "x": -9,
+      "z": 3,
+      "w": 3,
+      "d": 9,
+      "y": -0.3,
+      "round": 0.9,
+      "lava": true
+    },
+    {
+      "x": 9,
+      "z": -3,
+      "w": 3,
+      "d": 9,
+      "y": -0.3,
+      "round": 0.9,
+      "lava": true
+    }
+  ],
+  "objects": [
+    {
+      "id": "tarta",
+      "model": "tarta_cumple",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        3.58,
+        3.2,
+        3.58
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "maquina_a",
+      "model": "maquina_chicles",
+      "x": -13.8,
+      "y": 0,
+      "z": -6.6,
+      "rot": 0,
+      "size": [
+        1.54,
+        3,
+        1.54
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "maquina_b",
+      "model": "maquina_chicles",
+      "x": 13.8,
+      "y": 0,
+      "z": 6.6,
+      "rot": 180,
+      "size": [
+        1.54,
+        3,
+        1.54
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "copa_a",
+      "model": "copa_helado",
+      "x": -4.4,
+      "y": 0,
+      "z": -6.4,
+      "rot": 0,
+      "size": [
+        1.05,
+        2.2,
+        1.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "copa_b",
+      "model": "copa_helado",
+      "x": 4.4,
+      "y": 0,
+      "z": 6.4,
+      "rot": 180,
+      "size": [
+        1.05,
+        2.2,
+        1.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "batido_a",
+      "model": "batido",
+      "x": -15.6,
+      "y": 0,
+      "z": 2.2,
+      "rot": 0,
+      "size": [
+        0.84,
+        2.6,
+        0.84
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "batido_b",
+      "model": "batido",
+      "x": 15.6,
+      "y": 0,
+      "z": -2.2,
+      "rot": 180,
+      "size": [
+        0.84,
+        2.6,
+        0.84
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "piruleta_a",
+      "model": "piruleta",
+      "x": -12.4,
+      "y": 0,
+      "z": 1.8,
+      "rot": 0,
+      "size": [
+        0.24,
+        2.8,
+        1.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "piruleta_b",
+      "model": "piruleta",
+      "x": 12.4,
+      "y": 0,
+      "z": -1.8,
+      "rot": 180,
+      "size": [
+        0.24,
+        2.8,
+        1.22
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "baston_a",
+      "model": "baston_caramelo",
+      "x": -4.6,
+      "y": 0,
+      "z": 2.8,
+      "rot": 30,
+      "size": [
+        0.52,
+        7.8,
+        2.6
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "baston_b",
+      "model": "baston_caramelo",
+      "x": 4.6,
+      "y": 0,
+      "z": -2.8,
+      "rot": 210,
+      "size": [
+        0.52,
+        7.8,
+        2.6
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "tarro_a",
+      "model": "tarro_caramelos",
+      "x": -12,
+      "y": 0,
+      "z": 8.4,
+      "rot": 0,
+      "size": [
+        1.04,
+        2,
+        1.04
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "tarro_b",
+      "model": "tarro_caramelos",
+      "x": 12,
+      "y": 0,
+      "z": -8.4,
+      "rot": 180,
+      "size": [
+        1.04,
+        2,
+        1.04
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "magdalena_a",
+      "model": "magdalena",
+      "x": -7.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 0,
+      "size": [
+        1.6,
+        1.6,
+        1.6
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "magdalena_b",
+      "model": "magdalena",
+      "x": 7.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 180,
+      "size": [
+        1.6,
+        1.6,
+        1.6
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "manzana_a",
+      "model": "manzana_caramelo",
+      "x": -15.8,
+      "y": 0,
+      "z": -1.6,
+      "rot": 0,
+      "size": [
+        1.05,
+        2,
+        1.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "manzana_b",
+      "model": "manzana_caramelo",
+      "x": 15.8,
+      "y": 0,
+      "z": 1.6,
+      "rot": 180,
+      "size": [
+        1.05,
+        2,
+        1.05
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "tableta_a",
+      "model": "tableta_chocolate",
+      "x": -9.4,
+      "y": 0,
+      "z": -8.8,
+      "rot": 10,
+      "size": [
+        2.4,
+        0.13,
+        1.26
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "tableta_b",
+      "model": "tableta_chocolate",
+      "x": 9.4,
+      "y": 0,
+      "z": 8.8,
+      "rot": 190,
+      "size": [
+        2.4,
+        0.13,
+        1.26
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "trozo_a",
+      "model": "trozo_tarta",
+      "x": -3.6,
+      "y": 0,
+      "z": -2.6,
+      "rot": 40,
+      "size": [
+        1.6,
+        1.04,
+        1.52
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "trozo_b",
+      "model": "trozo_tarta",
+      "x": 3.6,
+      "y": 0,
+      "z": 2.6,
+      "rot": 220,
+      "size": [
+        1.6,
+        1.04,
+        1.52
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "osito_a",
+      "model": "osito_goma",
+      "x": -7.2,
+      "y": 0,
+      "z": -2.8,
+      "rot": 0,
+      "size": [
+        0.9,
+        1.8,
+        0.9
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "osito_b",
+      "model": "osito_goma",
+      "x": 7.2,
+      "y": 0,
+      "z": 2.8,
+      "rot": 180,
+      "size": [
+        0.9,
+        1.8,
+        0.9
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "algodon_a",
+      "model": "algodon_azucar",
+      "x": -12.6,
+      "y": 0,
+      "z": -2.6,
+      "rot": 0,
+      "size": [
+        1.16,
+        2.4,
+        1.16
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "algodon_b",
+      "model": "algodon_azucar",
+      "x": 12.6,
+      "y": 0,
+      "z": 2.6,
+      "rot": 180,
+      "size": [
+        1.16,
+        2.4,
+        1.16
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "algodon2_a",
+      "model": "algodon_azucar",
+      "x": -1.4,
+      "y": 0,
+      "z": 7.2,
+      "rot": 0,
+      "size": [
+        1.07,
+        2.2,
+        1.07
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "algodon2_b",
+      "model": "algodon_azucar",
+      "x": 1.4,
+      "y": 0,
+      "z": -7.2,
+      "rot": 180,
+      "size": [
+        1.07,
+        2.2,
+        1.07
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "galletas_a",
+      "model": "galletas",
+      "x": -6.4,
+      "y": 0,
+      "z": 5.4,
+      "rot": 0,
+      "size": [
+        1.1,
+        0.47,
+        1.1
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "galletas_b",
+      "model": "galletas",
+      "x": 6.4,
+      "y": 0,
+      "z": -5.4,
+      "rot": 180,
+      "size": [
+        1.1,
+        0.47,
+        1.1
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "nubes_a",
+      "model": "nubes",
+      "x": -14.2,
+      "y": 0,
+      "z": 5.4,
+      "rot": 0,
+      "size": [
+        1.1,
+        0.73,
+        1.22
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "nubes_b",
+      "model": "nubes",
+      "x": 14.2,
+      "y": 0,
+      "z": -5.4,
+      "rot": 180,
+      "size": [
+        1.1,
+        0.73,
+        1.22
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "caramelos_a",
+      "model": "caramelos",
+      "x": -2.2,
+      "y": 0,
+      "z": -5,
+      "rot": 0,
+      "size": [
+        1,
+        0.15,
+        0.62
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "caramelos_b",
+      "model": "caramelos",
+      "x": 2.2,
+      "y": 0,
+      "z": 5,
+      "rot": 180,
+      "size": [
+        1,
+        0.15,
+        0.62
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "polo_1",
+      "model": "polo",
+      "x": -18,
+      "y": 0,
+      "z": -14,
+      "rot": 20,
+      "size": [
+        2.14,
+        5,
+        0.71
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "polo_2",
+      "model": "polo",
+      "x": 20,
+      "y": 0,
+      "z": 12,
+      "rot": -30,
+      "size": [
+        2.14,
+        5,
+        0.71
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "pretzel",
+      "model": "pretzel",
+      "x": 12,
+      "y": 0,
+      "z": -15,
+      "rot": 0,
+      "size": [
+        16.25,
+        2.5,
+        12.5
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "rollo",
+      "model": "rollo_canela",
+      "x": -21,
+      "y": 0,
+      "z": 8,
+      "rot": 0,
+      "size": [
+        5.72,
+        2.2,
+        5.72
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "tarta_cerezas",
+      "model": "tarta_cerezas",
+      "x": 22,
+      "y": 0,
+      "z": -6,
+      "rot": 0,
+      "size": [
+        8.67,
+        2,
+        8.67
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "gominolas",
+      "model": "gominolas",
+      "x": -4,
+      "y": 0,
+      "z": -14,
+      "rot": 0,
+      "size": [
+        5.6,
+        1.4,
+        5.13
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cake_pop",
+      "model": "cake_pop",
+      "x": 5,
+      "y": 0,
+      "z": -14.5,
+      "rot": 0,
+      "size": [
+        2.41,
+        3.5,
+        1.97
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "gofre",
+      "model": "gofre",
+      "x": -21.5,
+      "y": 0,
+      "z": -6,
+      "rot": 30,
+      "size": [
+        4.5,
+        1,
+        4.5
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "piruleta_g",
+      "model": "piruleta",
+      "x": -9,
+      "y": 0,
+      "z": -16,
+      "rot": 0,
+      "size": [
+        0.61,
+        7,
+        3.04
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "piruleta_g2",
+      "model": "piruleta",
+      "x": 21,
+      "y": 0,
+      "z": 3,
+      "rot": 0,
+      "size": [
+        0.52,
+        6,
+        2.61
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [
+    {
+      "id": "regaliz_n",
+      "model": "regaliz",
+      "from": [
+        -5.6,
+        -9.4
+      ],
+      "to": [
+        5.6,
+        -9.4
+      ],
+      "length": 1.8,
+      "radius": 0.85,
+      "periodMs": 6000,
+      "pauseMs": 700
+    },
+    {
+      "id": "regaliz_s",
+      "model": "regaliz",
+      "from": [
+        5.6,
+        9.4
+      ],
+      "to": [
+        -5.6,
+        9.4
+      ],
+      "length": 1.8,
+      "radius": 0.85,
+      "periodMs": 6000,
+      "pauseMs": 700
+    }
+  ],
+  "devices": [
+    {
+      "id": "gofre_i",
+      "type": "fragile",
+      "x": -9,
+      "z": 4.6,
+      "w": 4.4,
+      "d": 2,
+      "rot": 0,
+      "shakeMs": 600,
+      "respawnMs": 4500
+    },
+    {
+      "id": "gofre_d",
+      "type": "fragile",
+      "x": 9,
+      "z": -4.6,
+      "w": 4.4,
+      "d": 2,
+      "rot": 0,
+      "shakeMs": 600,
+      "respawnMs": 4500
+    },
+    {
+      "id": "salto_i",
+      "type": "jump",
+      "x": -15.8,
+      "z": -9.2,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        -3.4,
+        0.6
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "salto_d",
+      "type": "jump",
+      "x": 15.8,
+      "z": 9.2,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        3.4,
+        -0.6
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    }
+  ],
+  "spawns": [
+    [
+      -6,
+      -0.4
+    ],
+    [
+      6,
+      0.4
+    ],
+    [
+      -13,
+      -4.4
+    ],
+    [
+      13,
+      4.4
+    ],
+    [
+      -2.6,
+      5.6
+    ],
+    [
+      2.6,
+      -5.6
+    ],
+    [
+      -12.4,
+      5.6
+    ],
+    [
+      12.4,
+      -5.6
+    ]
+  ]
+}

@@ -757,5 +757,325 @@
     "id": "verja",
     "name": "Verja de hierro",
     "source": "halloween\\verja.glb"
+  },
+  {
+    "id": "galeon",
+    "name": "Galeón",
+    "source": "piratas\\galeon.glb"
+  },
+  {
+    "id": "sable_pirata",
+    "name": "Sable pirata",
+    "source": "piratas\\sable_pirata.glb"
+  },
+  {
+    "id": "ancla",
+    "name": "Ancla",
+    "source": "piratas\\ancla.glb"
+  },
+  {
+    "id": "balandra",
+    "name": "Balandra",
+    "source": "piratas\\balandra.glb"
+  },
+  {
+    "id": "balsa",
+    "name": "Balsa",
+    "source": "piratas\\balsa.glb"
+  },
+  {
+    "id": "barril_ron",
+    "name": "Barril de ron",
+    "source": "piratas\\barril_ron.glb"
+  },
+  {
+    "id": "barril_polvora",
+    "name": "Barril de pólvora",
+    "source": "piratas\\barril_polvora.glb"
+  },
+  {
+    "id": "cofre_marino",
+    "name": "Cofre marino",
+    "source": "piratas\\cofre_marino.glb"
+  },
+  {
+    "id": "boya",
+    "name": "Boya",
+    "source": "piratas\\boya.glb"
+  },
+  {
+    "id": "campana_barco",
+    "name": "Campana de barco",
+    "source": "piratas\\campana_barco.glb"
+  },
+  {
+    "id": "canon_barco",
+    "name": "Cañón de barco",
+    "source": "piratas\\canon_barco.glb"
+  },
+  {
+    "id": "cofa",
+    "name": "Cofa",
+    "source": "piratas\\cofa.glb"
+  },
+  {
+    "id": "guarida_pirata",
+    "name": "Guarida pirata",
+    "source": "piratas\\guarida_pirata.glb"
+  },
+  {
+    "id": "mapa_tesoro",
+    "name": "Mapa del tesoro",
+    "source": "piratas\\mapa_tesoro.glb"
+  },
+  {
+    "id": "muelle",
+    "name": "Muelle",
+    "source": "piratas\\muelle.glb"
+  },
+  {
+    "id": "naufragio",
+    "name": "Naufragio",
+    "source": "piratas\\naufragio.glb"
+  },
+  {
+    "id": "balas_canon",
+    "name": "Balas de cañón",
+    "source": "piratas\\balas_canon.glb"
+  },
+  {
+    "id": "timon",
+    "name": "Timón",
+    "source": "piratas\\timon.glb"
+  },
+  {
+    "id": "farol_barco",
+    "name": "Farol de barco",
+    "source": "piratas\\farol_barco.glb"
+  },
+  {
+    "id": "loro",
+    "name": "Loro en su percha",
+    "source": "piratas\\loro.glb"
+  },
+  {
+    "id": "asteroide",
+    "name": "Asteroide",
+    "source": "espacio\\asteroide.glb"
+  },
+  {
+    "id": "capsula_escape",
+    "name": "Cápsula de escape",
+    "source": "espacio\\capsula_escape.glb"
+  },
+  {
+    "id": "caza_espacial",
+    "name": "Caza espacial",
+    "source": "espacio\\caza_espacial.glb"
+  },
+  {
+    "id": "lanzadera",
+    "name": "Lanzadera",
+    "source": "espacio\\lanzadera.glb"
+  },
+  {
+    "id": "robot_andante",
+    "name": "Robot andante",
+    "source": "espacio\\robot_andante.glb"
+  },
+  {
+    "id": "moto_flotante",
+    "name": "Moto flotante",
+    "source": "espacio\\moto_flotante.glb"
+  },
+  {
+    "id": "bidon_combustible",
+    "name": "Bidón de combustible",
+    "source": "espacio\\bidon_combustible.glb"
+  },
+  {
+    "id": "caja_scifi",
+    "name": "Caja espacial",
+    "source": "espacio\\caja_scifi.glb"
+  },
+  {
+    "id": "criocapsula",
+    "name": "Criocápsula",
+    "source": "espacio\\criocapsula.glb"
+  },
+  {
+    "id": "celula_energia",
+    "name": "Célula de energía",
+    "source": "espacio\\celula_energia.glb"
+  },
+  {
+    "id": "cohete_espacial",
+    "name": "Cohete espacial",
+    "source": "espacio\\cohete_espacial.glb"
+  },
+  {
+    "id": "consola",
+    "name": "Consola de mando",
+    "source": "espacio\\consola.glb"
+  },
+  {
+    "id": "cupula",
+    "name": "Cúpula de la base",
+    "source": "espacio\\cupula.glb"
+  },
+  {
+    "id": "dron",
+    "name": "Dron",
+    "source": "espacio\\dron.glb"
+  },
+  {
+    "id": "radiotelescopio",
+    "name": "Radiotelescopio",
+    "source": "espacio\\radiotelescopio.glb"
+  },
+  {
+    "id": "rover",
+    "name": "Rover",
+    "source": "espacio\\rover.glb"
+  },
+  {
+    "id": "modulo_lunar",
+    "name": "Módulo lunar",
+    "source": "espacio\\modulo_lunar.glb"
+  },
+  {
+    "id": "plataforma_aterrizaje",
+    "name": "Plataforma de aterrizaje",
+    "source": "espacio\\plataforma_aterrizaje.glb"
+  },
+  {
+    "id": "planeta_anillos",
+    "name": "Planeta con anillos",
+    "source": "espacio\\planeta_anillos.glb"
+  },
+  {
+    "id": "mochila_cohete",
+    "name": "Mochila cohete",
+    "source": "espacio\\mochila_cohete.glb"
+  },
+  {
+    "id": "maquina_chicles",
+    "name": "Máquina de chicles",
+    "source": "dulces\\maquina_chicles.glb"
+  },
+  {
+    "id": "algodon_azucar",
+    "name": "Algodón de azúcar",
+    "source": "dulces\\algodon_azucar.glb"
+  },
+  {
+    "id": "baston_caramelo",
+    "name": "Bastón de caramelo",
+    "source": "dulces\\baston_caramelo.glb"
+  },
+  {
+    "id": "batido",
+    "name": "Batido",
+    "source": "dulces\\batido.glb"
+  },
+  {
+    "id": "cake_pop",
+    "name": "Cake pops",
+    "source": "dulces\\cake_pop.glb"
+  },
+  {
+    "id": "caramelos",
+    "name": "Caramelos",
+    "source": "dulces\\caramelos.glb"
+  },
+  {
+    "id": "copa_helado",
+    "name": "Copa de helado",
+    "source": "dulces\\copa_helado.glb"
+  },
+  {
+    "id": "galletas",
+    "name": "Galletas",
+    "source": "dulces\\galletas.glb"
+  },
+  {
+    "id": "gofre",
+    "name": "Gofre",
+    "source": "dulces\\gofre.glb"
+  },
+  {
+    "id": "gominolas",
+    "name": "Gominolas",
+    "source": "dulces\\gominolas.glb"
+  },
+  {
+    "id": "manzana_caramelo",
+    "name": "Manzana de caramelo",
+    "source": "dulces\\manzana_caramelo.glb"
+  },
+  {
+    "id": "magdalena",
+    "name": "Magdalena",
+    "source": "dulces\\magdalena.glb"
+  },
+  {
+    "id": "nubes",
+    "name": "Nubes",
+    "source": "dulces\\nubes.glb"
+  },
+  {
+    "id": "osito_goma",
+    "name": "Osito de goma",
+    "source": "dulces\\osito_goma.glb"
+  },
+  {
+    "id": "piruleta",
+    "name": "Piruleta",
+    "source": "dulces\\piruleta.glb"
+  },
+  {
+    "id": "polo",
+    "name": "Polo",
+    "source": "dulces\\polo.glb"
+  },
+  {
+    "id": "trozo_tarta",
+    "name": "Trozo de tarta",
+    "source": "dulces\\trozo_tarta.glb"
+  },
+  {
+    "id": "pretzel",
+    "name": "Pretzel",
+    "source": "dulces\\pretzel.glb"
+  },
+  {
+    "id": "regaliz",
+    "name": "Rueda de regaliz",
+    "source": "dulces\\regaliz.glb"
+  },
+  {
+    "id": "tableta_chocolate",
+    "name": "Tableta de chocolate",
+    "source": "dulces\\tableta_chocolate.glb"
+  },
+  {
+    "id": "tarro_caramelos",
+    "name": "Tarro de caramelos",
+    "source": "dulces\\tarro_caramelos.glb"
+  },
+  {
+    "id": "tarta_cumple",
+    "name": "Tarta de cumpleaños",
+    "source": "dulces\\tarta_cumple.glb"
+  },
+  {
+    "id": "tarta_cerezas",
+    "name": "Tarta de cerezas",
+    "source": "dulces\\tarta_cerezas.glb"
+  },
+  {
+    "id": "rollo_canela",
+    "name": "Rollo de canela",
+    "source": "dulces\\rollo_canela.glb"
   }
 ]

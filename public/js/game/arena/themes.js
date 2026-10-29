@@ -156,6 +156,27 @@ export const THEMES = Object.freeze({
     blocks: [0xff5fa2, 0xffb3d9, 0xc77dff, 0x80ffdb, 0xffd166, 0xffffff],
     props: ['cojin'],
   },
+  piratas: {
+    id: 'piratas', name: 'Isla pirata',
+    background: 0x7fd3f0,
+    sky: 0xf4fbff, ground: 0xc9a86a, sun: 1.9,
+    blocks: [0xc0392b, 0x2c3e50, 0xf1c40f, 0x8e5a2b, 0x16a085, 0xecf0f1],
+    props: ['naranja'],
+  },
+  espacio: {
+    id: 'espacio', name: 'Base lunar',
+    background: 0x0c0f24,
+    sky: 0xc9d4ff, ground: 0x3a3a48, sun: 1.6,
+    blocks: [0xff6b6b, 0x4dabf7, 0xffd43b, 0x69db7c, 0xb197fc, 0xffffff],
+    props: ['pelota'],
+  },
+  dulces: {
+    id: 'dulces', name: 'País de las golosinas',
+    background: 0xffd6ec,
+    sky: 0xfff4fb, ground: 0x7a3e20, sun: 1.8,
+    blocks: [0xff7eb6, 0x7ee0ff, 0xfff07e, 0xb6ff7e, 0xd6a6ff, 0xffffff],
+    props: ['cojin'],
+  },
   halloween: {
     id: 'halloween', name: 'Cementerio encantado',
     background: 0x231a38,

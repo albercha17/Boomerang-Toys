@@ -61,5 +61,26 @@
     "theme": "halloween",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "piratas",
+    "name": "Isla pirata",
+    "theme": "piratas",
+    "play": true,
+    "baked": true
+  },
+  {
+    "id": "espacio",
+    "name": "Base lunar",
+    "theme": "espacio",
+    "play": true,
+    "baked": true
+  },
+  {
+    "id": "dulces",
+    "name": "País de las golosinas",
+    "theme": "dulces",
+    "play": true,
+    "baked": true
   }
 ]

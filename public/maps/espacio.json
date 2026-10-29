@@ -1,0 +1,683 @@
+{
+  "id": "espacio",
+  "name": "Base lunar",
+  "theme": "espacio",
+  "play": true,
+  "note": "Cúpula en el centro con compuertas que se abren y cierran; cuatro cráteres que caen al vacío; pasillos rodantes; teletransportes entre esquinas y propulsores. Kit Cozy espacial de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 4,
+    "pits": [
+      {
+        "x": -9.6,
+        "z": -6.8,
+        "w": 2.6,
+        "d": 2.6,
+        "round": 1.2
+      },
+      {
+        "x": 9.6,
+        "z": 6.8,
+        "w": 2.6,
+        "d": 2.6,
+        "round": 1.2
+      },
+      {
+        "x": 11.6,
+        "z": -3.6,
+        "w": 2.2,
+        "d": 2.2,
+        "round": 1
+      },
+      {
+        "x": -11.6,
+        "z": 3.6,
+        "w": 2.2,
+        "d": 2.2,
+        "round": 1
+      }
+    ],
+    "floor": "luna",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "cupula",
+      "model": "cupula",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rot": 0,
+      "size": [
+        4.96,
+        3.4,
+        5.87
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "consola_a",
+      "model": "consola",
+      "x": -3.4,
+      "y": 0,
+      "z": 3,
+      "rot": 0,
+      "size": [
+        1.31,
+        1.5,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "consola_b",
+      "model": "consola",
+      "x": 3.4,
+      "y": 0,
+      "z": -3,
+      "rot": 180,
+      "size": [
+        1.31,
+        1.5,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "modulo_a",
+      "model": "modulo_lunar",
+      "x": -13.4,
+      "y": 0,
+      "z": -5.6,
+      "rot": 20,
+      "size": [
+        3.41,
+        2.4,
+        3.41
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "modulo_b",
+      "model": "modulo_lunar",
+      "x": 13.4,
+      "y": 0,
+      "z": 5.6,
+      "rot": 200,
+      "size": [
+        3.41,
+        2.4,
+        3.41
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cohete_a",
+      "model": "cohete_espacial",
+      "x": -15.6,
+      "y": 0,
+      "z": 2.6,
+      "rot": 0,
+      "size": [
+        0.79,
+        4.5,
+        0.79
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cohete_b",
+      "model": "cohete_espacial",
+      "x": 15.6,
+      "y": 0,
+      "z": -2.6,
+      "rot": 180,
+      "size": [
+        0.79,
+        4.5,
+        0.79
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "robot_a",
+      "model": "robot_andante",
+      "x": -8.6,
+      "y": 0,
+      "z": 7.4,
+      "rot": 30,
+      "size": [
+        1.49,
+        2.6,
+        1.29
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "robot_b",
+      "model": "robot_andante",
+      "x": 8.6,
+      "y": 0,
+      "z": -7.4,
+      "rot": 210,
+      "size": [
+        1.49,
+        2.6,
+        1.29
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "crio_a",
+      "model": "criocapsula",
+      "x": -9.4,
+      "y": 0,
+      "z": -2.6,
+      "rot": 90,
+      "size": [
+        2.4,
+        1.01,
+        0.87
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "crio_b",
+      "model": "criocapsula",
+      "x": 9.4,
+      "y": 0,
+      "z": 2.6,
+      "rot": 270,
+      "size": [
+        2.4,
+        1.01,
+        0.87
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja_a",
+      "model": "caja_scifi",
+      "x": -4.6,
+      "y": 0,
+      "z": -6.8,
+      "rot": 0,
+      "size": [
+        1.6,
+        1.08,
+        1.09
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja_b",
+      "model": "caja_scifi",
+      "x": 4.6,
+      "y": 0,
+      "z": 6.8,
+      "rot": 180,
+      "size": [
+        1.6,
+        1.08,
+        1.09
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja2_a",
+      "model": "caja_scifi",
+      "x": -12.2,
+      "y": 0,
+      "z": 1,
+      "rot": 15,
+      "size": [
+        1.4,
+        0.94,
+        0.96
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "caja2_b",
+      "model": "caja_scifi",
+      "x": 12.2,
+      "y": 0,
+      "z": -1,
+      "rot": 195,
+      "size": [
+        1.4,
+        0.94,
+        0.96
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "celula_a",
+      "model": "celula_energia",
+      "x": -6.2,
+      "y": 0,
+      "z": 0.6,
+      "rot": 0,
+      "size": [
+        0.68,
+        1.6,
+        0.68
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "celula_b",
+      "model": "celula_energia",
+      "x": 6.2,
+      "y": 0,
+      "z": -0.6,
+      "rot": 180,
+      "size": [
+        0.68,
+        1.6,
+        0.68
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "capsula_a",
+      "model": "capsula_escape",
+      "x": -15.6,
+      "y": 0,
+      "z": 9.2,
+      "rot": 0,
+      "size": [
+        1.45,
+        2,
+        1.48
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "capsula_b",
+      "model": "capsula_escape",
+      "x": 15.6,
+      "y": 0,
+      "z": -9.2,
+      "rot": 180,
+      "size": [
+        1.45,
+        2,
+        1.48
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "asteroide_a",
+      "model": "asteroide",
+      "x": -1.6,
+      "y": 0,
+      "z": -8.8,
+      "rot": 0,
+      "size": [
+        2,
+        1.17,
+        1.6
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "asteroide_b",
+      "model": "asteroide",
+      "x": 1.6,
+      "y": 0,
+      "z": 8.8,
+      "rot": 180,
+      "size": [
+        2,
+        1.17,
+        1.6
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "bidon_a",
+      "model": "bidon_combustible",
+      "x": -7,
+      "y": 0,
+      "z": 4.2,
+      "rot": 0,
+      "size": [
+        0.44,
+        1.1,
+        0.44
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "bidon_b",
+      "model": "bidon_combustible",
+      "x": 7,
+      "y": 0,
+      "z": -4.2,
+      "rot": 180,
+      "size": [
+        0.44,
+        1.1,
+        0.44
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "mochila_a",
+      "model": "mochila_cohete",
+      "x": -11.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 0,
+      "size": [
+        0.68,
+        0.9,
+        0.68
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "mochila_b",
+      "model": "mochila_cohete",
+      "x": 11.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 180,
+      "size": [
+        0.68,
+        0.9,
+        0.68
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "radiotelescopio",
+      "model": "radiotelescopio",
+      "x": -10,
+      "y": 0,
+      "z": -16,
+      "rot": 20,
+      "size": [
+        4.59,
+        6,
+        3.78
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "lanzadera",
+      "model": "lanzadera",
+      "x": 12,
+      "y": 0,
+      "z": -16.5,
+      "rot": -20,
+      "size": [
+        3.91,
+        3.21,
+        7
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "caza",
+      "model": "caza_espacial",
+      "x": 22,
+      "y": 0,
+      "z": 4,
+      "rot": -60,
+      "size": [
+        5,
+        1.78,
+        4.81
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "rover",
+      "model": "rover",
+      "x": -22,
+      "y": 0,
+      "z": -3,
+      "rot": 70,
+      "size": [
+        3.51,
+        2.82,
+        4
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "plataforma",
+      "model": "plataforma_aterrizaje",
+      "x": 22,
+      "y": 0,
+      "z": -8,
+      "rot": 0,
+      "size": [
+        5,
+        0.93,
+        5.08
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "planeta",
+      "model": "planeta_anillos",
+      "x": 4,
+      "y": 7,
+      "z": -24,
+      "rot": 20,
+      "size": [
+        9,
+        4.41,
+        8.6
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "dron_1",
+      "model": "dron",
+      "x": -6,
+      "y": 3.5,
+      "z": -12.5,
+      "rot": 0,
+      "size": [
+        1.6,
+        1.34,
+        1.6
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "dron_2",
+      "model": "dron",
+      "x": 7,
+      "y": 3,
+      "z": 13,
+      "rot": 120,
+      "size": [
+        1.4,
+        1.17,
+        1.4
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "moto",
+      "model": "moto_flotante",
+      "x": -21,
+      "y": 0.6,
+      "z": 9,
+      "rot": 30,
+      "size": [
+        1.07,
+        1.42,
+        3
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [],
+  "devices": [
+    {
+      "id": "cinta_n",
+      "type": "conveyor",
+      "x": 6,
+      "z": -9.4,
+      "w": 9,
+      "d": 2,
+      "rot": 0,
+      "speed": 3.2
+    },
+    {
+      "id": "cinta_s",
+      "type": "conveyor",
+      "x": -6,
+      "z": 9.4,
+      "w": 9,
+      "d": 2,
+      "rot": 180,
+      "speed": 3.2
+    },
+    {
+      "id": "compuerta_i",
+      "type": "door",
+      "x": -4.4,
+      "z": -2,
+      "w": 3,
+      "d": 0.5,
+      "rot": 90,
+      "openMs": 2200,
+      "closedMs": 1800,
+      "offsetMs": 0,
+      "height": 2.4
+    },
+    {
+      "id": "compuerta_d",
+      "type": "door",
+      "x": 4.4,
+      "z": 2,
+      "w": 3,
+      "d": 0.5,
+      "rot": 90,
+      "openMs": 2200,
+      "closedMs": 1800,
+      "offsetMs": 2000,
+      "height": 2.4
+    },
+    {
+      "id": "tele_a",
+      "type": "portal",
+      "x": -16,
+      "z": -9.4,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "tele1"
+    },
+    {
+      "id": "tele_b",
+      "type": "portal",
+      "x": 16,
+      "z": 9.4,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "tele1"
+    },
+    {
+      "id": "tele_c",
+      "type": "portal",
+      "x": 16,
+      "z": -1,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "tele2"
+    },
+    {
+      "id": "tele_d",
+      "type": "portal",
+      "x": -16,
+      "z": 1,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "tele2"
+    },
+    {
+      "id": "propulsor_i",
+      "type": "jump",
+      "x": -8,
+      "z": 0.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        -1,
+        5.4
+      ],
+      "height": 5,
+      "durationMs": 1000
+    },
+    {
+      "id": "propulsor_d",
+      "type": "jump",
+      "x": 8,
+      "z": -0.6,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        1,
+        -5.4
+      ],
+      "height": 5,
+      "durationMs": 1000
+    }
+  ],
+  "spawns": [
+    [
+      -6,
+      -3.6
+    ],
+    [
+      6,
+      3.6
+    ],
+    [
+      -1.6,
+      5.4
+    ],
+    [
+      1.6,
+      -5.4
+    ],
+    [
+      -12.6,
+      -1.4
+    ],
+    [
+      12.6,
+      1.4
+    ],
+    [
+      -13.2,
+      6.6
+    ],
+    [
+      13.2,
+      -6.6
+    ]
+  ]
+}

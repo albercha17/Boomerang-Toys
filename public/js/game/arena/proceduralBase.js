@@ -65,7 +65,8 @@ function tileTexture(kind = 'baldosas') {
 
 /** Arena o hierba: dos tonos con manchas y piedrecitas. Una repetición = 6 unidades. */
 function terrainTexture(kind) {
-  const [light, dark, stone] = { hierba: ['#5c9e38', '#3e7a26', '#33571f'], noche: ['#2c3a2c', '#1d2620', '#16161c'] }[kind]
+  const [light, dark, stone] = { hierba: ['#5c9e38', '#3e7a26', '#33571f'], noche: ['#2c3a2c', '#1d2620', '#16161c'], luna: ['#9a9aa6', '#6c6c78', '#40404a'],
+      chocolate: ['#5a3018', '#3d200f', '#f07aa8'], playa: ['#e6cd8f', '#c9ab6e', '#a08560'] }[kind]
     ?? ['#dba866', '#b98045', '#86593a'];
   return canvasTexture(kind, 512, (g, n) => {
     g.fillStyle = light;
@@ -186,7 +187,7 @@ export function buildProceduralBase(root, data) {
       floorMaterial = tiled ? own(material(tileTexture(kind), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
     }
     add(new THREE.Mesh(own(floorGeometry), floorMaterial));
-    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba', alfombra: 'madera', noche: 'noche' }[kind]; // la terraza rosa, sobre césped; la alfombra, sobre parqué
+    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba', alfombra: 'madera', noche: 'noche', luna: 'luna', chocolate: 'chocolate', playa: 'mar' }[kind]; // la terraza rosa, sobre césped; la alfombra, sobre parqué
     if (outsideKind && (r.walls ?? 'baldosas') === 'ninguna') { // al aire libre: el terreno sigue más allá de la zona de juego
       const outW = r.w * 3;
       const outD = r.d * 4;
@@ -202,7 +203,9 @@ export function buildProceduralBase(root, data) {
       hole.lineTo(r.w / 2, r.d / 2);
       hole.lineTo(r.w / 2, -r.d / 2);
       frame.holes.push(hole);
-      const outsideMaterial = outsideKind === 'madera' ? material(woodTexture(), 1 / 4, 1 / 4) : material(terrainTexture(outsideKind), 1 / 6, 1 / 6, 0xd8d0c4);
+      const outsideMaterial = outsideKind === 'madera' ? material(woodTexture(), 1 / 4, 1 / 4)
+        : outsideKind === 'mar' ? new THREE.MeshStandardMaterial({ color: 0x1f7fa6, roughness: 0.25 })
+          : material(terrainTexture(outsideKind), 1 / 6, 1 / 6, 0xd8d0c4);
       const outside = add(new THREE.Mesh(own(new THREE.ShapeGeometry(frame)), own(outsideMaterial)));
       outside.rotation.x = -Math.PI / 2;
       outside.position.y = -0.12;
@@ -230,7 +233,7 @@ export function buildPitLiners(root, data) {
   const owned = [];
   const depth = data.room?.pitDepth ?? 3;
   // Azulejo claro de piscina con baldosas; tierra (de su tono) al aire libre: tumbas, ríos de lava...
-  const color = { baldosas: 0xd2ecf7, rosa: 0xd2ecf7, hierba: 0x3e3022, arena: 0x7a5a3a, noche: 0x241c26, alfombra: 0x6b4a32 }[data.room?.floor ?? 'baldosas'] ?? 0xd2ecf7;
+  const color = { baldosas: 0xd2ecf7, rosa: 0xd2ecf7, hierba: 0x3e3022, arena: 0x7a5a3a, noche: 0x241c26, alfombra: 0x6b4a32, luna: 0x4a4a55, chocolate: 0x3a1e10, playa: 0x8a7350 }[data.room?.floor ?? 'baldosas'] ?? 0xd2ecf7;
   const tiled = color === 0xd2ecf7;
   for (const p of data.room?.pits ?? []) {
     const pitShape = new THREE.Shape(roundedPath(p, THREE.Shape).getPoints(12));

@@ -129,6 +129,9 @@ def material_terreno(nombre, tipo):
         "arena": ((0.60, 0.40, 0.20), (0.43, 0.27, 0.13), (0.28, 0.17, 0.09)),
         "hierba": ((0.22, 0.42, 0.12), (0.14, 0.30, 0.08), (0.11, 0.21, 0.06)),
         "noche": ((0.10, 0.15, 0.10), (0.06, 0.09, 0.08), (0.05, 0.05, 0.07)),  # césped de cementerio, de noche
+        "luna": ((0.55, 0.55, 0.60), (0.36, 0.36, 0.42), (0.20, 0.20, 0.25)),  # polvo lunar con cráteres
+        "chocolate": ((0.32, 0.17, 0.09), (0.22, 0.11, 0.06), (0.95, 0.45, 0.65)),  # chocolate con virutas de colores
+        "playa": ((0.86, 0.74, 0.50), (0.74, 0.62, 0.40), (0.60, 0.50, 0.34)),  # arena fina de playa
     }[tipo]
     m = bpy.data.materials.new(nombre)
     m.use_nodes = True
@@ -290,7 +293,8 @@ else:
     for poligono in suelo.data.polygons:
         poligono.material_index = 0
     fuera = []
-    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba", "alfombra": "madera", "noche": "noche"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
+    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba", "alfombra": "madera", "noche": "noche", "luna": "luna",
+             "chocolate": "chocolate", "playa": "mar"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
     if FUERA and r.get("walls", "baldosas") == "ninguna":  # al aire libre: el terreno sigue más allá de la zona de juego
         bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -0.12, 0))
         f = bpy.context.active_object
@@ -310,7 +314,12 @@ else:
         bpy.ops.object.modifier_apply(modifier=agujero.name)
         bpy.data.objects.remove(corte, do_unlink=True)
         f.data.materials.clear()  # el recorte deja huecos de material vacíos
-        f.data.materials.append(material_madera("fuera", tablones=int(D)) if FUERA == "madera" else material_terreno("fuera", FUERA))
+        if FUERA == "madera":
+            f.data.materials.append(material_madera("fuera", tablones=int(D)))
+        elif FUERA == "mar":  # la isla, rodeada de mar
+            f.data.materials.append(material_color("fuera", (0.10, 0.45, 0.62), 0.3))
+        else:
+            f.data.materials.append(material_terreno("fuera", FUERA))
         for poligono in f.data.polygons:
             poligono.material_index = 0
         fuera.append(f)

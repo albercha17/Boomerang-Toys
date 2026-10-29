@@ -1,0 +1,728 @@
+{
+  "id": "piratas",
+  "name": "Isla pirata",
+  "theme": "piratas",
+  "play": true,
+  "note": "Dos islas separadas por un canal (caer al agua = ahogarse) con dos puentes que se caen y trampolines; barriles que ruedan por la playa; galeón y naufragio en el mar. Kit Cozy de piratas de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [
+      {
+        "x": 0,
+        "z": 0,
+        "w": 3.6,
+        "d": 22,
+        "round": 0.6
+      }
+    ],
+    "floor": "playa",
+    "walls": "ninguna"
+  },
+  "water": [
+    {
+      "x": 0,
+      "z": 0,
+      "w": 3.6,
+      "d": 22,
+      "y": -0.35,
+      "round": 0.6
+    }
+  ],
+  "objects": [
+    {
+      "id": "guarida_a",
+      "model": "guarida_pirata",
+      "x": -14,
+      "y": 0,
+      "z": -7.4,
+      "rot": 0,
+      "size": [
+        4.9,
+        2.8,
+        3.45
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "guarida_b",
+      "model": "guarida_pirata",
+      "x": 14,
+      "y": 0,
+      "z": 7.4,
+      "rot": 180,
+      "size": [
+        4.9,
+        2.8,
+        3.45
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canon_a",
+      "model": "canon_barco",
+      "x": -6,
+      "y": 0,
+      "z": -3,
+      "rot": 90,
+      "size": [
+        0.99,
+        0.89,
+        2.2
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "canon_b",
+      "model": "canon_barco",
+      "x": 6,
+      "y": 0,
+      "z": 3,
+      "rot": 270,
+      "size": [
+        0.99,
+        0.89,
+        2.2
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "balas_a",
+      "model": "balas_canon",
+      "x": -6.2,
+      "y": 0,
+      "z": 0.2,
+      "rot": 0,
+      "size": [
+        1.3,
+        0.76,
+        1.1
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "balas_b",
+      "model": "balas_canon",
+      "x": 6.2,
+      "y": 0,
+      "z": -0.2,
+      "rot": 180,
+      "size": [
+        1.3,
+        0.76,
+        1.1
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cofre_a",
+      "model": "cofre_marino",
+      "x": -10.4,
+      "y": 0,
+      "z": 2.6,
+      "rot": 15,
+      "size": [
+        1.7,
+        0.82,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cofre_b",
+      "model": "cofre_marino",
+      "x": 10.4,
+      "y": 0,
+      "z": -2.6,
+      "rot": 195,
+      "size": [
+        1.7,
+        0.82,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "barril_a",
+      "model": "barril_ron",
+      "x": -13.8,
+      "y": 0,
+      "z": 4.4,
+      "rot": 0,
+      "size": [
+        1.11,
+        1.3,
+        1.88
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "barril_b",
+      "model": "barril_ron",
+      "x": 13.8,
+      "y": 0,
+      "z": -4.4,
+      "rot": 180,
+      "size": [
+        1.11,
+        1.3,
+        1.88
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "ancla_a",
+      "model": "ancla",
+      "x": -9.6,
+      "y": 0,
+      "z": -8.6,
+      "rot": 30,
+      "size": [
+        2,
+        1.29,
+        1.41
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "ancla_b",
+      "model": "ancla",
+      "x": 9.6,
+      "y": 0,
+      "z": 8.6,
+      "rot": 210,
+      "size": [
+        2,
+        1.29,
+        1.41
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "cofa_a",
+      "model": "cofa",
+      "x": -15.6,
+      "y": 0,
+      "z": -1.2,
+      "rot": 0,
+      "size": [
+        1.46,
+        4,
+        1.46
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "cofa_b",
+      "model": "cofa",
+      "x": 15.6,
+      "y": 0,
+      "z": 1.2,
+      "rot": 180,
+      "size": [
+        1.46,
+        4,
+        1.46
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "timon_a",
+      "model": "timon",
+      "x": -6.4,
+      "y": 0,
+      "z": 8.4,
+      "rot": 0,
+      "size": [
+        1.56,
+        2,
+        0.9
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "timon_b",
+      "model": "timon",
+      "x": 6.4,
+      "y": 0,
+      "z": -8.4,
+      "rot": 180,
+      "size": [
+        1.56,
+        2,
+        0.9
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "campana_a",
+      "model": "campana_barco",
+      "x": -11.2,
+      "y": 0,
+      "z": 8.8,
+      "rot": 0,
+      "size": [
+        1.55,
+        2,
+        0.75
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "campana_b",
+      "model": "campana_barco",
+      "x": 11.2,
+      "y": 0,
+      "z": -8.8,
+      "rot": 180,
+      "size": [
+        1.55,
+        2,
+        0.75
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "farol_a",
+      "model": "farol_barco",
+      "x": -3.4,
+      "y": 0,
+      "z": -8.6,
+      "rot": 0,
+      "size": [
+        0.6,
+        1.4,
+        0.6
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "farol_b",
+      "model": "farol_barco",
+      "x": 3.4,
+      "y": 0,
+      "z": 8.6,
+      "rot": 180,
+      "size": [
+        0.6,
+        1.4,
+        0.6
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "loro_a",
+      "model": "loro",
+      "x": -15.8,
+      "y": 0,
+      "z": 8.6,
+      "rot": 0,
+      "size": [
+        1.1,
+        2.2,
+        1.02
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "loro_b",
+      "model": "loro",
+      "x": 15.8,
+      "y": 0,
+      "z": -8.6,
+      "rot": 180,
+      "size": [
+        1.1,
+        2.2,
+        1.02
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "palmera_a",
+      "model": "palmera",
+      "x": -9.4,
+      "y": 0,
+      "z": -4.8,
+      "rot": 0,
+      "size": [
+        3.07,
+        4.2,
+        2.52
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "palmera_b",
+      "model": "palmera",
+      "x": 9.4,
+      "y": 0,
+      "z": 4.8,
+      "rot": 180,
+      "size": [
+        3.07,
+        4.2,
+        2.52
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "helecho_a",
+      "model": "helecho",
+      "x": -3.6,
+      "y": 0,
+      "z": 3.8,
+      "rot": 0,
+      "size": [
+        2.2,
+        1.25,
+        2.08
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "helecho_b",
+      "model": "helecho",
+      "x": 3.6,
+      "y": 0,
+      "z": -3.8,
+      "rot": 180,
+      "size": [
+        2.2,
+        1.25,
+        2.08
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "helecho2_a",
+      "model": "helecho",
+      "x": -9.6,
+      "y": 0,
+      "z": -1,
+      "rot": 30,
+      "size": [
+        2,
+        1.13,
+        1.89
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "helecho2_b",
+      "model": "helecho",
+      "x": 9.6,
+      "y": 0,
+      "z": 1,
+      "rot": 210,
+      "size": [
+        2,
+        1.13,
+        1.89
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "polvora_a",
+      "model": "barril_polvora",
+      "x": -8.2,
+      "y": 0,
+      "z": 5.2,
+      "rot": 0,
+      "size": [
+        1.11,
+        1,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "polvora_b",
+      "model": "barril_polvora",
+      "x": 8.2,
+      "y": 0,
+      "z": -5.2,
+      "rot": 180,
+      "size": [
+        1.11,
+        1,
+        0.72
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "mapa_a",
+      "model": "mapa_tesoro",
+      "x": -3.6,
+      "y": 0,
+      "z": -1.4,
+      "rot": 20,
+      "size": [
+        1.2,
+        0.16,
+        1.15
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "mapa_b",
+      "model": "mapa_tesoro",
+      "x": 3.6,
+      "y": 0,
+      "z": 1.4,
+      "rot": 200,
+      "size": [
+        1.2,
+        0.16,
+        1.15
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "boya_1",
+      "model": "boya",
+      "x": 0.4,
+      "y": -0.2,
+      "z": -8.2,
+      "rot": 0,
+      "size": [
+        1.56,
+        1.4,
+        1.56
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "boya_2",
+      "model": "boya",
+      "x": -0.4,
+      "y": -0.2,
+      "z": 8.6,
+      "rot": 0,
+      "size": [
+        1.56,
+        1.4,
+        1.56
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "balsa",
+      "model": "balsa",
+      "x": 0,
+      "y": -0.25,
+      "z": 0.6,
+      "rot": 90,
+      "size": [
+        2.6,
+        2.38,
+        1.41
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "galeon",
+      "model": "galeon",
+      "x": -6,
+      "y": -1.2,
+      "z": -21,
+      "rot": 90,
+      "size": [
+        7.36,
+        16.49,
+        18
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "balandra",
+      "model": "balandra",
+      "x": 22,
+      "y": -0.8,
+      "z": 2,
+      "rot": 0,
+      "size": [
+        2.36,
+        7.59,
+        10
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "naufragio",
+      "model": "naufragio",
+      "x": -22.5,
+      "y": -0.5,
+      "z": 4,
+      "rot": 40,
+      "size": [
+        7,
+        2.02,
+        5.56
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "muelle",
+      "model": "muelle",
+      "x": 13,
+      "y": -0.1,
+      "z": 13.5,
+      "rot": 0,
+      "size": [
+        6,
+        2.7,
+        2.1
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "sable",
+      "model": "sable_pirata",
+      "x": -12.4,
+      "y": 0,
+      "z": 0.6,
+      "rot": 40,
+      "size": [
+        1.4,
+        0.25,
+        0.2
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [
+    {
+      "id": "barril_i",
+      "model": "barril_ron",
+      "from": [
+        -12.6,
+        -4.2
+      ],
+      "to": [
+        -12.6,
+        2.2
+      ],
+      "length": 1.6,
+      "radius": 0.6,
+      "periodMs": 5200,
+      "pauseMs": 700
+    },
+    {
+      "id": "barril_d",
+      "model": "barril_ron",
+      "from": [
+        12.6,
+        4.2
+      ],
+      "to": [
+        12.6,
+        -2.2
+      ],
+      "length": 1.6,
+      "radius": 0.6,
+      "periodMs": 5200,
+      "pauseMs": 700
+    }
+  ],
+  "devices": [
+    {
+      "id": "puente_n",
+      "type": "fragile",
+      "x": 0,
+      "z": -4.4,
+      "w": 4.6,
+      "d": 2.2,
+      "rot": 0,
+      "shakeMs": 650,
+      "respawnMs": 4500
+    },
+    {
+      "id": "puente_s",
+      "type": "fragile",
+      "x": 0,
+      "z": 4.4,
+      "w": 4.6,
+      "d": 2.2,
+      "rot": 0,
+      "shakeMs": 650,
+      "respawnMs": 4500
+    },
+    {
+      "id": "trampolin_i",
+      "type": "jump",
+      "x": -4,
+      "z": 0.4,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        6.4,
+        -5.6
+      ],
+      "height": 4,
+      "durationMs": 850
+    },
+    {
+      "id": "trampolin_d",
+      "type": "jump",
+      "x": 4,
+      "z": -0.4,
+      "w": 2,
+      "d": 2,
+      "rot": 0,
+      "target": [
+        -6.4,
+        5.6
+      ],
+      "height": 4,
+      "durationMs": 850
+    }
+  ],
+  "spawns": [
+    [
+      -8,
+      1.8
+    ],
+    [
+      8,
+      -1.8
+    ],
+    [
+      -4.6,
+      -6
+    ],
+    [
+      4.6,
+      6
+    ],
+    [
+      -11,
+      6.6
+    ],
+    [
+      11,
+      -6.6
+    ],
+    [
+      -6.4,
+      2.4
+    ],
+    [
+      6.4,
+      -2.4
+    ]
+  ]
+}

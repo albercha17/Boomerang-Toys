@@ -24,7 +24,7 @@ const LEVELS = [
 const TILT_FOCUS = 0.5; // altura de la pantalla que queda nítida (0 abajo, 1 arriba)
 const TILT_BLUR = 0.7; // fuerza del desenfoque hacia arriba y abajo (suave: solo los bordes)
 
-const CAMERA_TILT = THREE.MathUtils.degToRad(60); // inclinación sobre el suelo, como en Boomerang Fu
+const CAMERA_TILT = THREE.MathUtils.degToRad(48); // inclinación sobre el suelo: más baja que Boomerang Fu (60°), con más profundidad
 const HUD_PX = 56; // alto de la barra superior del juego: la arena se encuadra por debajo
 const MARGIN_PX = 18; // margen libre alrededor de la arena (también abajo: que se vea el canto de la mesa)
 
@@ -46,7 +46,7 @@ export class Stage {
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x2a1d14);
-    this.camera = new THREE.PerspectiveCamera(36, 1, 0.1, 200);
+    this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
     this.target = new THREE.Vector3();
     this.basePosition = new THREE.Vector3();
     this.frameSize = { width: 20, depth: 12 };
