@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { surfaceKind, surfaceMaterial, projectUV } from '../render/surfaces.js';
 
 /**
  * Base de un mapa hecha por código (tablero, patas, suelo, paredes y huecos): se usa mientras no haya una base
@@ -143,6 +144,16 @@ export function buildProceduralBase(root, data) {
   const owned = [];
   const own = (r) => { owned.push(r); return r; };
   const add = (mesh) => { mesh.receiveShadow = true; root.add(mesh); return mesh; };
+  // Con textura de verdad (render/surfaces.js) si la hay para esa pieza; si no, la pintada por código
+  const dress = (mesh, name) => {
+    const kind = surfaceKind(name, data);
+    const m = kind ? surfaceMaterial(kind, data) : null;
+    if (!m) return mesh;
+    mesh.updateMatrixWorld(true);
+    projectUV(mesh, kind, data);
+    mesh.material = own(m);
+    return mesh;
+  };
 
   if (data.table) {
     const t = data.table;
@@ -150,12 +161,12 @@ export function buildProceduralBase(root, data) {
     top.rotateX(-Math.PI / 2);
     top.translate(0, -t.thickness, 0);
     const wood = own(material(woodTexture(), 1 / 8, 1 / 8));
-    add(new THREE.Mesh(own(top), wood));
+    dress(add(new THREE.Mesh(own(top), wood)), 'HORNEADO_tablero');
     const legGeometry = own(new THREE.CylinderGeometry(0.55, 0.45, t.height - t.thickness, 20));
     const legMaterial = own(new THREE.MeshStandardMaterial({ color: 0x8c5a30, roughness: 0.6 }));
     for (const sx of [-1, 1]) {
       for (const sz of [-1, 1]) {
-        const leg = add(new THREE.Mesh(legGeometry, legMaterial));
+        const leg = add(new THREE.Mesh(legGeometry.clone(), legMaterial));
         leg.position.set(sx * (t.w / 2 - 1.6), -t.thickness - (t.height - t.thickness) / 2, sz * (t.d / 2 - 1.4));
       }
     }
@@ -164,6 +175,8 @@ export function buildProceduralBase(root, data) {
     const floor = add(new THREE.Mesh(own(new THREE.PlaneGeometry(floorW, floorD)), own(material(tileTexture(), floorW / 3.2, floorD / 3.2, 0xe8e8e8))));
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -t.height;
+    dress(floor, 'HORNEADO_suelo');
+    root.children.filter((c) => c.geometry?.type === 'CylinderGeometry').forEach((leg) => dress(leg, 'pata'));
   } else {
     const r = data.room;
     const tile = r.tile ?? 1.4;
@@ -186,7 +199,7 @@ export function buildProceduralBase(root, data) {
     } else {
       floorMaterial = tiled ? own(material(tileTexture(kind), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
     }
-    add(new THREE.Mesh(own(floorGeometry), floorMaterial));
+    dress(add(new THREE.Mesh(own(floorGeometry), floorMaterial)), 'HORNEADO_suelo');
     const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba', alfombra: 'madera', noche: 'noche', luna: 'luna', chocolate: 'chocolate', playa: 'mar' }[kind]; // la terraza rosa, sobre césped; la alfombra, sobre parqué
     if (outsideKind && (r.walls ?? 'baldosas') === 'ninguna') { // al aire libre: el terreno sigue más allá de la zona de juego
       const outW = r.w * 3;
@@ -208,7 +221,8 @@ export function buildProceduralBase(root, data) {
           : material(terrainTexture(outsideKind), 1 / 6, 1 / 6, 0xd8d0c4);
       const outside = add(new THREE.Mesh(own(new THREE.ShapeGeometry(frame)), own(outsideMaterial)));
       outside.rotation.x = -Math.PI / 2;
-      outside.position.y = -0.12;
+      outside.position.y = -0.01;
+      dress(outside, 'HORNEADO_fuera');
     }
     const depth = r.pitDepth ?? 3;
     owned.push(...buildPitLiners(root, data));
@@ -220,6 +234,7 @@ export function buildProceduralBase(root, data) {
       const wall = add(new THREE.Mesh(own(new THREE.BoxGeometry(w, wallHeight, d)), own(material(tileTexture(), len / (wallTile * 2), wallHeight / (wallTile * 2)))));
       wall.position.set(x, wallHeight / 2, z);
       wall.castShadow = true;
+      dress(wall, 'HORNEADO_pared');
     }
     const under = add(new THREE.Mesh(own(new THREE.PlaneGeometry(r.w + 40, r.d + 40)), own(new THREE.MeshStandardMaterial({ color: 0x5f7b8f }))));
     under.rotation.x = -Math.PI / 2;

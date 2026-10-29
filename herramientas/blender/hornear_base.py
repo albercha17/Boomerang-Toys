@@ -379,7 +379,8 @@ def hornear(obj, tam, nombre):
     bpy.ops.object.mode_set(mode="OBJECT")
     for i, layer in enumerate(obj.data.uv_layers):
         layer.active_render = layer.name != "horneado"  # la textura de madera sigue usando su UV
-    bpy.ops.object.bake(type="COMBINED", margin=8)
+    # Solo las sombras suaves de esquinas y bordes (oclusión ambiental): el color lo pone el juego con sus texturas
+    bpy.ops.object.bake(type="AO", margin=8)
     ruta = SALIDA / f"{nombre}.png"
     img.filepath_raw = str(ruta)
     img.file_format = "PNG"

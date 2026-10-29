@@ -132,7 +132,7 @@ function queueBake(map) {
       // Si mientras horneaba se cambiaron otra vez las medidas, se vuelve a hornear
       const now = current();
       if (now && baseKey(now) !== key) queueBake(now);
-      writeJson(path.join(BASES, map.id, 'base.json'), { key, bakedAt: new Date().toISOString() });
+      writeJson(path.join(BASES, map.id, 'base.json'), { key, bakedAt: new Date().toISOString(), ao: true });
       writeIndex(readIndex().map((e) => (e.id === map.id ? { ...e, baked: true } : e))); // el juego ya puede pedir su base
     },
   });

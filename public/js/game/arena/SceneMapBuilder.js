@@ -5,6 +5,7 @@ import { buildPitLiners, buildProceduralBase, roundedPath, tableShape } from './
 import { moverLocal, moverProgress } from './movers.js';
 import { buildDevices, trackDistance } from './devices.js';
 import { buildAmbient } from './ambient.js';
+import { surfaceKind, surfaceMaterial, projectUV } from '../render/surfaces.js';
 
 /**
  * Mapas descritos en public/maps/<id>.json (formato en shared/mapFormat.js; se editan en /editor).
@@ -86,7 +87,9 @@ async function loadBase(id, data, baked = true) {
   try {
     const stamp = await fetchJson(`/models/mapas/${id}/base.json`);
     if (stamp.key !== baseKey(data)) return null;
-    return (await loader.loadAsync(`/models/mapas/${id}/base.glb?v=${encodeURIComponent(stamp.bakedAt ?? '')}`)).scene;
+    const scene = (await loader.loadAsync(`/models/mapas/${id}/base.glb?v=${encodeURIComponent(stamp.bakedAt ?? '')}`)).scene;
+    scene.userData.ao = Boolean(stamp.ao); // horneado nuevo: solo las sombras suaves (las texturas las pone el juego)
+    return scene;
   } catch {
     return null;
   }
@@ -230,8 +233,35 @@ export function buildSceneMap(stage, physics, layout) {
   const theme = { ...THEMES[data.theme], name: data.name };
   const baked = usesBakedBase(layout.sceneMap);
 
-  if (baked) {
-    // Base horneada: lo «HORNEADO_» sin luz (ya la lleva); el resto (patas) con la luz del juego
+  if (baked && entry.base.userData.ao) {
+    // Base horneada nueva: cada pieza con su textura de verdad, la luz y las sombras del juego, y del horneado
+    // solo las sombras suaves de las esquinas y bordes (aoMap)
+    const view = entry.base.clone(true);
+    view.traverse((o) => {
+      if (!o.isMesh) return;
+      const name = `${o.name} ${o.parent?.name ?? ''}`;
+      const kind = surfaceKind(name, data);
+      const baked = o.material.map;
+      o.geometry = o.geometry.clone();
+      const material = kind ? surfaceMaterial(kind, data) : null;
+      if (material) {
+        projectUV(o, kind, data);
+        if (baked && /HORNEADO/.test(name)) {
+          baked.channel = 1;
+          baked.colorSpace = THREE.NoColorSpace; // son sombras, no color
+          baked.needsUpdate = true;
+          material.aoMap = baked;
+          material.aoMapIntensity = 1;
+        }
+        o.material = own(material);
+      }
+      o.receiveShadow = true;
+      o.castShadow = /pared|pata|tablero/.test(name);
+    });
+    root.add(view);
+    owned.push(...buildPitLiners(root, data));
+  } else if (baked) {
+    // Base horneada antigua: lo «HORNEADO_» sin luz (ya la lleva); el resto (patas) con la luz del juego
     const view = entry.base.clone(true);
     view.traverse((o) => {
       if (!o.isMesh) return;
