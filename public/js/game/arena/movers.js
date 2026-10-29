@@ -26,7 +26,8 @@ export function moverCrushes(m, x, z, r) {
   if (Math.abs(across) >= m.halfLength + r * 0.5) return false;
   const a = m.angle ?? 0;
   const step = (m.x - (m.lastX ?? m.x)) * Math.cos(a) + (m.z - (m.lastZ ?? m.z)) * Math.sin(a); // lo que avanzó en su sentido
-  return Math.abs(step) > 1e-4 && Math.sign(along) === Math.sign(step) && Math.abs(along) < m.radius + r + 0.12;
+  // al empujarlo, la física lo deja algo separado (~0,15 más allá del contacto): de ahí el margen
+  return Math.abs(step) > 1e-4 && Math.sign(along) === Math.sign(step) && Math.abs(along) < m.radius + r + 0.3;
 }
 
 /** ¿Está el punto cerca de donde pasa el rodillo ahora mismo? (para que los bots no se metan delante) */

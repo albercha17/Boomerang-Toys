@@ -1,13 +1,13 @@
 const { POWERUPS, SUPERS, ALL, MAX_ABILITIES } = window.PowerupCatalog;
 
 const INFO_MS = 4500;
-const TOAST_MS = 2600;
+const NEW_MS = 6000; // al cogerlo, la explicación se queda algo más
 
 const escape = (text) => String(text).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 /**
- * Power-ups del jugador en su mando: iconos en la barra superior (al tocarlos se explica qué hace cada uno)
- * y un aviso cuando se coge uno nuevo. La superhabilidad (caja dorada, un solo uso) va aparte, en dorado.
+ * Power-ups del jugador en su mando: iconos en la barra superior (al tocarlos se explica qué hace cada uno);
+ * al coger uno nuevo, sale la misma explicación sola (con «¡Nuevo!»). La superhabilidad (caja dorada, un solo uso) va aparte, en dorado.
  */
 const WHEN = { dash: 'en tu próximo DASH', throw: 'en tu próximo LANZAMIENTO' };
 export class AbilitiesPanel {
@@ -42,28 +42,26 @@ export class AbilitiesPanel {
     if (!this.info.hidden && !all.includes(this.info.dataset.ability)) this.info.hidden = true;
   }
 
+  /** Recién cogido: vibra y explica qué hace. */
   announce(id) {
     const p = ALL[id];
     if (navigator.vibrate) navigator.vibrate(p.super ? [60, 40, 60, 40, 120] : [30, 40, 30]);
-    this.toast.classList.toggle('super', Boolean(p.super));
-    this.toast.innerHTML = p.super
-      ? `<b>★ SÚPER: ${p.icon} ${escape(p.name)}</b> · se usa sola ${WHEN[p.trigger]} (una vez)`
-      : `<b>${p.icon} ${escape(p.name)}</b> · toca el icono de arriba para ver qué hace`;
-    this.toast.hidden = false;
-    clearTimeout(this.toastTimer);
-    this.toastTimer = setTimeout(() => { this.toast.hidden = true; }, TOAST_MS);
+    this.explain(id, { fresh: true });
   }
 
-  explain(id) {
+  explain(id, { fresh = false } = {}) {
     const p = ALL[id];
     this.info.dataset.ability = id;
+    this.info.classList.toggle('super', Boolean(p.super));
+    this.info.classList.toggle('fresh', fresh);
     const note = p.super
       ? `Superhabilidad de un solo uso: se dispara sola ${WHEN[p.trigger]}. Solo llevas una; si coges otra caja dorada, la cambias.`
       : `Llevas ${this.abilities.filter((a) => POWERUPS[a]).length} de ${MAX_ABILITIES}: al coger otra se pierde la más antigua.`;
-    this.info.innerHTML = `<div class="ability-title">${p.super ? '★ ' : ''}${p.icon} ${escape(p.name)}</div><p>${escape(p.description)}</p><small>${note}</small>`;
+    const badge = fresh ? `<span class="ability-new">${p.super ? '¡Súper nueva!' : '¡Nuevo!'}</span>` : '';
+    this.info.innerHTML = `${badge}<div class="ability-title">${p.super ? '★ ' : ''}${p.icon} ${escape(p.name)}</div><p>${escape(p.description)}</p><small>${note}</small>`;
     this.info.hidden = false;
     this.toast.hidden = true;
     clearTimeout(this.infoTimer);
-    this.infoTimer = setTimeout(() => { this.info.hidden = true; }, INFO_MS);
+    this.infoTimer = setTimeout(() => { this.info.hidden = true; }, fresh ? NEW_MS : INFO_MS);
   }
 }

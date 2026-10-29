@@ -41,6 +41,26 @@ function outlineMaterial(width) {
   return material;
 }
 
+/**
+ * Contorno para mallas con esqueleto: se engorda DESPUÉS de doblar la malla (con la normal ya doblada); si se
+ * engordara antes, al doblarse rodillas y codos el contorno asomaría por delante como rayas negras.
+ */
+const skinnedMaterials = new Map();
+export function skinnedOutline(width = OUTLINE_WIDTH) {
+  if (!skinnedMaterials.has(width)) {
+    const material = new THREE.MeshBasicMaterial({ color: OUTLINE_COLOR, side: THREE.BackSide });
+    material.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <skinning_vertex>',
+        `#include <skinning_vertex>\n transformed += normalize(objectNormal) * ${width.toFixed(4)};`,
+      );
+    };
+    material.customProgramCacheKey = () => `outline-skin-${width}`;
+    skinnedMaterials.set(width, material);
+  }
+  return skinnedMaterials.get(width);
+}
+
 const materials = new Map();
 export function outline(width = OUTLINE_WIDTH) {
   if (!materials.has(width)) materials.set(width, outlineMaterial(width));

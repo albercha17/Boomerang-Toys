@@ -13,26 +13,37 @@ const SPARK = new THREE.OctahedronGeometry(0.09);
 const GOLD = 0xffc93c;
 const SIZE = { regalo: 0.82, cofre: 1.15 }; // lado mayor en unidades
 const OPEN_MS = 450;
+const REVEAL_MS = 1500; // lo que dura el icono que sale de la caja al abrirla
 
 const ICON_TEXTURES = new Map(); // emoji -> textura (se dibuja una vez y se reutiliza)
 
-/** Icono del power-up (emoji) flotando sobre la caja. */
-function createIcon(emoji) {
-  if (!ICON_TEXTURES.has(emoji)) ICON_TEXTURES.set(emoji, drawIcon(emoji));
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: ICON_TEXTURES.get(emoji), depthTest: false, transparent: true }));
-  sprite.scale.set(0.7, 0.7, 1);
+/** Lo que sale de la caja al abrirla: el icono del power-up (emoji) con su nombre debajo. */
+function createIcon(def) {
+  const key = `${def.icon}|${def.name}`;
+  if (!ICON_TEXTURES.has(key)) ICON_TEXTURES.set(key, drawIcon(def));
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: ICON_TEXTURES.get(key), depthTest: false, transparent: true }));
+  sprite.scale.set(2.4, 1.2, 1);
   sprite.renderOrder = 9;
+  sprite.visible = false; // la caja no dice lo que lleva hasta que se abre
   return sprite;
 }
 
-function drawIcon(emoji) {
+function drawIcon(def) {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 96;
+  canvas.width = 256;
+  canvas.height = 128;
   const g = canvas.getContext('2d');
-  g.font = '70px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText(emoji, 48, 54);
+  g.font = '66px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+  g.fillText(def.icon, 128, 46);
+  g.font = '900 26px "Trebuchet MS", sans-serif';
+  g.lineJoin = 'round';
+  g.lineWidth = 7;
+  g.strokeStyle = 'rgba(40, 24, 10, 0.9)';
+  g.strokeText(def.name, 128, 106, 248);
+  g.fillStyle = def.super ? '#ffd76a' : '#ffffff';
+  g.fillText(def.name, 128, 106, 248);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -54,8 +65,8 @@ function fallbackBox(def) {
 }
 
 /**
- * Caja sorpresa en el suelo: flota y gira hasta que alguien pasa por encima; entonces se abre (la tapa salta) y
- * desaparece. Los power-ups normales son una caja de regalo; los de superhabilidad (def.super), un cofre del tesoro
+ * Caja sorpresa en el suelo: flota y gira hasta que alguien pasa por encima; entonces se abre (la tapa salta), sale
+ * de dentro el icono de lo que llevaba con su nombre, y desaparece. Cerrada no dice lo que lleva. Los power-ups normales son una caja de regalo; los de superhabilidad (def.super), un cofre del tesoro
  * con un halo dorado en el suelo y destellos alrededor.
  */
 export class PowerUp {
@@ -85,8 +96,7 @@ export class PowerUp {
       if (golden) this.box.scale.setScalar(1.35);
     }
     this.baseScale = this.box.scale.x;
-    this.icon = createIcon(def.icon);
-    this.icon.position.y = golden ? 1.75 : 1.4;
+    this.icon = createIcon(def);
     this.group.add(this.box, this.icon);
     this.sparks = [];
     if (golden) {
@@ -100,7 +110,6 @@ export class PowerUp {
         this.group.add(spark);
         this.sparks.push(spark);
       }
-      this.icon.scale.set(0.95, 0.95, 1);
     }
     this.group.position.set(x, 0, z);
     stage.scene.add(this.group);
@@ -123,19 +132,24 @@ export class PowerUp {
       this.box.position.y = 0.15 + Math.sin(t * 3) * 0.08;
       this.box.rotation.y = t * 1.4;
       this.box.scale.setScalar(this.baseScale * pop);
-      this.icon.material.opacity = a;
-      this.icon.position.y = (this.def.super ? 1.75 : 1.4) + Math.sin(t * 3) * 0.05;
     } else {
-      // Abriéndose: la tapa salta y gira, la caja da un respingo y el icono sube y se desvanece
+      // Abriéndose: la tapa salta y gira, la caja da un respingo y se va; de dentro sale el icono con su nombre,
+      // que crece con un rebote, sube un poco y se desvanece
       const k = Math.min(1, (now - this.openedAt) / OPEN_MS);
       if (this.lid) {
         this.lid.position.y = this.lidHome.y + this.lidLift * Math.sin(k * Math.PI * 0.6);
         this.lid.rotation.x = this.lidHome.rx - k * 1.9;
       }
-      this.box.scale.setScalar(this.baseScale * (1 + Math.sin(k * Math.PI) * 0.18) * (k > 0.75 ? 1 - (k - 0.75) * 4 : 1));
-      this.icon.position.y += 0.05;
-      this.icon.material.opacity = 1 - k;
-      if (k >= 1) return false;
+      this.box.scale.setScalar(Math.max(0.001, this.baseScale * (1 + Math.sin(k * Math.PI) * 0.18) * (k > 0.75 ? 1 - (k - 0.75) * 4 : 1)));
+      const r = Math.min(1, (now - this.openedAt) / REVEAL_MS);
+      const grow = Math.min(1, r / 0.22);
+      const pop = 1 - Math.pow(1 - grow, 3) + Math.sin(grow * Math.PI) * 0.3; // sale con rebote
+      const size = this.def.super ? 1.25 : 1;
+      this.icon.visible = true;
+      this.icon.scale.set(4.4 * pop * size, 2.2 * pop * size, 1);
+      this.icon.position.y = 0.8 + Math.min(1, r / 0.3) * 2.2 + r * 0.5; // por encima de la cabeza de quien la coge
+      this.icon.material.opacity = r < 0.75 ? 1 : 1 - (r - 0.75) / 0.25;
+      if (r >= 1) return false;
     }
     if (this.glow) {
       this.glow.scale.setScalar(1 + Math.sin(t * 4) * 0.12);

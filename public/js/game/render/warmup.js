@@ -24,11 +24,13 @@ export function warmUp(stage, game) {
   for (const { id } of window.CharacterCatalog.CHARACTERS) {
     const figure = makeFigure(id, 0xffffff, 1.4);
     group.add(figure.group);
+    for (const part of figure.parts ?? []) group.add(part.object); // las piezas en que se desmonta al morir
   }
   // Cajas (regalo y cofre) con sus iconos: una de cada power-up (los iconos quedan guardados para reutilizarlos)
   for (const def of Object.values(ALL)) {
     const box = new PowerUp(stage, def, 0, 0);
     stage.scene.remove(box.group);
+    box.icon.visible = true; // lo que sale al abrirla (cerrada no se ve)
     group.add(box.group);
     extras.push(box);
   }
