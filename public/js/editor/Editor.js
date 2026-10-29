@@ -14,7 +14,7 @@ const { normalizeMap, emptyMap, ID_PATTERN, THEMES } = window.MapFormat;
 const DEG = Math.PI / 180;
 const r2 = (v) => Math.round(v * 100) / 100;
 const normDeg = (d) => r2(((((d + 180) % 360) + 360) % 360) - 180);
-const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca', cuarto: 'Cuarto de juegos' };
+const THEME_NAMES = { cocina: 'Cocina', bano: 'Baño', dormitorio: 'Dormitorio', salon: 'Salón', patio: 'Patio', oeste: 'Oeste', barbie: 'Mundo Barbie', selva: 'Selva azteca', cuarto: 'Cuarto de juegos', halloween: 'Halloween' };
 const FLOOR_NAMES = { baldosas: 'Baldosas', rosa: 'Baldosas rosas', arena: 'Arena (desierto)', hierba: 'Hierba' };
 const WALL_NAMES = { baldosas: 'Alicatadas', ninguna: 'Ninguna (al aire libre)' };
 const COLLIDERS = { box: 'Caja', cylinder: 'Cilindro', none: 'Ninguno (se atraviesa)' };

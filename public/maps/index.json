@@ -54,5 +54,12 @@
     "theme": "cuarto",
     "play": true,
     "baked": true
+  },
+  {
+    "id": "halloween",
+    "name": "Cementerio encantado",
+    "theme": "halloween",
+    "play": true,
+    "baked": true
   }
 ]

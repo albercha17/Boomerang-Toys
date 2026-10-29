@@ -156,6 +156,13 @@ export const THEMES = Object.freeze({
     blocks: [0xff5fa2, 0xffb3d9, 0xc77dff, 0x80ffdb, 0xffd166, 0xffffff],
     props: ['cojin'],
   },
+  halloween: {
+    id: 'halloween', name: 'Cementerio encantado',
+    background: 0x231a38,
+    sky: 0x8f86e0, ground: 0x1e1830, sun: 1.0,
+    blocks: [0xff7a1a, 0x8e5cff, 0x3ddc84, 0xffd23f, 0x2b2b3a, 0xe8e2ff],
+    props: ['naranja'],
+  },
   cuarto: {
     id: 'cuarto', name: 'Cuarto de juegos',
     background: 0xf3e3c8,

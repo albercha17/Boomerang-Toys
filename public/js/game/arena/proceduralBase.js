@@ -65,7 +65,8 @@ function tileTexture(kind = 'baldosas') {
 
 /** Arena o hierba: dos tonos con manchas y piedrecitas. Una repetición = 6 unidades. */
 function terrainTexture(kind) {
-  const [light, dark, stone] = kind === 'hierba' ? ['#5c9e38', '#3e7a26', '#33571f'] : ['#dba866', '#b98045', '#86593a'];
+  const [light, dark, stone] = { hierba: ['#5c9e38', '#3e7a26', '#33571f'], noche: ['#2c3a2c', '#1d2620', '#16161c'] }[kind]
+    ?? ['#dba866', '#b98045', '#86593a'];
   return canvasTexture(kind, 512, (g, n) => {
     g.fillStyle = light;
     g.fillRect(0, 0, n, n);
@@ -185,7 +186,7 @@ export function buildProceduralBase(root, data) {
       floorMaterial = tiled ? own(material(tileTexture(kind), 1 / (tile * 2), 1 / (tile * 2))) : own(material(terrainTexture(kind), 1 / 6, 1 / 6));
     }
     add(new THREE.Mesh(own(floorGeometry), floorMaterial));
-    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba', alfombra: 'madera' }[kind]; // la terraza rosa, sobre césped; la alfombra, sobre parqué
+    const outsideKind = { arena: 'arena', hierba: 'hierba', rosa: 'hierba', alfombra: 'madera', noche: 'noche' }[kind]; // la terraza rosa, sobre césped; la alfombra, sobre parqué
     if (outsideKind && (r.walls ?? 'baldosas') === 'ninguna') { // al aire libre: el terreno sigue más allá de la zona de juego
       const outW = r.w * 3;
       const outD = r.d * 4;
@@ -228,12 +229,15 @@ export function buildProceduralBase(root, data) {
 export function buildPitLiners(root, data) {
   const owned = [];
   const depth = data.room?.pitDepth ?? 3;
+  // Azulejo claro de piscina con baldosas; tierra (de su tono) al aire libre: tumbas, ríos de lava...
+  const color = { baldosas: 0xd2ecf7, rosa: 0xd2ecf7, hierba: 0x3e3022, arena: 0x7a5a3a, noche: 0x241c26, alfombra: 0x6b4a32 }[data.room?.floor ?? 'baldosas'] ?? 0xd2ecf7;
+  const tiled = color === 0xd2ecf7;
   for (const p of data.room?.pits ?? []) {
     const pitShape = new THREE.Shape(roundedPath(p, THREE.Shape).getPoints(12));
     const geometry = new THREE.ExtrudeGeometry(pitShape, { depth: depth - 0.02, bevelEnabled: false });
     geometry.rotateX(-Math.PI / 2);
     geometry.translate(0, -depth, 0);
-    const material = new THREE.MeshStandardMaterial({ color: 0xd2ecf7, roughness: 0.5, side: THREE.BackSide }) // azulejo claro de piscina;
+    const material = new THREE.MeshStandardMaterial({ color, roughness: tiled ? 0.5 : 0.95, side: THREE.BackSide });
     const liner = new THREE.Mesh(geometry, material);
     liner.receiveShadow = true;
     root.add(liner);

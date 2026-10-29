@@ -587,5 +587,175 @@
     "id": "castillo_hinchable",
     "name": "Castillo hinchable",
     "source": "cuarto\\castillo_hinchable.glb"
+  },
+  {
+    "id": "arana_gigante",
+    "name": "Araña de dibujos",
+    "source": "halloween\\arana_gigante.glb"
+  },
+  {
+    "id": "arbol_tenebroso",
+    "name": "Árbol tenebroso",
+    "source": "halloween\\arbol_tenebroso.glb"
+  },
+  {
+    "id": "ataud",
+    "name": "Ataúd",
+    "source": "halloween\\ataud.glb"
+  },
+  {
+    "id": "buzon_tenebroso",
+    "name": "Buzón tenebroso",
+    "source": "halloween\\buzon_tenebroso.glb"
+  },
+  {
+    "id": "calabaza_farol",
+    "name": "Calabaza farol",
+    "source": "halloween\\calabaza_farol.glb"
+  },
+  {
+    "id": "caldero_caramelos",
+    "name": "Caldero de caramelos",
+    "source": "halloween\\caldero_caramelos.glb"
+  },
+  {
+    "id": "casa_encantada",
+    "name": "Casa de muñecas encantada",
+    "source": "halloween\\casa_encantada.glb"
+  },
+  {
+    "id": "casita_bruja",
+    "name": "Casita de bruja",
+    "source": "halloween\\casita_bruja.glb"
+  },
+  {
+    "id": "cofre_candado",
+    "name": "Cofre con candado",
+    "source": "halloween\\cofre_candado.glb"
+  },
+  {
+    "id": "columpio_tetrico",
+    "name": "Columpio tétrico",
+    "source": "halloween\\columpio_tetrico.glb"
+  },
+  {
+    "id": "corona_halloween",
+    "name": "Corona de Halloween",
+    "source": "halloween\\corona_halloween.glb"
+  },
+  {
+    "id": "cuadro_encantado",
+    "name": "Cuadro encantado",
+    "source": "halloween\\cuadro_encantado.glb"
+  },
+  {
+    "id": "cuervo",
+    "name": "Cuervo",
+    "source": "halloween\\cuervo.glb"
+  },
+  {
+    "id": "escoba",
+    "name": "Escoba de bruja",
+    "source": "halloween\\escoba.glb"
+  },
+  {
+    "id": "espantapajaros",
+    "name": "Espantapájaros",
+    "source": "halloween\\espantapajaros.glb"
+  },
+  {
+    "id": "farola_tenebrosa",
+    "name": "Farola tenebrosa",
+    "source": "halloween\\farola_tenebrosa.glb"
+  },
+  {
+    "id": "gargola",
+    "name": "Gárgola",
+    "source": "halloween\\gargola.glb"
+  },
+  {
+    "id": "gato_negro",
+    "name": "Gato negro",
+    "source": "halloween\\gato_negro.glb"
+  },
+  {
+    "id": "huerto_calabazas",
+    "name": "Huerto de calabazas",
+    "source": "halloween\\huerto_calabazas.glb"
+  },
+  {
+    "id": "huesos",
+    "name": "Montón de huesos",
+    "source": "halloween\\huesos.glb"
+  },
+  {
+    "id": "lapida",
+    "name": "Lápida",
+    "source": "halloween\\lapida.glb"
+  },
+  {
+    "id": "libro_maldito",
+    "name": "Libro maldito",
+    "source": "halloween\\libro_maldito.glb"
+  },
+  {
+    "id": "mausoleo",
+    "name": "Mausoleo",
+    "source": "halloween\\mausoleo.glb"
+  },
+  {
+    "id": "mecedora",
+    "name": "Mecedora",
+    "source": "halloween\\mecedora.glb"
+  },
+  {
+    "id": "mesa_adivina",
+    "name": "Mesa de adivina",
+    "source": "halloween\\mesa_adivina.glb"
+  },
+  {
+    "id": "murcielago",
+    "name": "Murciélago",
+    "source": "halloween\\murcielago.glb"
+  },
+  {
+    "id": "piano_viejo",
+    "name": "Piano viejo",
+    "source": "halloween\\piano_viejo.glb"
+  },
+  {
+    "id": "puerta_cementerio",
+    "name": "Puerta de cementerio",
+    "source": "halloween\\puerta_cementerio.glb"
+  },
+  {
+    "id": "reloj_pendulo",
+    "name": "Reloj de péndulo",
+    "source": "halloween\\reloj_pendulo.glb"
+  },
+  {
+    "id": "sombrero_bruja",
+    "name": "Sombrero de bruja",
+    "source": "halloween\\sombrero_bruja.glb"
+  },
+  {
+    "id": "telarana",
+    "name": "Telaraña",
+    "source": "halloween\\telarana.glb"
+  },
+  {
+    "id": "tumba_abierta",
+    "name": "Tumba abierta",
+    "source": "halloween\\tumba_abierta.glb"
+  },
+  {
+    "id": "velas",
+    "name": "Velas",
+    "source": "halloween\\velas.glb"
+  },
+  {
+    "id": "verja",
+    "name": "Verja de hierro",
+    "source": "halloween\\verja.glb"
   }
 ]

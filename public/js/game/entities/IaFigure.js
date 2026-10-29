@@ -38,7 +38,6 @@ const SETTINGS = {
   },
   mago: { neck: 0.5, legTop: 0.18, armY: [0.18, 0.5] }, // cabezón con sombrero y túnica larga
   // Personajes añadidos el 29 oct 2026 (medidos con la rejilla de frente)
-  buzz: { armAmp: 0.3, twistAmp: 0, arms: { L: { minX: 0.28, minY: 0.45, maxY: 0.8, shoulder: [0.27, 0.62] }, R: { minX: 0.28, minY: 0.45, maxY: 0.8, shoulder: [-0.27, 0.62] } } }, // brazos doblados hacia arriba
   mario: { armAmp: 0.6, twistAmp: 0.5, neck: 0.6, legTop: 0.2, arms: { L: { minX: 0.3, minY: 0.25, maxY: 0.62, shoulder: [0.3, 0.6] }, R: { minX: 0.3, minY: 0.3, maxY: 0.62, shoulder: [-0.3, 0.6] } } },
   stitch: { neck: 0.5, legTop: 0.15, arms: { L: { minX: 0.42, minY: 0.18, maxY: 0.5, shoulder: [0.4, 0.42] }, R: { minX: 0.42, minY: 0.18, maxY: 0.5, shoulder: [-0.4, 0.42] } } },
   olaf: { rigid: true, legTop: 0.1 }, // se contonea entero, con sus brazos de rama tal cual

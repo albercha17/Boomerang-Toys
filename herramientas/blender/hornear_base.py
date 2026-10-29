@@ -128,6 +128,7 @@ def material_terreno(nombre, tipo):
     claro, oscuro, piedra = {
         "arena": ((0.60, 0.40, 0.20), (0.43, 0.27, 0.13), (0.28, 0.17, 0.09)),
         "hierba": ((0.22, 0.42, 0.12), (0.14, 0.30, 0.08), (0.11, 0.21, 0.06)),
+        "noche": ((0.10, 0.15, 0.10), (0.06, 0.09, 0.08), (0.05, 0.05, 0.07)),  # césped de cementerio, de noche
     }[tipo]
     m = bpy.data.materials.new(nombre)
     m.use_nodes = True
@@ -289,7 +290,7 @@ else:
     for poligono in suelo.data.polygons:
         poligono.material_index = 0
     fuera = []
-    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba", "alfombra": "madera"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
+    FUERA = {"arena": "arena", "hierba": "hierba", "rosa": "hierba", "alfombra": "madera", "noche": "noche"}.get(TIPO)  # la terraza rosa, sobre césped; la alfombra, sobre parqué
     if FUERA and r.get("walls", "baldosas") == "ninguna":  # al aire libre: el terreno sigue más allá de la zona de juego
         bpy.ops.mesh.primitive_plane_add(size=1, location=g2b(0, -0.12, 0))
         f = bpy.context.active_object
@@ -342,6 +343,11 @@ scene.world = mundo
 mundo.use_nodes = True
 mundo.node_tree.nodes["Background"].inputs["Color"].default_value = (0.95, 0.88, 0.78, 1)
 mundo.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.42
+if datos.get("room", {}).get("floor") == "noche":  # de noche: luz de luna, más floja y azulada, y cielo oscuro
+    sol.energy = 1.2
+    sol.color = (0.72, 0.78, 1.0)
+    mundo.node_tree.nodes["Background"].inputs["Color"].default_value = (0.35, 0.32, 0.55, 1)
+    mundo.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.3
 
 
 # --- horneado: la luz y las sombras de todo, en la textura del tablero y del suelo --------------

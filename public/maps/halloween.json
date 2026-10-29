@@ -1,0 +1,1116 @@
+{
+  "id": "halloween",
+  "name": "Cementerio encantado",
+  "theme": "halloween",
+  "play": true,
+  "note": "Mausoleo en el centro; cuatro tumbas abiertas (huecos); calabazas gigantes que ruedan por delante y por detrás; trampolines por encima de las tumbas y portales entre los lados. Kit Cozy de Halloween de grab3d.",
+  "room": {
+    "w": 36,
+    "d": 22,
+    "wallHeight": 2.6,
+    "tile": 1.4,
+    "wallTile": 0.8,
+    "pitDepth": 3,
+    "pits": [
+      {
+        "x": -8,
+        "z": -4.5,
+        "w": 2.8,
+        "d": 1.5,
+        "round": 0.3
+      },
+      {
+        "x": 8,
+        "z": -4.5,
+        "w": 2.8,
+        "d": 1.5,
+        "round": 0.3
+      },
+      {
+        "x": -8,
+        "z": 4.5,
+        "w": 2.8,
+        "d": 1.5,
+        "round": 0.3
+      },
+      {
+        "x": 8,
+        "z": 4.5,
+        "w": 2.8,
+        "d": 1.5,
+        "round": 0.3
+      }
+    ],
+    "floor": "noche",
+    "walls": "ninguna"
+  },
+  "water": [],
+  "objects": [
+    {
+      "id": "mausoleo",
+      "model": "mausoleo",
+      "x": 0,
+      "y": 0,
+      "z": -1,
+      "rot": 0,
+      "size": [
+        2.88,
+        3.4,
+        3.8
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "gargola_i",
+      "model": "gargola",
+      "x": -2.6,
+      "y": 0,
+      "z": 1.9,
+      "rot": 0,
+      "size": [
+        0.88,
+        1.6,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "gargola_d",
+      "model": "gargola",
+      "x": 2.6,
+      "y": 0,
+      "z": 1.9,
+      "rot": 0,
+      "size": [
+        0.88,
+        1.6,
+        0.88
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_0",
+      "model": "lapida",
+      "x": -8,
+      "y": 0,
+      "z": -6.25,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.52
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_1",
+      "model": "lapida",
+      "x": 8,
+      "y": 0,
+      "z": -6.25,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.52
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_2",
+      "model": "lapida",
+      "x": -8,
+      "y": 0,
+      "z": 6.25,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.52
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_3",
+      "model": "lapida",
+      "x": 8,
+      "y": 0,
+      "z": 6.25,
+      "rot": 0,
+      "size": [
+        1.14,
+        1.2,
+        1.52
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "ataud_a",
+      "model": "ataud",
+      "x": -13.6,
+      "y": 0,
+      "z": 3.6,
+      "rot": 90,
+      "size": [
+        2.2,
+        0.62,
+        0.81
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "ataud_b",
+      "model": "ataud",
+      "x": 13.6,
+      "y": 0,
+      "z": -3.6,
+      "rot": 270,
+      "size": [
+        2.2,
+        0.62,
+        0.81
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "espantapajaros_a",
+      "model": "espantapajaros",
+      "x": -12.4,
+      "y": 0,
+      "z": -6.6,
+      "rot": 20,
+      "size": [
+        1.55,
+        2.3,
+        0.83
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "espantapajaros_b",
+      "model": "espantapajaros",
+      "x": 12.4,
+      "y": 0,
+      "z": 6.6,
+      "rot": 200,
+      "size": [
+        1.55,
+        2.3,
+        0.83
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "farola_a",
+      "model": "farola_tenebrosa",
+      "x": -4.6,
+      "y": 0,
+      "z": -6.8,
+      "rot": 0,
+      "size": [
+        1.36,
+        2.8,
+        0.85
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "farola_b",
+      "model": "farola_tenebrosa",
+      "x": 4.6,
+      "y": 0,
+      "z": 6.8,
+      "rot": 180,
+      "size": [
+        1.36,
+        2.8,
+        0.85
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "caldero_a",
+      "model": "caldero_caramelos",
+      "x": -4.4,
+      "y": 0,
+      "z": 4.2,
+      "rot": 0,
+      "size": [
+        1.28,
+        1.2,
+        1
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "caldero_b",
+      "model": "caldero_caramelos",
+      "x": 4.4,
+      "y": 0,
+      "z": -4.2,
+      "rot": 180,
+      "size": [
+        1.28,
+        1.2,
+        1
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "reloj_a",
+      "model": "reloj_pendulo",
+      "x": -10.4,
+      "y": 0,
+      "z": 0,
+      "rot": 90,
+      "size": [
+        0.65,
+        2.5,
+        0.38
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "reloj_b",
+      "model": "reloj_pendulo",
+      "x": 10.4,
+      "y": 0,
+      "z": 0,
+      "rot": 270,
+      "size": [
+        0.65,
+        2.5,
+        0.38
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "adivina_a",
+      "model": "mesa_adivina",
+      "x": -13.4,
+      "y": 0,
+      "z": -1.4,
+      "rot": 0,
+      "size": [
+        1.29,
+        1.3,
+        1.24
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "adivina_b",
+      "model": "mesa_adivina",
+      "x": 13.4,
+      "y": 0,
+      "z": 1.4,
+      "rot": 180,
+      "size": [
+        1.29,
+        1.3,
+        1.24
+      ],
+      "collider": "cylinder"
+    },
+    {
+      "id": "lapida_s1_a",
+      "model": "lapida",
+      "x": -15.6,
+      "y": 0,
+      "z": -5.2,
+      "rot": 10,
+      "size": [
+        1.05,
+        1.1,
+        1.39
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_s1_b",
+      "model": "lapida",
+      "x": 15.6,
+      "y": 0,
+      "z": 5.2,
+      "rot": 190,
+      "size": [
+        1.05,
+        1.1,
+        1.39
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_s2_a",
+      "model": "lapida",
+      "x": -4.6,
+      "y": 0,
+      "z": 7,
+      "rot": -15,
+      "size": [
+        0.95,
+        1,
+        1.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_s2_b",
+      "model": "lapida",
+      "x": 4.6,
+      "y": 0,
+      "z": -7,
+      "rot": 165,
+      "size": [
+        0.95,
+        1,
+        1.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_s3_a",
+      "model": "lapida",
+      "x": -2.8,
+      "y": 0,
+      "z": -6.8,
+      "rot": 5,
+      "size": [
+        0.95,
+        1,
+        1.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "lapida_s3_b",
+      "model": "lapida",
+      "x": 2.8,
+      "y": 0,
+      "z": 6.8,
+      "rot": 185,
+      "size": [
+        0.95,
+        1,
+        1.27
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "mecedora",
+      "model": "mecedora",
+      "x": 13.8,
+      "y": 0,
+      "z": -9.4,
+      "rot": 200,
+      "size": [
+        0.76,
+        1.4,
+        1.19
+      ],
+      "collider": "box"
+    },
+    {
+      "id": "sombrero",
+      "model": "sombrero_bruja",
+      "x": -13.8,
+      "y": 0,
+      "z": 9.6,
+      "rot": 0,
+      "size": [
+        0.82,
+        0.8,
+        0.82
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "escoba",
+      "model": "escoba",
+      "x": 1.4,
+      "y": 0,
+      "z": 7.6,
+      "rot": 35,
+      "size": [
+        1.8,
+        0.35,
+        0.35
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "huerto_a",
+      "model": "huerto_calabazas",
+      "x": -11.4,
+      "y": 0,
+      "z": 8.8,
+      "rot": 0,
+      "size": [
+        3,
+        0.73,
+        2.25
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "huerto_b",
+      "model": "huerto_calabazas",
+      "x": 11.4,
+      "y": 0,
+      "z": -8.8,
+      "rot": 180,
+      "size": [
+        3,
+        0.73,
+        2.25
+      ],
+      "collider": "none",
+      "bush": true
+    },
+    {
+      "id": "calabaza_a",
+      "model": "calabaza_farol",
+      "x": -6.4,
+      "y": 0,
+      "z": 1.8,
+      "rot": 0,
+      "size": [
+        0.9,
+        0.74,
+        0.88
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "calabaza_b",
+      "model": "calabaza_farol",
+      "x": 6.4,
+      "y": 0,
+      "z": -1.8,
+      "rot": 180,
+      "size": [
+        0.9,
+        0.74,
+        0.88
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "libro_a",
+      "model": "libro_maldito",
+      "x": -2.2,
+      "y": 0,
+      "z": 6.4,
+      "rot": 30,
+      "size": [
+        0.9,
+        0.39,
+        1.22
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "libro_b",
+      "model": "libro_maldito",
+      "x": 2.2,
+      "y": 0,
+      "z": -6.4,
+      "rot": 210,
+      "size": [
+        0.9,
+        0.39,
+        1.22
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "cofre_a",
+      "model": "cofre_candado",
+      "x": -15.8,
+      "y": 0,
+      "z": 9.4,
+      "rot": 0,
+      "size": [
+        1.3,
+        0.66,
+        0.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "cofre_b",
+      "model": "cofre_candado",
+      "x": 15.8,
+      "y": 0,
+      "z": -9.4,
+      "rot": 180,
+      "size": [
+        1.3,
+        0.66,
+        0.8
+      ],
+      "collider": "box",
+      "loose": true
+    },
+    {
+      "id": "velas_1",
+      "model": "velas",
+      "x": 1.2,
+      "y": 0,
+      "z": 1.4,
+      "rot": 0,
+      "size": [
+        0.73,
+        0.6,
+        0.5
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "velas_2",
+      "model": "velas",
+      "x": -1.2,
+      "y": 0,
+      "z": 1.4,
+      "rot": 0,
+      "size": [
+        0.73,
+        0.6,
+        0.5
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "huesos_1",
+      "model": "huesos",
+      "x": -6.4,
+      "y": 0,
+      "z": -4.4,
+      "rot": 0,
+      "size": [
+        0.9,
+        0.35,
+        0.77
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "huesos_2",
+      "model": "huesos",
+      "x": 6.4,
+      "y": 0,
+      "z": 4.6,
+      "rot": 120,
+      "size": [
+        0.9,
+        0.35,
+        0.77
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "gato",
+      "model": "gato_negro",
+      "x": 3.6,
+      "y": 0,
+      "z": 1.2,
+      "rot": -30,
+      "size": [
+        0.51,
+        0.8,
+        0.65
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cuervo_1",
+      "model": "cuervo",
+      "x": -9.2,
+      "y": 0,
+      "z": -6.1,
+      "rot": 30,
+      "size": [
+        0.51,
+        0.9,
+        0.47
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "puerta",
+      "model": "puerta_cementerio",
+      "x": 0,
+      "y": 0,
+      "z": -12.1,
+      "rot": 0,
+      "size": [
+        4,
+        3.33,
+        0.84
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja__16_5",
+      "model": "verja",
+      "x": -16.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja__13_5",
+      "model": "verja",
+      "x": -13.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja__10_5",
+      "model": "verja",
+      "x": -10.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja__7_5",
+      "model": "verja",
+      "x": -7.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja__4_5",
+      "model": "verja",
+      "x": -4.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja_4_5",
+      "model": "verja",
+      "x": 4.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja_7_5",
+      "model": "verja",
+      "x": 7.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja_10_5",
+      "model": "verja",
+      "x": 10.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja_13_5",
+      "model": "verja",
+      "x": 13.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "verja_16_5",
+      "model": "verja",
+      "x": 16.5,
+      "y": 0,
+      "z": -11.9,
+      "rot": 0,
+      "size": [
+        3.05,
+        1.68,
+        0.16
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "casita",
+      "model": "casita_bruja",
+      "x": -12,
+      "y": 0,
+      "z": -16.5,
+      "rot": 20,
+      "size": [
+        7.34,
+        7.5,
+        5.71
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "casa",
+      "model": "casa_encantada",
+      "x": 12,
+      "y": 0,
+      "z": -16,
+      "rot": -15,
+      "size": [
+        4.01,
+        5.5,
+        3.12
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_1",
+      "model": "arbol_tenebroso",
+      "x": -20.5,
+      "y": 0,
+      "z": -6,
+      "rot": 0,
+      "size": [
+        4.48,
+        5,
+        3.54
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_2",
+      "model": "arbol_tenebroso",
+      "x": 21,
+      "y": 0,
+      "z": 3,
+      "rot": 90,
+      "size": [
+        4.93,
+        5.5,
+        3.9
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_3",
+      "model": "arbol_tenebroso",
+      "x": 4,
+      "y": 0,
+      "z": -15.5,
+      "rot": 40,
+      "size": [
+        4.48,
+        5,
+        3.54
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_4",
+      "model": "arbol_tenebroso",
+      "x": -21,
+      "y": 0,
+      "z": 9,
+      "rot": 200,
+      "size": [
+        4.03,
+        4.5,
+        3.19
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "arbol_5",
+      "model": "arbol_tenebroso",
+      "x": 20,
+      "y": 0,
+      "z": -10,
+      "rot": 140,
+      "size": [
+        4.48,
+        5,
+        3.54
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "columpio",
+      "model": "columpio_tetrico",
+      "x": -6,
+      "y": 0,
+      "z": -15,
+      "rot": 0,
+      "size": [
+        3.14,
+        3.2,
+        2.07
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "buzon",
+      "model": "buzon_tenebroso",
+      "x": 19.5,
+      "y": 0,
+      "z": 9.5,
+      "rot": -20,
+      "size": [
+        0.76,
+        2,
+        1.05
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "piano",
+      "model": "piano_viejo",
+      "x": 22,
+      "y": 0,
+      "z": -3.5,
+      "rot": -90,
+      "size": [
+        1.99,
+        2.2,
+        0.83
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "murcielago_1",
+      "model": "murcielago",
+      "x": -7,
+      "y": 4.5,
+      "z": -13,
+      "rot": 0,
+      "size": [
+        1.41,
+        1,
+        0.81
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "murcielago_2",
+      "model": "murcielago",
+      "x": 9,
+      "y": 5.5,
+      "z": -13.5,
+      "rot": 30,
+      "size": [
+        1.69,
+        1.2,
+        0.98
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "murcielago_3",
+      "model": "murcielago",
+      "x": 19,
+      "y": 4,
+      "z": 6,
+      "rot": -40,
+      "size": [
+        1.41,
+        1,
+        0.81
+      ],
+      "collider": "none"
+    },
+    {
+      "id": "cuervo_2",
+      "model": "cuervo",
+      "x": -3,
+      "y": 0,
+      "z": -12.3,
+      "rot": 0,
+      "size": [
+        0.57,
+        1,
+        0.52
+      ],
+      "collider": "none"
+    }
+  ],
+  "movers": [
+    {
+      "id": "calabaza_atras",
+      "model": "calabaza_farol",
+      "from": [
+        -6,
+        -9.2
+      ],
+      "to": [
+        6,
+        -9.2
+      ],
+      "length": 1.8,
+      "radius": 0.74,
+      "periodMs": 6000,
+      "pauseMs": 800
+    },
+    {
+      "id": "calabaza_delante",
+      "model": "calabaza_farol",
+      "from": [
+        6,
+        9.2
+      ],
+      "to": [
+        -6,
+        9.2
+      ],
+      "length": 1.8,
+      "radius": 0.74,
+      "periodMs": 6000,
+      "pauseMs": 800
+    }
+  ],
+  "devices": [
+    {
+      "id": "trampolin_i",
+      "type": "jump",
+      "x": -15.6,
+      "z": -9,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        -5.4,
+        -3
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "trampolin_d",
+      "type": "jump",
+      "x": 15.6,
+      "z": 9,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "target": [
+        5.4,
+        3
+      ],
+      "height": 4.5,
+      "durationMs": 950
+    },
+    {
+      "id": "portal_i",
+      "type": "portal",
+      "x": -16,
+      "z": 1,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "brujas"
+    },
+    {
+      "id": "portal_d",
+      "type": "portal",
+      "x": 16,
+      "z": -1,
+      "w": 2.2,
+      "d": 2.2,
+      "rot": 0,
+      "link": "brujas"
+    }
+  ],
+  "spawns": [
+    [
+      -15,
+      5.8
+    ],
+    [
+      15,
+      -5.8
+    ],
+    [
+      -5.8,
+      -0.4
+    ],
+    [
+      5.8,
+      0.4
+    ],
+    [
+      -11,
+      6.2
+    ],
+    [
+      11,
+      -6.2
+    ],
+    [
+      -0.6,
+      5.2
+    ],
+    [
+      0.6,
+      -5.6
+    ]
+  ]
+}

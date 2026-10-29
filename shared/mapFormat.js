@@ -6,7 +6,7 @@
  *     table: { w, d, chamfer, thickness, height }    mesa: salirse = caer (height = altura hasta el suelo)
  *     room:  { w, d, wallHeight, tile, wallTile, pitDepth, pits: [{ x, z, w, d, round }],   o habitación
  *              floor: 'baldosas' | 'rosa' | 'arena' | 'hierba' | 'alfombra', walls: 'baldosas' | 'ninguna' }   (suelo y paredes de la base;
- *              alfombra = la alfombra infantil de carreteras, con parqué alrededor)
+ *              alfombra = la alfombra infantil de carreteras, con parqué alrededor; noche = césped de cementerio)
  *     water: [{ x, z, w, d, y, round, lava }]        agua: caer dentro = ahogarse (lava: true = te quemas)
  *     objects: [{ id, model, x, y, z, rot, tilt: [x, z], size: [w, h, d], stretch: [x, y, z],
  *                 collider: 'box' | 'cylinder' | 'none', bush, loose }]
@@ -28,8 +28,8 @@
   'use strict';
 
   const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto'];
-  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra'];
+  const THEMES = ['cocina', 'bano', 'dormitorio', 'salon', 'patio', 'oeste', 'barbie', 'selva', 'cuarto', 'halloween'];
+  const FLOORS = ['baldosas', 'rosa', 'arena', 'hierba', 'alfombra', 'noche'];
   const WALLS = ['baldosas', 'ninguna'];
   const num = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
   const round = (v) => Math.round(num(v) * 1000) / 1000;
